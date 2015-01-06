@@ -61,7 +61,7 @@ four of a kind: (0, 84*13) + 8000
 straight flush: (5001, 5010) + 6000
 */
 unsigned int evaluate(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-                             uint64_t e, uint64_t f, uint64_t g) {
+                      uint64_t e, uint64_t f, uint64_t g) {
   // printf("%16llx, %16llx, %16llx, %16llx, %16llx\n", (long long unsigned)a, (long long unsigned)b, (long long unsigned)c, (long long unsigned)d, (long long unsigned)e);
   // four of a kind
   uint64_t sum = a + b + c + d + e + f + g;
