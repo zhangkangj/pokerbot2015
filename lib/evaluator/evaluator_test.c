@@ -98,7 +98,19 @@ void test() {
   printf("%d\n", evaluate_cards("As", "Kd", "Qs", "Ts", "9h", "8h", "7c"));
 }
 
+
+void benchmark2() {
+  clock_t stop_time, start_time = clock();
+  uint64_t stop_cycle, start_cycle = rdtsc();
+  float result = get_preflop_naive_strength("Ac", "Ad");
+  stop_cycle = rdtsc();
+  stop_time = clock();
+  printf("%f\n", result);
+  printf("%0.2f cycles, %0.2f seconds. \n", ((double)(stop_cycle - start_cycle)), ((double) (stop_time - start_time)) / CLOCKS_PER_SEC);
+}
+
 int main( int argc, const char* argv[]) {
   benchmark();
+  //benchmark2();
   //test();
 }

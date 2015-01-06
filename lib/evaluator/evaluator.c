@@ -117,6 +117,48 @@ unsigned int evaluate(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
   }
 }
 
+float get_preflop_naive_strength(const char x_str[3], const char y_str[3]) {
+  unsigned int x = card_to_num(x_str), y = card_to_num(y_str);
+  unsigned int a, b, c, d, e, f, g;
+  unsigned long long result = 0;
+  uint64_t aa, bb, cc, dd, ee, ff, gg, xx = card_to_bit(x_str), yy = card_to_bit(y_str);
+  unsigned int mask[48] = {0};
+  for (a = 0; a < 51; ++a) {
+    if ((a==x)||(a==y)) continue;
+    aa = num_to_bit(a);
+    for (b = a+1; b < 52; ++b) {
+      if ((b==x)||(b==y)) continue;
+      bb = num_to_bit(b);
+      int i, j=0;
+      for (i=0; i<52; i++) {
+        if ((i!=a)&&(i!=b)&&(i!=x)&&(i!=y)) {
+          mask[j++] = i;
+        }
+      }
+      for (c = 0; c < 44; ++c) {
+        cc = num_to_bit(mask[c]);
+        for (d = c+1; d < 45; ++d) {
+          dd = num_to_bit(mask[d]);
+          for (e = d+1; e < 46; ++e) {
+            ee = num_to_bit(mask[e]);
+            for (f = e+1; f < 47; ++f) {
+              ff = num_to_bit(mask[f]);
+              for (g = f+1; g < 48; ++g) {
+                gg = num_to_bit(mask[g]);
+                unsigned int tmp1 = evaluate(xx, yy, cc, dd, ee, ff, gg);
+                unsigned int tmp2 = evaluate(aa, bb, cc, dd, ee, ff, gg);
+                result += (tmp1>tmp2)*2 + (tmp1==tmp2);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  printf("%llu\n", result);
+  return result / 2097572400.0 / 2;
+}
+
 unsigned int evaluate_cards(const char a[3], const char b[3], const char c[3], const char d[3],
                             const char e[3], const char f[3], const char g[3]) {
   uint64_t aa, bb, cc, dd, ee, ff, gg;
