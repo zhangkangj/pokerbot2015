@@ -62,9 +62,13 @@ straight flush: (5001, 5010) + 6000
 */
 unsigned int evaluate(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
                              uint64_t e, uint64_t f, uint64_t g) {
-  //printf("%16llx, %16llx, %16llx, %16llx, %16llx\n", (long long unsigned)a, (long long unsigned)b, (long long unsigned)c, (long long unsigned)d, (long long unsigned)e);
+  // printf("%16llx, %16llx, %16llx, %16llx, %16llx\n", (long long unsigned)a, (long long unsigned)b, (long long unsigned)c, (long long unsigned)d, (long long unsigned)e);
   // four of a kind
   uint64_t sum = a + b + c + d + e + f + g;
+  unsigned int ranks_1 = (unsigned int) shift_long((0x0001111111111111ul & sum));
+  unsigned int ranks_2 = (unsigned int) shift_long((0x0001111111111111ul & (sum>>1)));
+  unsigned int has_three = ranks_1 & ranks_2;
+
   if (unlikely(sum & 0x0004444444444444ul)) {
     uint64_t has_four = sum & 0x0004444444444444ul;
     unsigned int has_four_ = (unsigned int) shift_long((has_four>>2));
@@ -72,10 +76,7 @@ unsigned int evaluate(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
     return class_map[has_four_] + kicker_map[has_four_kicker] + 8000; // four of a kind
   }
   // full house 
-  unsigned int ranks_1 = (unsigned int) shift_long((0x0001111111111111ul & sum));
-  unsigned int ranks_2 = (unsigned int) shift_long((0x0001111111111111ul & (sum>>1)));
-  unsigned int has_three = ranks_1 & ranks_2;
-  if (unlikely(has_three)) {
+  else if (unlikely(has_three)) {
     unsigned int has_full_house_kicker = ((~ranks_1) & ranks_2) | class_map[0x7fffu^has_three];
     if (has_full_house_kicker) {
       return kicker_map[has_three] * 16 + kicker_map[has_full_house_kicker] + 7000;
@@ -104,14 +105,16 @@ unsigned int evaluate(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
     return kicker_map[has_three] * 64 + kicker_map[has_three_kicker] + 4000;
   }
   // two pair / pair
-  unsigned int has_two = ranks_2;
-  if (has_two) {
+  else if (ranks_2) {
+    unsigned int has_two = ranks_2;
     unsigned int has_two_kicker = ranks_1 | kicker_map[0x7fffu^has_two];
     return class_map[has_two] + kicker_map[has_two_kicker] + 1000;
-  }
+  } 
   // high card
-  unsigned int has_high_card = has_straight;
-  return has_straight;
+  else {
+    unsigned int has_high_card = has_straight;
+    return has_high_card;
+  }
 }
 
 unsigned int evaluate_cards(const char a[3], const char b[3], const char c[3], const char d[3],
