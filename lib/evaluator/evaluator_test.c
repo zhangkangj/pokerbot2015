@@ -99,10 +99,10 @@ void test() {
 }
 
 
-void benchmark2() {
+void test_preflop() {
   clock_t stop_time, start_time = clock();
   uint64_t stop_cycle, start_cycle = rdtsc();
-  float result = get_preflop_naive_strength("Ac", "Ad");
+  float result = get_preflop_naive_strength("Ad", "Ac");
   stop_cycle = rdtsc();
   stop_time = clock();
   printf("%f\n", result);
@@ -110,7 +110,7 @@ void benchmark2() {
 }
 
 int main( int argc, const char* argv[]) {
-  benchmark();
-  //benchmark2();
-  //test();
+  //benchmark();
+  //test_preflop();
+  test();
 }

@@ -2,3 +2,11 @@ test.*
 *.o
 *.pyc
 .spyderproject
+sqlite.db
+.sconsign.dblite
+*~
+*.dump
+
+/log
+/data
+
