@@ -7,6 +7,6 @@ sqlite.db
 *~
 *.dump
 
-/log
+/log/test
 /data
 

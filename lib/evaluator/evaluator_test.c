@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "evaluator.c"
+#include "evaluator_lib.c"
 
 uint64_t rdtsc(){
     unsigned int lo,hi;
@@ -70,7 +70,11 @@ void benchmark() {
 }
 
 void test() {
+  printf("%d\n", evaluate_cards("Ks", "Kh", "Qd", "Qc", "Jc", "Jc", "2c"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Qd", "Qc", "Jc", "Jc", "2c"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Kd", "Kc", "Qc", "Qc", "2c"));
   // four of a kind
+  /*
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "8c", "2c"));
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "Ts", "2c"));
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "Ts", "Th"));
@@ -95,14 +99,13 @@ void test() {
   printf("%d\n", evaluate_cards("Ks", "Kh", "3d", "3s", "As", "Ah", "2h"));
   printf("%d\n", evaluate_cards("As", "Ah", "Kd", "Qs", "Ts", "8h", "9h"));
   // high card
-  printf("%d\n", evaluate_cards("As", "Kd", "Qs", "Ts", "9h", "8h", "7c"));
+  printf("%d\n", evaluate_cards("As", "Kd", "Qs", "Ts", "9h", "8h", "7c"));*/
 }
-
 
 void test_preflop() {
   clock_t stop_time, start_time = clock();
   uint64_t stop_cycle, start_cycle = rdtsc();
-  float result = get_preflop_naive_strength("Ad", "Ac");
+  float result = get_preflop_naive_strength("Kd", "Kc");
   stop_cycle = rdtsc();
   stop_time = clock();
   printf("%f\n", result);

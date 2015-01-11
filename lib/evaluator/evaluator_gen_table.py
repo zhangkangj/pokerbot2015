@@ -116,8 +116,10 @@ for a in range(12, 0, -1):
     result[index] = count * 13 + 1 + 1092
 
 # 3 choose 2 --> (1092+1, 1092+1+78*13) for two pair
+count = 78
 for a in range(12, 1, -1):
   for b in range(a-1, 0, -1):
+    count -= 1
     for c in range(b-1, -1, -1):
       x = (1<<a)|(1<<b)|(1<<c)
       bin_str = bin(x)[2:]
