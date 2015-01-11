@@ -70,9 +70,8 @@ void benchmark() {
 }
 
 void test() {
-  printf("%d\n", evaluate_cards("Ks", "Kh", "Qd", "Qc", "Jc", "Jc", "2c"));
-  printf("%d\n", evaluate_cards("As", "Ah", "Qd", "Qc", "Jc", "Jc", "2c"));
-  printf("%d\n", evaluate_cards("As", "Ah", "Kd", "Kc", "Qc", "Qc", "2c"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Kc", "Kd", "Ks", "Tc"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Qc", "Qd", "Qs", "Tc"));
   // four of a kind
   /*
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "8c", "2c"));
@@ -105,7 +104,7 @@ void test() {
 void test_preflop() {
   clock_t stop_time, start_time = clock();
   uint64_t stop_cycle, start_cycle = rdtsc();
-  float result = get_preflop_naive_strength("Kd", "Kc");
+  float result = get_preflop_naive_strength("Ad", "Ac");
   stop_cycle = rdtsc();
   stop_time = clock();
   printf("%f\n", result);
@@ -113,7 +112,7 @@ void test_preflop() {
 }
 
 int main( int argc, const char* argv[]) {
-  //benchmark();
+  benchmark();
   //test_preflop();
-  test();
+  //test();
 }

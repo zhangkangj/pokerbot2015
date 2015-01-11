@@ -99,7 +99,7 @@ unsigned int evaluate(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
     unsigned int has_four_kicker = (unsigned int) shift_long(((sum|(sum>>1)) & 0x0001111111111111ul));
     return class_map[has_four_] + kicker_map[has_four_kicker] + 8000; // four of a kind
   }
-  // full house 
+  // full house
   else if (unlikely(has_three)) {
     unsigned int has_full_house_kicker = ((~ranks_1) & ranks_2) | class_map[0x7fffu^has_three];
     if (has_full_house_kicker) {
