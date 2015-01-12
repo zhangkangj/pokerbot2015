@@ -1,1 +1,1 @@
-python bot/example/Player.py "$@"
+python naive.py "$@"
