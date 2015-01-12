@@ -53,7 +53,7 @@ class BasePlayer(object):
     self.init_active_players = [True if x == 'true' else False for x in parts[12:15]]
     self.num_active_players = self.init_num_active_player
     self.active_players = self.init_active_players
-    self.init_timebank = float(parts[16])
+    self.init_timebank = float(parts[15])
     self.timebank = self.init_timebank
 
   def handover(self, parts):
@@ -97,7 +97,7 @@ class BasePlayer(object):
         result = self.handle_message(data)
       except:
         import traceback
-        traceback.print_exec()
+        traceback.print_exc()
         print data
         result = None
       if result is not None:
