@@ -13,7 +13,7 @@ class BasePlayer(object):
     self.opp2_name = None
     self.game_init_stack_size = None
     self.bb_size = None
-    self.max_num_hands = None
+    self.max_num_hand = None
     self.game_init_timebank = None
     # hand info
     self.hand_id = None # start with 0
@@ -26,9 +26,16 @@ class BasePlayer(object):
     self.init_timebank = None
     # round info
     self.stack_sizes = None
-    self.num_active_players = None
+    self.num_active_player = None
     self.active_players = None
     self.timebank = None
+    self.num_board_card = None
+    self.board_cards = None
+    self.pot_size = None
+    self.num_last_action = None
+    self.last_actions = None
+    self.num_legal_action = None
+    self.legal_actions = None
 
   def new_game(self, parts):
     self.player_name = parts[1]
@@ -36,7 +43,7 @@ class BasePlayer(object):
     self.opp2_name = parts[3]
     self.game_init_stack_size = int(parts[4])
     self.bb_size = int(parts[5])
-    self.max_num_hands = int(parts[6])
+    self.max_num_hand = int(parts[6])
     self.game_init_timebank = float(parts[7])
 
   def key_value(self, parts):
@@ -51,14 +58,43 @@ class BasePlayer(object):
     self.player_names = parts[8:11]
     self.init_num_active_player = int(parts[11])
     self.init_active_players = [True if x == 'true' else False for x in parts[12:15]]
-    self.num_active_players = self.init_num_active_player
+    self.num_active_player = self.init_num_active_player
     self.active_players = self.init_active_players
     self.init_timebank = float(parts[15])
     self.timebank = self.init_timebank
 
-  def handover(self, parts):
-    pass
+  def action(self, parts):
+    self.pot_size = int(parts[1])
+    self.num_board_card = int(parts[2])
+    self.board_cards = parts[3:(3+self.num_board_card)]
+    index = 3+self.num_board_card
+    self.stack_sizes = [int(x) for x in parts[index:(index+3)]]
+    index = index + 3
+    self.num_active_player = int(parts[index])
+    index = index + 1
+    self.active_players = [True if x == 'true' else False for x in parts[index:(index+3)]]
+    index = index + 3
+    self.num_last_action = int(parts[index])
+    index = index + 1
+    self.last_actions = parts[index:(index+self.num_last_action)]
+    index = index + self.num_last_action
+    self.num_legal_action = int(parts[index])
+    index = index + 1
+    self.legal_actions = parts[index:(index+self.num_legal_action)]
+    index = index + self.num_legal_action
+    self.timebank = float(parts[index])
 
+  def handover(self, parts):
+    self.stack_sizes = [int(x) for x in parts[1:4]]
+    self.num_board_card = int(parts[4])
+    self.board_cards = parts[5:(5+self.num_board_card)]
+    index = 5 + self.num_board_card
+    self.num_last_action = int(parts[index])
+    index = index + 1
+    self.last_actions = parts[index:(index+self.num_last_action)]
+    index = index + self.num_last_action
+    self.timebank = float(parts[index])
+        
   def set_key_value(self):
     return ''
 
@@ -75,7 +111,8 @@ class BasePlayer(object):
       self.new_hand(parts)
       self.current_bot.new_hand()
     elif word == 'GETACTION':
-      result = 'CHECK'
+      self.action(parts)
+      result = self.current_bot.action()
     elif word == 'HANDOVER':
       self.handover(parts)
       self.current_bot.handover()

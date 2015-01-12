@@ -16,6 +16,18 @@ class BaseBot:
   def new_hand(self):
     pass
   
+  def action(self):
+    if self.player.num_board_card == 0:
+      return self.preflop()
+    elif self.player.num_board_card == 3:
+      return self.flop()
+    elif self.player.num_board_card == 4:
+      return self.turn()
+    elif self.player.num_board_card == 5:
+      return self.river()
+    else:
+      raise Exception("invalid number board card")      
+  
   def preflop(self, *args, **kwargs):
     raise NotImplementedError
 
