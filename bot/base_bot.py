@@ -41,7 +41,7 @@ class BaseBot(object):
     raise NotImplementedError
 
   def handover(self, *args, **kwargs):
-    raise NotImplementedError
+    pass
   
   def set_key_value(self):
     return ''

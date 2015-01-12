@@ -117,8 +117,9 @@ class BasePlayer(object):
       self.handover(parts)
       self.current_bot.handover()
     elif word == 'REQUESTKEYVALUES':
-      result = self.set_key_value()
-      result += self.current_bot.set_key_value()
+      # this is called by the end of a match
+      result = self.set_key_value() + '\n'
+      result += self.current_bot.set_key_value() + '\n'
       result += 'FINISH'
     return result
 
