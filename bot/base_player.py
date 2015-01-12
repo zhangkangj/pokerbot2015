@@ -77,7 +77,7 @@ class BasePlayer(object):
     elif word == 'GETACTION':
       result = 'CHECK'
     elif word == 'HANDOVER':
-      self.handover(parts)a
+      self.handover(parts)
       self.current_bot.handover()
     elif word == 'REQUESTKEYVALUES':
       result = self.set_key_value()
