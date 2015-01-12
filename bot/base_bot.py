@@ -5,7 +5,7 @@ Created on Mon Jan 12 12:27:09 2015
 @author: zhk
 """
 
-class BaseBot:
+class BaseBot(object):
   
   def __init__(self, player):
     self.player = player
@@ -16,15 +16,15 @@ class BaseBot:
   def new_hand(self):
     pass
   
-  def action(self):
+  def action(self, *args, **kwargs):
     if self.player.num_board_card == 0:
-      return self.preflop()
+      return self.preflop(*args, **kwargs)
     elif self.player.num_board_card == 3:
-      return self.flop()
+      return self.flop(*args, **kwargs)
     elif self.player.num_board_card == 4:
-      return self.turn()
+      return self.turn(*args, **kwargs)
     elif self.player.num_board_card == 5:
-      return self.river()
+      return self.river(*args, **kwargs)
     else:
       raise Exception("invalid number board card")      
   
