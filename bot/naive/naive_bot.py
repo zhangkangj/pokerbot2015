@@ -22,14 +22,14 @@ class NaiveBot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(NaiveBot, self).action(equity, can_raise, can_bet, can_call)
+    return super(NaiveBot, self).action(equity*0.8, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
-    if can_bet and equity > 0.33:        
+    if can_bet and equity > (1.0/self.player.num_active_player):
       result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]
       print 'betting', result
-    elif can_raise and equity > 0.33:        
+    elif can_raise and equity > (1.0/self.player.num_active_player):        
       result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]
       print 'raising', result
     elif can_call:
