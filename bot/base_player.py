@@ -62,6 +62,8 @@ class BasePlayer(object):
     self.active_players = self.init_active_players
     self.init_timebank = float(parts[15])
     self.timebank = self.init_timebank
+    self.board_cards = []
+    self.num_board_card = 0
 
   def action(self, parts):
     self.pot_size = int(parts[1])
@@ -94,7 +96,8 @@ class BasePlayer(object):
     self.last_actions = parts[index:(index+self.num_last_action)]
     index = index + self.num_last_action
     self.timebank = float(parts[index])
-        
+    print
+
   def set_key_value(self):
     return ''
 
