@@ -1,0 +1,1 @@
+python ../../playbig.py "$@"

@@ -195,3 +195,44 @@ unsigned int evaluate_cards(const char a[3], const char b[3], const char c[3], c
   gg = card_to_bit(g);
   return evaluate(aa, bb, cc, dd, ee, ff, gg);
 }
+
+unsigned int evaluate_nums(unsigned int a, unsigned int b, unsigned int c, unsigned int d,
+                           unsigned int e, unsigned int f, unsigned int g) {
+  uint64_t aa, bb, cc, dd, ee, ff, gg;
+  aa = num_to_bit(a);
+  bb = num_to_bit(b);
+  cc = num_to_bit(c);
+  dd = num_to_bit(d);
+  ee = num_to_bit(e);
+  ff = num_to_bit(f);
+  gg = num_to_bit(g);
+  return evaluate(aa, bb, cc, dd, ee, ff, gg);
+}
+
+void evaluate_flop(unsigned int mc1, unsigned int mc2, unsigned int bc1, unsigned int bc2, unsigned int bc3) {
+  unsigned int allowed_cards[47] = {0};
+  unsigned int i, j=0;
+  for (i = 0; i < 47; ++i){
+    if ((j!=mc1) && (j!=mc2) && (j!=bc1) && (j!=bc2) && (j!=bc3)){
+      allowed_cards[i] = j;
+    }
+    j++;
+  }
+  unsigned int result[276] = {0};
+  unsigned int index = 0
+  for (i=0; i<46; i=i+2){
+    for (j=i+1; j<47; j=j+2){
+      uint64_t bc4 = num_to_bit(allowed_cards[i]);
+      uint64_t bc5 = num_to_bit(allowed_cards[j]);
+      uint64_t opp_cards[45] = {0};
+      unsigned int m, n = 0;
+      for (m = 0; m < 45; ++m){
+        
+        opp_cards[m] = n;
+        n++;
+      }
+      index++;
+    }
+  }
+
+}

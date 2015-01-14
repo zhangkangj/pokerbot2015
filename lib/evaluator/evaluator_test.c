@@ -116,6 +116,6 @@ void test_preflop() {
 
 int main( int argc, const char* argv[]) {
   //benchmark();
-  test_preflop();
-  //test();
+  //test_preflop();
+  test();
 }

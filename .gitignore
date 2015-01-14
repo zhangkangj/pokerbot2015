@@ -7,7 +7,7 @@ sqlite.db
 .sconsign.dblite
 *~
 *.dump
-pokerbot.sh
+config.txt
 
 /log/test
 /data
