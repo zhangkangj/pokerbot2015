@@ -257,3 +257,5 @@ class Playbig_1Bot(base_bot.BaseBot):
 
     else:
       print 'ERROR: equity: ', equity, ' is out of legal range'
+    return result
+

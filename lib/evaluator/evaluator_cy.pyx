@@ -11,6 +11,7 @@ Created on Wed Jan 14 11:45:09 2015
 cimport cython
 from libc.stdlib cimport calloc, free
 
+import ctypes
 from .. import util
 from evaluator_c cimport evaluate_nums
 from evaluator_c cimport evaluate_river as evaluate_river_c
@@ -49,7 +50,7 @@ def evaluate_turn(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_):
   bc3 = util.card_to_num(bc3_)
   bc4 = util.card_to_num(bc4_)
   evaluate_turn_c(mc1, mc2, bc1, bc2, bc3, bc4, result_ptr)
-  result = range(46)
+  result = ctypes.c_uint * 46
   for i in range(46):
     result[i] = result_ptr[i]
   with nogil:

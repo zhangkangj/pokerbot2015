@@ -3,6 +3,7 @@ import layered_bot
 
 class LayeredPlayer(base_player.BasePlayer):
   def __init__(self):
+    super(LayeredPlayer, self).__init__()
     self.current_bot = layered_bot.LayeredBot(self)
   
   def new_game(self, parts):

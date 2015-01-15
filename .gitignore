@@ -10,7 +10,7 @@ sqlite.db
 *.dump
 *.zip
 config.txt
-./pokerbot.sh
+/pokerbot.sh
 
 /log/test
 /data
