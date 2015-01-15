@@ -3,6 +3,7 @@ import mixed_bot
 
 class MixedPlayer(base_player.BasePlayer):
   def __init__(self):
+    super(MixedPlayer, self).__init__()
     self.current_bot = mixed_bot.MixedBot(self)
   
   def new_game(self, parts):

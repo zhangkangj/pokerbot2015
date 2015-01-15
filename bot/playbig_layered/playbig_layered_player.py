@@ -3,7 +3,7 @@ import playbig_layered_bot
 
 class Playbig_layeredPlayer(base_player.BasePlayer):
   def __init__(self):
-    super(LayeredPlayer, self).__init__()
+    super(Playbig_layeredPlayer, self).__init__()
     self.current_bot = playbig_layered_bot.Playbig_layeredBot(self)
   
   def new_game(self, parts):

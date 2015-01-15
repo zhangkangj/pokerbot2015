@@ -10,8 +10,8 @@ import playbig_bot
 
 class PlaybigPlayer(base_player.BasePlayer):
   def __init__(self):
-    super(LayeredPlayer, self).__init__()
-    self.current_bot = playbig_bot.PlaybigBot(self)
+  	super(PlaybigPlayer, self).__init__()
+  	self.current_bot = playbig_bot.PlaybigBot(self)
   
   def new_game(self, parts):
     super(PlaybigPlayer, self).new_game(parts)
