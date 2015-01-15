@@ -5,9 +5,14 @@ Created on Tue Jan 13 16:48:51 2015
 @author: zhk
 """
 
+import traceback
+
 def num_to_card(n):
-    rank = n % 13
-    suit = n / 13
+  if isinstance(n, basestring):
+    return n
+  else:
+    rank = n / 4
+    suit = n % 4
     if rank == 12:
         rank = "A"
     elif rank == 11:
@@ -33,6 +38,7 @@ def num_to_card(n):
     return rank + suit
 
 def card_to_num(card):
+  if isinstance(card, basestring):
     rank = card[0]
     suit = card[1]
     if rank == "A":
@@ -58,9 +64,51 @@ def card_to_num(card):
     else:
         raise Exception("suit exception:" + suit)
     return suit + rank * 4
+  else:
+    return card
 
 def n2c(numbers):
     return [number_to_card(x) for x in numbers]
 
 def c2n(cards):
     return [card_to_number(x) for x in cards]
+
+def tester(func):
+  def inner(*args, **kwargs):
+    try:
+      return func(*args, **kwargs)
+    except:
+      trace.print_exc()
+      print args, kwargs
+      return None
+  return inner
+
+@tester
+def test():
+  print 'testing'
+  import numpy as np
+  print 'numpy version', np.__version__
+  import platform
+  print 'platform', platform.dist()
+  import traceback
+  try:
+    from lib.evaluator import evaluator
+  except:
+    traceback.print_exc()
+    print 'failed to import evaluator'
+  try:
+    from lib.evaluator import evaluator_cy
+  except:
+    traceback.print_exc()
+    print 'failed to import evaluator_cy'
+  try:
+    from lib.card_abstraction import card_abs_cy
+  except:
+    traceback.print_exc()
+    print 'failed to import lib.card_abs_cy'
+  try:
+    from study.card_abstraction import card_abs_cy
+  except:
+    traceback.print_exc()
+    print 'failed to import study.card_abs_cy'
+  print 'test done'

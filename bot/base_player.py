@@ -1,7 +1,3 @@
-import argparse
-import socket
-import sys
-
 class BasePlayer(object):
   
   def __init__(self):

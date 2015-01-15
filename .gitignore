@@ -1,5 +1,6 @@
 test.*
 *.o
+*reload*
 *.out
 *.pyc
 .spyderproject
@@ -7,7 +8,9 @@ sqlite.db
 .sconsign.dblite
 *~
 *.dump
+*.zip
 config.txt
+./pokerbot.sh
 
 /log/test
 /data
