@@ -9,10 +9,9 @@ import argparse
 import socket
 import sys
 
-from bot.playbig import playbig_player
+from bot.playbig_layered import playbig_layered_player
 
 if __name__ == '__main__':
-
   parser = argparse.ArgumentParser(description='A Pokerbot.', add_help=False, prog='pokerbot')
   parser.add_argument('-h', dest='host', type=str, default='localhost', help='Host to connect to, defaults to localhost')
   parser.add_argument('port', metavar='PORT', type=int, help='Port on host to connect to')
@@ -25,6 +24,6 @@ if __name__ == '__main__':
   except socket.error as e:
     print 'Error connecting! Aborting'
     exit()
-  
-  bot = playbig_player.PlaybigPlayer()
+
+  bot = playbig_layered_player.Playbig_layeredPlayer()
   bot.run(s)

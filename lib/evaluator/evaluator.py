@@ -12,7 +12,8 @@ from lib.evaluator import pbots_calc
 from lib.evaluator import evaluator_cy
 
 def evaluate(player_cards, board, dead, num_evaluation=1000000):
-  result = pbots_calc.calc(player_cards, board, dead, num_evaluation)
+	#TODO: revert to num_evaluation
+  result = pbots_calc.calc(player_cards, board, dead, 1000)
   return result.ev[0]
 
 def evaluate_turn(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_):
