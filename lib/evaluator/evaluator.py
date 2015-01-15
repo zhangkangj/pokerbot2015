@@ -11,5 +11,6 @@ Created on Sat Jan 10 02:24:21 2015
 from lib.evaluator import pbots_calc
 
 def evaluate(player_cards, board, dead, num_evaluation=1000000):
-  result = pbots_calc.calc(player_cards, board, dead, num_evaluation)
+	#TODO: revert to num_evaluation
+  result = pbots_calc.calc(player_cards, board, dead, 1000)
   return result.ev[0]
