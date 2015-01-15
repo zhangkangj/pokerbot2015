@@ -10,7 +10,8 @@
 
 BOT_NAME_PREFIX=""
 #OSX needs this for sed to work, for linux, assign empty string to this variable 
-OSX_SED_EXTRA=".sed.bak"
+OSX_SED_EXTRA=""
+#OSX_SED_EXTRA=".sed.bak"
 
 NAIVE_BOT_NAME_PREFIX="naive"
 NAIVE_BOT_NAME_PREFIX_UPPER="Naive"

@@ -8,7 +8,7 @@ Created on Mon Jan 12 12:58:46 2015
 from .. import base_bot
 from lib.evaluator import evaluator
 
-class Playbig_1Bot(base_bot.BaseBot):
+class MixedBot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
@@ -22,7 +22,7 @@ class Playbig_1Bot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(Playbig_1Bot, self).action(equity*0.8, can_raise, can_bet, can_call)
+    return super(MixedBot, self).action(equity*0.8, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
