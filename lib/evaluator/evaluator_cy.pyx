@@ -13,7 +13,7 @@ from libc.stdlib cimport calloc, free
 
 import ctypes
 from .. import util
-from evaluator_c cimport evaluate_nums
+from evaluator_c cimport evaluate_nums as evaluate_nums_c
 from evaluator_c cimport evaluate_river as evaluate_river_c
 from evaluator_c cimport evaluate_turn as evaluate_turn_c
 from evaluator_c cimport evaluate_flop as evaluate_flop_c
@@ -47,40 +47,19 @@ def flop_idx(int c1, int c2, int c3, int c4, int c5):
   board_index = c3 * (c3-1) * (c3-2) / 6 + c4 * (c4-1) / 2 + c5
   return hole_index * 22100 + board_index
 
-def evaluate_cards(a, b, c, d, e, f, g):
-  cdef:
-    unsigned int aa, bb, cc, dd, ee, ff, gg
-  aa = util.card_to_num(a)
-  bb = util.card_to_num(b)
-  cc = util.card_to_num(c)
-  dd = util.card_to_num(d)
-  ee = util.card_to_num(e)
-  ff = util.card_to_num(f)
-  gg = util.card_to_num(g)
-  return evaluate_nums(aa, bb, cc, dd, ee, ff, gg)
+def evaluate_cards(unsigned int a, unsigned int b,
+                   unsigned int c, unsigned int d, unsigned int e, unsigned int f, unsigned int g):
+  return evaluate_nums_c(a, b, c, d, e, f, g)
 
-def evaluate_river(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_, bc5_):
-  cdef:
-    unsigned int mc1, mc2, bc1, bc2, bc3, bc4, bc5
-  mc1 = util.card_to_num(mc1_)
-  mc2 = util.card_to_num(mc2_)
-  bc1 = util.card_to_num(bc1_)
-  bc2 = util.card_to_num(bc2_)
-  bc3 = util.card_to_num(bc3_)
-  bc4 = util.card_to_num(bc4_)
-  bc5 = util.card_to_num(bc5_)
+def evaluate_river(unsigned int mc1, unsigned int mc2,
+                   unsigned int bc1, unsigned int bc2, unsigned int bc3, unsigned int bc4, unsigned int bc5):
   return evaluate_river_c(mc1, mc2, bc1, bc2, bc3, bc4, bc5)
 
-def evaluate_turn(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_):
+def evaluate_turn(unsigned int mc1, unsigned int mc2,
+                  unsigned int bc1, unsigned int bc2, unsigned int bc3, unsigned int bc4):
   cdef:
-    unsigned int mc1, mc2, bc1, bc2, bc3, bc4, i
+    unsigned int i
     unsigned int* result_ptr = <unsigned int*> calloc(46, cython.sizeof(int))
-  mc1 = util.card_to_num(mc1_)
-  mc2 = util.card_to_num(mc2_)
-  bc1 = util.card_to_num(bc1_)
-  bc2 = util.card_to_num(bc2_)
-  bc3 = util.card_to_num(bc3_)
-  bc4 = util.card_to_num(bc4_)
   evaluate_turn_c(mc1, mc2, bc1, bc2, bc3, bc4, result_ptr)
   result = (ctypes.c_uint * 46)()
   for i in range(46):
@@ -89,15 +68,12 @@ def evaluate_turn(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_):
     free(result_ptr)
   return result
 
-def evaluate_flop(mc1_, mc2_, bc1_, bc2_, bc3_, unsigned int num_iter):
+def evaluate_flop(unsigned int mc1, unsigned int mc2,
+                  unsigned int bc1, unsigned int bc2, unsigned int bc3,
+                  unsigned int num_iter):
   cdef:
-    unsigned int mc1, mc2, bc1, bc2, bc3, i
+    unsigned int i
     unsigned int* result_ptr = <unsigned int*> calloc(1081, cython.sizeof(int))
-  mc1 = util.card_to_num(mc1_)
-  mc2 = util.card_to_num(mc2_)
-  bc1 = util.card_to_num(bc1_)
-  bc2 = util.card_to_num(bc2_)
-  bc3 = util.card_to_num(bc3_)
   evaluate_flop_c(mc1, mc2, bc1, bc2, bc3, num_iter, result_ptr)
   result = (ctypes.c_uint * 1081)()
   for i in range(1081):
