@@ -5,10 +5,6 @@ Created on Mon Jan 12 14:48:21 2015
 @author: zhk
 """
 
-def foo(*args):
-  print args
 
-def bar(*args):
-  foo(*args)
-
-bar(13)
+import pyximport
+pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator']}, reload_support=True, inplace=True)
