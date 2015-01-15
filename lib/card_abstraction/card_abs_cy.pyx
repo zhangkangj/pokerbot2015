@@ -40,13 +40,6 @@ cdef int preflop_c(int c1, int c2):
 Flop functions
 '''
 
-cdef extern from "evaluator_lib.c":
-  unsigned int evaluate_nums(unsigned int a, unsigned int b, unsigned int c,
-                             unsigned int d, unsigned int e, unsigned int f,
-                             unsigned int g)
-  void evaluate_flop(unsigned int mc1, unsigned int mc2, unsigned int bc1, unsigned int bc2, unsigned int bc3,
-                     unsigned int num_iter, unsigned int* result)
-
 cdef int flop_idx(int c1, int c2, int c3, int c4, int c5):
   cdef int index, hole_index, board_index
   if c1 > c2:

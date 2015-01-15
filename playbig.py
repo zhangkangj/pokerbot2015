@@ -24,6 +24,6 @@ if __name__ == '__main__':
   except socket.error as e:
     print 'Error connecting! Aborting'
     exit()
-
+  
   bot = playbig_player.PlaybigPlayer()
   bot.run(s)
