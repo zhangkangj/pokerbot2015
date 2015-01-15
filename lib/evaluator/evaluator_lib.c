@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #define likely(x)       __builtin_expect((x),1)
@@ -7,7 +8,7 @@
 #define shift_long(x) (((((x>>31)+x)>>14)+((x>>31)+x)) & 0x0000000000007ffful);
 
 inline unsigned int card_to_num(const char card[]){
-  unsigned int rank, suit;
+  unsigned int rank, suit = 0;
   switch(card[0]) {
     case 'A': rank = 12; break;
     case 'K': rank = 11; break;
@@ -26,7 +27,7 @@ inline unsigned int card_to_num(const char card[]){
 }
 
 inline uint64_t card_to_bit(const char card[]) {
-  uint64_t rank, suit;
+  uint64_t rank, suit = 0;
   switch (card[0]) {
     case 'A': rank = 0x1000000000000; break;
     case 'K': rank = 0x100000000000; break;
@@ -46,8 +47,8 @@ inline uint64_t card_to_bit(const char card[]) {
 
 inline char* num_to_card(unsigned int x) {
   unsigned int rank = x >> 2;
-  unsigned int suit = 52 - rank << 2;
-  char rank_, suit_;
+  unsigned int suit = 52 - (rank << 2);
+  char rank_, suit_ = 0;
   switch (rank) {
     case 12: rank_ = 'A'; break;
     case 11: rank_ = 'K'; break;
@@ -142,47 +143,6 @@ unsigned int evaluate(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
   }
 }
 
-float get_preflop_naive_strength(const char x_str[3], const char y_str[3]) {
-  unsigned int x = card_to_num(x_str), y = card_to_num(y_str);
-  unsigned int a, b, c, d, e, f, g;
-  unsigned long long result = 0;
-  uint64_t aa, bb, cc, dd, ee, ff, gg, xx = card_to_bit(x_str), yy = card_to_bit(y_str);
-  unsigned int mask[48] = {0};
-  for (a = 0; a < 51; ++a) {
-    if ((a==x)||(a==y)) continue;
-    aa = num_to_bit(a);
-    for (b = a+1; b < 52; ++b) {
-      if ((b==x)||(b==y)) continue;
-      bb = num_to_bit(b);
-      int i, j=0;
-      for (i=0; i<52; i++) {
-        if ((i!=a)&&(i!=b)&&(i!=x)&&(i!=y)) {
-          mask[j++] = i;
-        }
-      }
-      for (c = 0; c < 44; ++c) {
-        cc = num_to_bit(mask[c]);
-        for (d = c+1; d < 45; ++d) {
-          dd = num_to_bit(mask[d]);
-          for (e = d+1; e < 46; ++e) {
-            ee = num_to_bit(mask[e]);
-            for (f = e+1; f < 47; ++f) {
-              ff = num_to_bit(mask[f]);
-              for (g = f+1; g < 48; ++g) {
-                gg = num_to_bit(mask[g]);
-                unsigned int tmp1 = evaluate(xx, yy, cc, dd, ee, ff, gg);
-                unsigned int tmp2 = evaluate(aa, bb, cc, dd, ee, ff, gg);
-                result += (tmp1>tmp2)*2 + (tmp1==tmp2);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return result / 2097572400.0 / 2;
-}
-
 unsigned int evaluate_cards(const char a[3], const char b[3], const char c[3], const char d[3],
                             const char e[3], const char f[3], const char g[3]) {
   uint64_t aa, bb, cc, dd, ee, ff, gg;
@@ -209,30 +169,108 @@ unsigned int evaluate_nums(unsigned int a, unsigned int b, unsigned int c, unsig
   return evaluate(aa, bb, cc, dd, ee, ff, gg);
 }
 
-void evaluate_flop(unsigned int mc1, unsigned int mc2, unsigned int bc1, unsigned int bc2, unsigned int bc3) {
-  unsigned int allowed_cards[47] = {0};
+void evaluate_flop(unsigned int mc1_, unsigned int mc2_, unsigned int bc1_, unsigned int bc2_, unsigned int bc3_,
+                   unsigned int num_iter, unsigned int* result) {
+  uint64_t mc1 = num_to_bit(mc1_);
+  uint64_t mc2 = num_to_bit(mc2_);
+  uint64_t bc1 = num_to_bit(bc1_);
+  uint64_t bc2 = num_to_bit(bc2_);
+  uint64_t bc3 = num_to_bit(bc3_);
+  uint64_t allowed_cards[47] = {0};
   unsigned int i, j=0;
-  for (i = 0; i < 47; ++i){
-    if ((j!=mc1) && (j!=mc2) && (j!=bc1) && (j!=bc2) && (j!=bc3)){
-      allowed_cards[i] = j;
+  for (i = 0; i < 52; ++i){
+    if ((i!=mc1_) && (i!=mc2_) && (i!=bc1_) && (i!=bc2_) && (i!=bc3_)){
+      allowed_cards[j++] = num_to_bit(i);
     }
-    j++;
   }
-  unsigned int result[276] = {0};
-  unsigned int index = 0
-  for (i=0; i<46; i=i+2){
-    for (j=i+1; j<47; j=j+2){
-      uint64_t bc4 = num_to_bit(allowed_cards[i]);
-      uint64_t bc5 = num_to_bit(allowed_cards[j]);
-      uint64_t opp_cards[45] = {0};
-      unsigned int m, n = 0;
-      for (m = 0; m < 45; ++m){
-        
-        opp_cards[m] = n;
-        n++;
+  unsigned int index = 0;
+  for (i=0; i<46; i=i+1){
+    for (j=i+1; j<47; j=j+1){
+      uint64_t bc4 = allowed_cards[i];
+      uint64_t bc5 = allowed_cards[j];
+      unsigned int m;
+      unsigned int value = rand();
+      unsigned int value1 = (value>>16)%45;
+      unsigned int value2 = (value<<16)%45;
+      for (m=0; m<num_iter; ++m) {
+        unsigned int r1, r2;
+        value1 = (value1 * 1664525 + 1013904223) % 45;
+        r1 = value1 + (value1>=i) + (value1>=(j-1));
+        do {
+          value2 = (value2 * 22695477 + 1) % 45;
+          r2 = value2 + (value2>=i) + (value2>=(j-1));
+        } while (r1==r2);
+        uint64_t oc1 = allowed_cards[r1];
+        uint64_t oc2 = allowed_cards[r2];
+        unsigned int s1, s2;
+        s1 = evaluate(mc1, mc2, bc1, bc2, bc3, bc4, bc5);
+        s2 = evaluate(oc1, oc2, bc1, bc2, bc3, bc4, bc5);
+        result[index] += (s1>s2) * 2 + (s1==s2);
       }
       index++;
     }
   }
+}
 
+void evaluate_turn(unsigned int mc1_, unsigned int mc2_,
+                   unsigned int bc1_, unsigned int bc2_, unsigned int bc3_, unsigned int bc4_,
+                   unsigned int* result) {
+  uint64_t mc1 = num_to_bit(mc1_);
+  uint64_t mc2 = num_to_bit(mc2_);
+  uint64_t bc1 = num_to_bit(bc1_);
+  uint64_t bc2 = num_to_bit(bc2_);
+  uint64_t bc3 = num_to_bit(bc3_);
+  uint64_t bc4 = num_to_bit(bc4_);
+  uint64_t allowed_cards[46] = {0};
+  unsigned int i, j = 0, k;
+  for (i = 0; i < 52; ++i){
+    if ((i!=mc1_) && (i!=mc2_) && (i!=bc1_) && (i!=bc2_) && (i!=bc3_) && (i!=bc4_)){
+      allowed_cards[j++] = num_to_bit(i);
+    }
+  }
+  for (i = 0; i < 46; ++i) {
+    uint64_t bc5 = allowed_cards[i];
+    for (j = 0; j < 45; ++j) {
+      if (j == i) continue;
+      uint64_t oc1 = allowed_cards[j];
+      for (k = j + 1; k < 46; ++k) {
+        if (k == i) continue;
+        uint64_t oc2 = allowed_cards[k];
+        unsigned int s1, s2;
+        s1 = evaluate(mc1, mc2, bc1, bc2, bc3, bc4, bc5);
+        s2 = evaluate(oc1, oc2, bc1, bc2, bc3, bc4, bc5);
+        result[i] += (s1>s2) * 2 + (s1==s2);
+      }
+    }
+  }
+}
+
+float evaluate_river(unsigned int mc1_, unsigned int mc2_,
+                     unsigned int bc1_, unsigned int bc2_, unsigned int bc3_, unsigned int bc4_, unsigned int bc5_) {
+  uint64_t mc1 = num_to_bit(mc1_);
+  uint64_t mc2 = num_to_bit(mc2_);
+  uint64_t bc1 = num_to_bit(bc1_);
+  uint64_t bc2 = num_to_bit(bc2_);
+  uint64_t bc3 = num_to_bit(bc3_);
+  uint64_t bc4 = num_to_bit(bc4_);
+  uint64_t bc5 = num_to_bit(bc5_);
+  uint64_t allowed_cards[45] = {0};
+  unsigned int i, j=0;
+  for (i = 0; i < 52; ++i){
+    if ((i!=mc1_) && (i!=mc2_) && (i!=bc1_) && (i!=bc2_) && (i!=bc3_) && (i!=bc4_) && (i!=bc5_)){
+      allowed_cards[j++] = num_to_bit(i);
+    }
+  }
+  unsigned int result = 0;
+  for (i=0; i<44; i=i+1){
+    for (j=i+1; j<45; j=j+1){
+      uint64_t oc1 = allowed_cards[i];
+      uint64_t oc2 = allowed_cards[j];
+      unsigned int s1, s2;
+      s1 = evaluate(mc1, mc2, bc1, bc2, bc3, bc4, bc5);
+      s2 = evaluate(oc1, oc2, bc1, bc2, bc3, bc4, bc5);
+      result += (s1>s2) * 2 + (s1==s2);
+    }
+  }
+  return (float)result / 990.0 / 2;
 }

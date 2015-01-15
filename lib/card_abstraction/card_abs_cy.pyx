@@ -5,8 +5,6 @@ Created on Tue Jan 13 16:36:02 2015
 @author: zhk
 """
 
-import numpy as np
-cimport numpy as np
 #from libc.math cimport
 #from libc.stdlib cimport max, min
 from .. import util
@@ -42,23 +40,13 @@ cdef int preflop_c(int c1, int c2):
 Flop functions
 '''
 
-cdef extern from "/home/zhk/pokerbot/lib/evaluator/evaluator_lib.c":
+cdef extern from "evaluator_lib.c":
   unsigned int evaluate_nums(unsigned int a, unsigned int b, unsigned int c,
                              unsigned int d, unsigned int e, unsigned int f,
                              unsigned int g)
   void evaluate_flop(unsigned int mc1, unsigned int mc2, unsigned int bc1, unsigned int bc2, unsigned int bc3,
-                     unsigned int num_iter)
+                     unsigned int num_iter, unsigned int* result)
 
-def evaluate_cards(a, b, c, d, e, f, g):
-  aa = util.card_to_num(a)
-  bb = util.card_to_num(b)
-  cc = util.card_to_num(c)
-  dd = util.card_to_num(d)
-  ee = util.card_to_num(e)
-  ff = util.card_to_num(f)
-  gg = util.card_to_num(g)
-  return evaluate_nums(aa, bb, cc, dd, ee, ff, gg)
-  
 cdef int flop_idx(int c1, int c2, int c3, int c4, int c5):
   cdef int index, hole_index, board_index
   if c1 > c2:
@@ -73,9 +61,3 @@ cdef int flop_idx(int c1, int c2, int c3, int c4, int c5):
     c3, c4 = c4, c3
   board_index = c3 * (c3-1) * (c3-2) / 6 + c4 * (c4-1) / 2 + c5
   return hole_index * 22100 + board_index
-
-total = 0
-for i in range(0, 46, 2):
-  for j in range(i+1, 47, 2):
-    total += 1
-    print total

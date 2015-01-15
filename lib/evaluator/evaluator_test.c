@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
@@ -69,10 +70,50 @@ void benchmark() {
   printf("no pair:          %d\n", hands[0]);
 }
 
+float get_preflop_naive_strength(const char x_str[3], const char y_str[3]) {
+  unsigned int x = card_to_num(x_str), y = card_to_num(y_str);
+  unsigned int a, b, c, d, e, f, g;
+  unsigned long long result = 0;
+  uint64_t aa, bb, cc, dd, ee, ff, gg, xx = card_to_bit(x_str), yy = card_to_bit(y_str);
+  unsigned int mask[48] = {0};
+  for (a = 0; a < 51; ++a) {
+    if ((a==x)||(a==y)) continue;
+    aa = num_to_bit(a);
+    for (b = a+1; b < 52; ++b) {
+      if ((b==x)||(b==y)) continue;
+      bb = num_to_bit(b);
+      int i, j=0;
+      for (i=0; i<52; i++) {
+        if ((i!=a)&&(i!=b)&&(i!=x)&&(i!=y)) {
+          mask[j++] = i;
+        }
+      }
+      for (c = 0; c < 44; ++c) {
+        cc = num_to_bit(mask[c]);
+        for (d = c+1; d < 45; ++d) {
+          dd = num_to_bit(mask[d]);
+          for (e = d+1; e < 46; ++e) {
+            ee = num_to_bit(mask[e]);
+            for (f = e+1; f < 47; ++f) {
+              ff = num_to_bit(mask[f]);
+              for (g = f+1; g < 48; ++g) {
+                gg = num_to_bit(mask[g]);
+                unsigned int tmp1 = evaluate(xx, yy, cc, dd, ee, ff, gg);
+                unsigned int tmp2 = evaluate(aa, bb, cc, dd, ee, ff, gg);
+                result += (tmp1>tmp2)*2 + (tmp1==tmp2);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return result / 2097572400.0 / 2;
+}
+
 void test() {
   
-  printf("%d\n", evaluate_cards("Ac", "Kc", "8c", "4c", "3c", "Jh", "Qh"));
-  printf("%d\n", evaluate_cards("Ac", "Kc", "8c", "4c", "3c", "2c", "Qh"));
+  printf("%d\n", evaluate_cards("Ac", "Kc", "Qc", "Jc", "Tc", "Qd", "Td"));
   // four of a kind
   /*
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "8c", "2c"));
@@ -107,15 +148,21 @@ void test() {
 void test_preflop() {
   clock_t stop_time, start_time = clock();
   uint64_t stop_cycle, start_cycle = rdtsc();
-  float result = get_preflop_naive_strength("Ad", "Ac");
+  //float result = get_preflop_naive_strength("Ad", "Ac");
+  int i, result = 0;
+  unsigned int results[1081] = {0};
+  evaluate_turn(51, 47, 43, 39, 35, 31, results);
+  for (i = 0; i < 1081; i++) {
+    result += results[i];
+  }
   stop_cycle = rdtsc();
   stop_time = clock();
-  printf("%f\n", result);
+  printf("%f\n", (float)result);
   printf("%0.2f cycles, %0.2f seconds. \n", ((double)(stop_cycle - start_cycle)), ((double) (stop_time - start_time)) / CLOCKS_PER_SEC);
 }
 
 int main( int argc, const char* argv[]) {
   //benchmark();
-  //test_preflop();
-  test();
+  test_preflop();
+  //test();
 }

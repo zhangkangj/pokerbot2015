@@ -6,8 +6,11 @@ Created on Tue Jan 13 16:48:51 2015
 """
 
 def num_to_card(n):
-    rank = n % 13
-    suit = n / 13
+  if isinstance(n, basestring):
+    return n
+  else:
+    rank = n / 4
+    suit = n % 4
     if rank == 12:
         rank = "A"
     elif rank == 11:
@@ -33,6 +36,7 @@ def num_to_card(n):
     return rank + suit
 
 def card_to_num(card):
+  if isinstance(card, basestring):
     rank = card[0]
     suit = card[1]
     if rank == "A":
@@ -58,6 +62,8 @@ def card_to_num(card):
     else:
         raise Exception("suit exception:" + suit)
     return suit + rank * 4
+  else:
+    return card
 
 def n2c(numbers):
     return [number_to_card(x) for x in numbers]

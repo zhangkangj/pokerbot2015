@@ -5,7 +5,7 @@ Created on Tue Jan 13 17:36:12 2015
 @author: zhk
 """
 
-from .. import util
+from lib import util
 
 def preflop(card1, card2):
   c1 = util.card_to_num(card1)
