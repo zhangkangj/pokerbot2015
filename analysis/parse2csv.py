@@ -12,28 +12,72 @@ def get_card_equities(row):
 	equity_3 = evaluator.evaluate(card_str_3, board_card_str, '', 1000)
 	return [hole_cards,equity_2,equity_3]
 
+def gen_result_keys():
+	result_keys = ['game_index','hand_index']
+	for tempname in ['dealer','SB','BB']:
+		result_keys.append(tempname + '_name');
+		result_keys.append(tempname + '_stack');
+		result_keys.append(tempname + '_hole_cards');
+		result_keys.append(tempname + '_equity_2');
+		result_keys.append(tempname + '_equity_3');
+		result_keys.append('is_'+tempname + '_enter_preflop');
+		result_keys.append(tempname+'_actions_preflop');
+		result_keys.append(tempname+'_put2pot_preflop');
+	result_keys.append('PreFlop_potsize');
+	result_keys.append('flopCards');
+	for r in ['flop','turn','river']:
+		result_keys.append(r+'Cards')
+		for tempname in ['dealer','SB','BB']:
+			result_keys.append(tempname+'_equity_2_'+r);
+			result_keys.append(tempname + '_equity_3_'+r);
+			result_keys.append('is_'+tempname + '_enter_'+r);
+			result_keys.append(tempname+'_actions_'+r);
+			result_keys.append(tempname+'_put2pot_'+r);
+		result_keys.append(r+'_potsize');
+	result_keys.pop();
+	result_keys.append('final_potsize');
+	result_keys.append('is_showdown');
+	for tempname in ['dealer','SB','BB']:
+		result_keys.append('is_showdown_'+tempname)
+		result_keys.append('is_'+tempname+'_win')
+	return result_keys
 
 def main():
 
-	LOGPATH_pref = "//home//rongsha//logs//Day_2//Casino_Day-2_Nuts_p"
+	LOGPATH_pref = "//home//rongsha//logs//Day_4//Casino_Day-4_Nuts_p"
 	OUT_FILENAME = LOGPATH_pref + '.csv'
 	OUT_FILE_TEAMS = LOGPATH_pref + '_teams.csv'
 	resultmat = []
 	teamsmat = []
+	result_keys = gen_result_keys()
+	headerflag = 0;
+	count = 0;
 	# for game_index in [1]:
 	for game_index in range(1,7):
 		LOGPATH = LOGPATH_pref+str(game_index) + '//'
 		for MATCHNAME in os.listdir(LOGPATH):
 			# OUT_FILENAME = LOGPATH + MATCHNAME + '.csv'
 
-			count = 0
+			
 			print (LOGPATH+MATCHNAME)
 			with open(LOGPATH+MATCHNAME, 'r') as f:
 				for row in f.readlines():
+					
+					if count > 1000:
+						f = open(OUT_FILENAME,'a')
+						dict_writer = csv.DictWriter(f,fieldnames=result_keys)
+						print result_keys;
+						if headerflag == 0: 
+							dict_writer.writeheader()
+						dict_writer.writerows(resultmat)
+						f.close()
+						resultmat = [];
+						count = 0;
+						headerflag = 1;
 					if '6.176 MIT Pokerbots' in row:
 						continue;
 					elif row[0:4]=="Hand": # a new hand
-
+						count += 1
 						state = 'preflop'
 						temp_strs = row.split(', ');
 						hand_index = int(temp_strs[0].strip('Hand #'))
@@ -204,7 +248,8 @@ def main():
 						result['is_'+names[curname]+'_enter_'+state] = True
 
 				# end of each match
-				tempdict = {}
+				tempdict = {};
+				teamsresult={}
 				for tempname in ['dealer','SB','BB']:
 					tempdict[result[tempname+'_name']] = result[tempname+'_stack'];
 				rankings = sorted(tempdict,key=tempdict.get,reverse=True);
@@ -216,37 +261,8 @@ def main():
 
 
 			
-	result_keys = ['game_index','hand_index']
-	for tempname in ['dealer','SB','BB']:
-		result_keys.append(tempname + '_name');
-		result_keys.append(tempname + '_stack');
-		result_keys.append(tempname + '_hole_cards');
-		result_keys.append(tempname + '_equity_2');
-		result_keys.append(tempname + '_equity_3');
-		result_keys.append('is_'+tempname + '_enter_preflop');
-		result_keys.append(tempname+'_actions_preflop');
-		result_keys.append(tempname+'_put2pot_preflop');
-	result_keys.append('PreFlop_potsize');
-	result_keys.append('flopCards');
-	for r in ['flop','turn','river']:
-		result_keys.append(r+'Cards')
-		for tempname in ['dealer','SB','BB']:
-			result_keys.append(tempname+'_equity_2_'+r);
-			result_keys.append(tempname + '_equity_3_'+r);
-			result_keys.append('is_'+tempname + '_enter_'+r);
-			result_keys.append(tempname+'_actions_'+r);
-			result_keys.append(tempname+'_put2pot_'+r);
-		result_keys.append(r+'_potsize');
-	result_keys.pop();
-	result_keys.append('final_potsize');
-	result_keys.append('is_showdown');
-	for tempname in ['dealer','SB','BB']:
-		result_keys.append('is_showdown_'+tempname)
-		result_keys.append('is_'+tempname+'_win')
-	f = open(OUT_FILENAME,'w')
-	dict_writer = csv.DictWriter(f,fieldnames=result_keys)
-	dict_writer.writeheader()
-	dict_writer.writerows(resultmat)
+
+
 
 	f2 = open(OUT_FILE_TEAMS,'w')
 	dict_writer2 = csv.DictWriter(f2,fieldnames=['win','loss'])
