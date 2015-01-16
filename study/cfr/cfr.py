@@ -7,7 +7,7 @@ Created on Thu Jan 15 16:19:06 2015
 
 import numpy as np
 
-MAX_BET_NUM = 4
+MAX_BET_NUM = 3
 
 class Node(object):
   count = 0
@@ -39,7 +39,7 @@ class Node(object):
     else:
       assert 1==0, ('invalid player', self.active_player)
     return next_player
-      
+
   def spawn_round_node(self, pot_size, stack_sb, stack_bb):
     node = RoundNode(self.num_round+1, self.bucket_sequence_sb, self.bucket_sequence_bb,
                  pot_size, stack_sb, stack_bb)
@@ -58,6 +58,7 @@ class Node(object):
     active_player = self.get_next_player()
     node = CheckNode(active_player, self.num_round, self.bucket_sequence_sb, self.bucket_sequence_bb,
                      pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    self.child_nodes.append(node)
 
   def spawn_fold_node(self, pot_size, stack_sb, stack_bb):
     assert self.active_player is not None
@@ -99,14 +100,15 @@ class RaiseNode(Node):
     call_amount = abs(amount_bb - amount_sb)
     stack, sb_delta, bb_delta = (stack_sb, call_amount, 0) if active_player == 'SB' else (stack_bb, 0, call_amount)
     if stack <= call_amount:
-      self.spawn_showdown_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb, stack_bb)
+      self.spawn_showdown_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb-sb_delta, stack_bb-bb_delta)
     else:
       if num_round < 3:
         # SB calls BB after post blinds
-        if num_round == 0 and active_player == 'SB' and stack_sb == 1 and stack_bb == 3:
+        if num_round == 0 and active_player == 'SB' and amount_sb == 1 and amount_bb == 2:
           self.spawn_check_node(pot_size, stack_sb-1, stack_bb, amount_sb=2, amount_bb=2)
+        else:
         # player calls before river
-        self.spawn_round_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb-sb_delta, stack_bb-bb_delta)
+          self.spawn_round_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb-sb_delta, stack_bb-bb_delta)
       else:
         # player calls at river
         self.spawn_showdown_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb-sb_delta, stack_bb-bb_delta)
@@ -121,7 +123,7 @@ class RaiseNode(Node):
           raise_amounts = set(desired_amounts)
         for raise_amount in raise_amounts:
           sb_delta, bb_delta = (raise_amount+sb_delta, 0) if active_player == 'SB' else (0, raise_amount+bb_delta)
-          self.spawn_raise_node(pot_size, stack_sb+sb_delta, stack_bb-bb_delta,
+          self.spawn_raise_node(pot_size, stack_sb-sb_delta, stack_bb-bb_delta,
                                 amount_sb+sb_delta, amount_bb+bb_delta, raise_amount, num_bet+1, raise_amount)
 
 
@@ -148,7 +150,7 @@ class CheckNode(Node):
       raise_amounts = set(desired_amounts)
     for raise_amount in raise_amounts:
       sb_delta, bb_delta = (raise_amount, 0) if active_player == 'SB' else (0, raise_amount)
-      self.spawn_raise_node(pot_size, stack_sb+sb_delta, stack_bb-bb_delta,
+      self.spawn_raise_node(pot_size, stack_sb-sb_delta, stack_bb-bb_delta,
                             amount_sb+sb_delta, amount_bb+bb_delta, raise_amount, num_bet=1, raise_amount=raise_amount)
 
 
