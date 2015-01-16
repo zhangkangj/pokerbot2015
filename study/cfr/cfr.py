@@ -8,7 +8,7 @@ Created on Thu Jan 15 16:19:06 2015
 class Node(object):
   def __init__(self, active_player, num_round, 
                bucket_sequence_sb, bucket_sequence_bb,
-               pot_size, stack1, stack2, amount_sb, amount_bb):
+               pot_size, stack1, stack2, amount_sb, amount_bb, min_bet):
     self.active_player = active_player # SB or BB
     self.num_round = num_round
     self.bucket_sequence_sb = None
@@ -25,17 +25,17 @@ class Node(object):
   
 class RoundNode(Node):
   def __init__(self, active_player, num_round, bucket_sequence_sb, bucket_sequence_bb,
-               pot_size, stack_sb, stack_bb, amount_sb, amount_bb):
+               pot_size, stack_sb, stack_bb, amount_sb, amount_bb, min_bet):
     super(RoundNode, self).__init__(num_round, bucket_sequence_sb, bucket_sequence_bb, 
-                                    pot_size, stack_sb, stack_bb, amount_sb, amount_bb):
+                                    pot_size, stack_sb, stack_bb, amount_sb, amount_bb, min_bet):
     if self.num_round == 0:
       self.child_nodes.append(RaiseNode('SB', num_round, 
                                         bucket_sequence_sb, bucket_sequence_bb,
-                                        0, amount_sb-1, amount_bb-2, 1, 2))
+                                        0, amount_sb-1, amount_bb-2, 1, 2, 2))
     else:
-      self.child_nodes.append(RaiseNode('SB', num_round, 
+      self.child_nodes.append(CheckNode('SB', num_round, 
                                         bucket_sequence_sb, bucket_sequence_bb,
-                                        pot_size, amount_sb, amount_bb, 0, 0))
+                                        pot_size, stack_sb, stack_bb, 0, 0, 2))
 
 class RaiseNode(Node):
   def __init__(self, active_player, num_round, bucket_sequence_sb, bucket_sequence_bb,
