@@ -85,12 +85,13 @@ class RoundNode(Node):
     super(RoundNode, self).__init__(None, num_round, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0)
     Node.round_count += 1
+#    print 'round', Node.round_count
     if self.num_round == 0:
       assert pot_size == 0
       assert stack_sb == stack_bb
       Node.count = 0
-      self.amount_sb, self.amount_bb == 1, 2
-      self.spawn_raise_node(pot_size, stack_sb, stack_bb, self.amount_sb, self.amount_bb, min_bet=2, num_bet=0, raise_amount=2)
+      self.amount_sb, self.amount_bb = 1, 2
+      self.spawn_raise_node(pot_size, stack_sb -1 , stack_bb-2, self.amount_sb, self.amount_bb, min_bet=2, num_bet=0, raise_amount=2)
     else:
       self.spawn_check_node(pot_size, stack_sb, stack_bb, self.amount_sb, self.amount_bb)
 
@@ -101,6 +102,7 @@ class RaiseNode(Node):
     super(RaiseNode, self).__init__(active_player, num_round, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     Node.raise_count += 1
+#    print 'raise', Node.raise_count
     # player folds
     self.spawn_fold_node(pot_size+amount_sb+amount_bb, stack_sb, stack_bb)
     # player calls
@@ -121,13 +123,17 @@ class RaiseNode(Node):
         self.spawn_showdown_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb-sb_delta, stack_bb-bb_delta)
       # player raises
       if num_bet < MAX_BET_NUM:
+ #       print min_bet, pot_size, amount_bb,amount_sb
         raise_limit = stack - call_amount
         # desired_amounts = [2, pot_size+amount_sb+amount_bb+call_amount]
         desired_amounts = [min_bet , (pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
-        if raise_limit < pot_size:
+        if raise_limit < pot_size+amount_sb+amount_bb+call_amount:
           raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
         else:
           raise_amounts = set(desired_amounts)
+  #      print raise_amounts, desired_amounts, raise_limit
+        if len(desired_amounts) < 3:
+          print desired_amounts
         for raise_amount in raise_amounts:
           sb_delta, bb_delta = (raise_amount+sb_delta, 0) if active_player == 'SB' else (0, raise_amount+bb_delta)
           self.spawn_raise_node(pot_size, stack_sb-sb_delta, stack_bb-bb_delta,
@@ -140,6 +146,7 @@ class CheckNode(Node):
     super(CheckNode, self).__init__(active_player,num_round, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     Node.check_count += 1
+ #   print 'check', Node.check_count
     # player checks
     if (self.num_round==0 and active_player=='SB') or (self.num_round>0 and active_player=='BB'):
       self.spawn_check_node(pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
@@ -147,12 +154,13 @@ class CheckNode(Node):
       if self.num_round == 3:
         self.spawn_showdown_node(pot_size, stack_sb, stack_bb)
       else:
-        self.spawn_round_node(pot_size, stack_sb, stack_bb)
+        self.spawn_round_node(pot_size + amount_sb + amount_bb, stack_sb, stack_bb)
     # player bets
     raise_limit = stack_sb if active_player == 'SB' else stack_bb
     desired_amounts = [2 , (pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
+ #   print desired_amounts, raise_limit, amount_sb, amount_bb
     # desired_amounts = [2, pot_size+amount_sb+amount_bb]
-    if raise_limit < pot_size:
+    if raise_limit < pot_size+amount_sb+amount_bb:
       raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
     else:
       raise_amounts = set(desired_amounts)
@@ -168,6 +176,7 @@ class FoldNode(Node):
                                    pot_size, stack_sb, stack_bb, 0, 0)
     self.winner = self.active_player
     Node.fold_count += 1
+ #   print 'fold', Node.fold_count
 
 
 class ShowdownNode(Node):
@@ -175,8 +184,9 @@ class ShowdownNode(Node):
     super(ShowdownNode, self).__init__(None, None, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, 0, 0)
     Node.showdown_count += 1
+#    print 'showdown', Node.showdown_count
 
 
 if __name__ == "__main__":
-  root = RoundNode(0, None, None, 0, 300, 300)
+  root = RoundNode(0, None, None, 0, 8, 8)
   print Node.count, Node.round_count, Node.raise_count, Node.check_count, Node.fold_count, Node.showdown_count
