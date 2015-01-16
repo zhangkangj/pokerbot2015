@@ -232,7 +232,7 @@ def main():
 						curname = row.split(' ')[0];
 						result['is_'+names[curname]+'_enter_'+state] = True
 						tempstr2 = names[curname]+'_actions_'+state
-						if row.split(' ')[1] == 'checkes':
+						if 'checkes' in row.split(' ')[1] :
 							result[tempstr2] += 'H';
 						elif row.split(' ')[1] in ['bets','raises']:
 							result[tempstr2] += 'R';
@@ -240,7 +240,7 @@ def main():
 						elif row.split(' ')[1] == 'calls':
 							result[tempstr2] += 'A';
 							result[names[curname]+'_put2pot_'+state] = row.split(' ')[-1].strip('\n');
-						elif row.split(' ')[1] == 'folds':
+						elif 'folds' inrow.split(' ')[1] :
 							result[tempstr2] += 'F';
 					elif 'posts' in row:
 						curname = row.split(' ')[0];
