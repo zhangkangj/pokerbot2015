@@ -68,10 +68,10 @@ def card_to_num(card):
     return card
 
 def n2c(numbers):
-    return [number_to_card(x) for x in numbers]
+    return [num_to_card(x) for x in numbers]
 
 def c2n(cards):
-    return [card_to_number(x) for x in cards]
+    return [card_to_num(x) for x in cards]
 
 def tester(func):
   def inner(*args, **kwargs):
@@ -101,14 +101,4 @@ def test():
   except:
     traceback.print_exc()
     print 'failed to import evaluator_cy'
-  try:
-    from lib.card_abstraction import card_abs_cy
-  except:
-    traceback.print_exc()
-    print 'failed to import lib.card_abs_cy'
-  try:
-    from study.card_abstraction import card_abs_cy
-  except:
-    traceback.print_exc()
-    print 'failed to import study.card_abs_cy'
   print 'test done'
