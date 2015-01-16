@@ -17,12 +17,15 @@ def main():
 
 	LOGPATH_pref = "//home//rongsha//logs//Day_2//Casino_Day-2_Nuts_p"
 	OUT_FILENAME = LOGPATH_pref + '.csv'
+	OUT_FILE_TEAMS = LOGPATH_pref + '_teams.csv'
+	resultmat = []
+	teamsmat = []
 	# for game_index in [1]:
 	for game_index in range(1,7):
 		LOGPATH = LOGPATH_pref+str(game_index) + '//'
 		for MATCHNAME in os.listdir(LOGPATH):
 			# OUT_FILENAME = LOGPATH + MATCHNAME + '.csv'
-			resultmat = []
+
 			count = 0
 			print (LOGPATH+MATCHNAME)
 			with open(LOGPATH+MATCHNAME, 'r') as f:
@@ -200,6 +203,16 @@ def main():
 						result[names[curname]+'_put2pot_'+state] = row.split(' ')[5].strip('\n')
 						result['is_'+names[curname]+'_enter_'+state] = True
 
+				# end of each match
+				tempdict = {}
+				for tempname in ['dealer','SB','BB']:
+					tempdict[result[tempname+'_name']] = result[tempname+'_stack'];
+				rankings = sorted(tempdict,key=tempdict.get,reverse=True);
+				rankings_other = filter(lambda x:x!='Nuts',rankings)
+				teamsresult['win']=rankings_other[0];
+				teamsresult['loss'] = rankings_other[1];
+				teamsmat.append(teamsresult);
+
 
 
 			
@@ -234,6 +247,11 @@ def main():
 	dict_writer = csv.DictWriter(f,fieldnames=result_keys)
 	dict_writer.writeheader()
 	dict_writer.writerows(resultmat)
+
+	f2 = open(OUT_FILE_TEAMS,'w')
+	dict_writer2 = csv.DictWriter(f2,fieldnames=['win','loss'])
+	dict_writer2.writeheader()
+	dict_writer2.writerows(teamsmat)
 
 
 
