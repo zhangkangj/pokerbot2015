@@ -201,7 +201,7 @@ def traverse_game_tree(stacks, pot_sizes, in_game_players, need_act_players, bet
             round1 = 'TURN'
         else:
             round1 = 'RIVER'
-        traverse_game_tree(list(stacks), list(pot_sizes), list(in_game_players), list(need_act_players), 0, next_state, round1, legal_actions, previous_actions+[game_state], gamestat)
+        traverse_game_tree(list(stacks), list(pot_sizes), list(in_game_players), [True,True,True], 0, next_state, round1, legal_actions, previous_actions+[game_state], gamestat)
     elif game_state == 'SHOWDOWN':
         traverse_game_tree(stacks, pot_sizes, get_winners(), need_act_players, 0,'ENDGAME', 'ENDGAME', [], previous_actions+[game_state],gamestat)
     elif game_state == 'ENDGAME':
