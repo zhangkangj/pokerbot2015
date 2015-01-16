@@ -11,6 +11,11 @@ MAX_BET_NUM = 3
 
 class Node(object):
   count = 0
+  round_count = 0
+  raise_count = 0
+  check_count = 0
+  fold_count = 0
+  showdown_count = 0
   def __init__(self, active_player, num_round, 
                bucket_sequence_sb, bucket_sequence_bb,
                pot_size, stack_sb, stack_bb, amount_sb, amount_bb):
@@ -79,6 +84,7 @@ class RoundNode(Node):
   def __init__(self, num_round, bucket_sequence_sb, bucket_sequence_bb, pot_size, stack_sb, stack_bb):
     super(RoundNode, self).__init__(None, num_round, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0)
+    Node.round_count += 1
     if self.num_round == 0:
       assert pot_size == 0
       assert stack_sb == stack_bb
@@ -94,6 +100,7 @@ class RaiseNode(Node):
                pot_size, stack_sb, stack_bb, amount_sb, amount_bb, min_bet, num_bet, raise_amount):
     super(RaiseNode, self).__init__(active_player, num_round, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    Node.raise_count += 1
     # player folds
     self.spawn_fold_node(pot_size+amount_sb+amount_bb, stack_sb, stack_bb)
     # player calls
@@ -132,6 +139,7 @@ class CheckNode(Node):
                pot_size, stack_sb, stack_bb, amount_sb, amount_bb):
     super(CheckNode, self).__init__(active_player,num_round, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    Node.check_count += 1
     # player checks
     if (self.num_round==0 and active_player=='SB') or (self.num_round>0 and active_player=='BB'):
       self.spawn_check_node(pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
@@ -159,14 +167,16 @@ class FoldNode(Node):
     super(FoldNode, self).__init__(None, None, None, None, 
                                    pot_size, stack_sb, stack_bb, 0, 0)
     self.winner = self.active_player
+    Node.fold_count += 1
 
 
 class ShowdownNode(Node):
   def __init__(self, bucket_sequence_sb, bucket_sequence_bb, pot_size, stack_sb, stack_bb):
     super(ShowdownNode, self).__init__(None, None, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, 0, 0)
+    Node.showdown_count += 1
 
 
 if __name__ == "__main__":
   root = RoundNode(0, None, None, 0, 300, 300)
-  print Node.count
+  print Node.count, Node.round_count, Node.raise_count, Node.check_count, Node.fold_count, Node.showdown_count
