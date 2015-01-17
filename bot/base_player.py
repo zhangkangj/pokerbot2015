@@ -32,6 +32,7 @@ class BasePlayer(object):
     self.last_actions = None
     self.num_legal_action = None
     self.legal_actions = None
+    self.action_state=None
 
   def new_game(self, parts):
     self.player_name = parts[1]
@@ -41,6 +42,7 @@ class BasePlayer(object):
     self.bb_size = int(parts[5])
     self.max_num_hand = int(parts[6])
     self.game_init_timebank = float(parts[7])
+
 
   def key_value(self, parts):
     pass
@@ -60,6 +62,11 @@ class BasePlayer(object):
     self.timebank = self.init_timebank
     self.board_cards = []
     self.num_board_card = 0
+    self.last_actions_preflop = []
+    self.last_actions_flop=[]
+    self.last_actions_turn=[]
+    self.last_actions_river=[]
+    self.action_state='PREFLOP';
 
   def action(self, parts):
     self.pot_size = int(parts[1])
@@ -75,12 +82,41 @@ class BasePlayer(object):
     self.num_last_action = int(parts[index])
     index = index + 1
     self.last_actions = parts[index:(index+self.num_last_action)]
+    
+    for last_action in self.last_actions:
+      tempstr = last_action.split(':')
+      if len(tempstr) == 2 and ('DEAL' not in last_action): # check or fold, not Deal
+        lastelm = None;
+      elif len(tempstr) == 3:
+        lastelm = int(tempstr[1]);
+      elif 'DEAL' in last_action:
+        self.action_state = tempstr[-1]
+        continue
+      else:
+        print "Error: Last Action parsing wrong"
+      if self.action_state == 'PREFLOP': 
+        self.last_actions_preflop.append((tempstr[-1],tempstr[0],lastelm))
+      elif self.action_state=='FLOP':
+        self.last_actions_flop.append((tempstr[-1],tempstr[0],lastelm));
+      elif self.action_state == 'TURN':
+        self.last_actions_turn.append((tempstr[-1],tempstr[0],lastelm));
+      elif self.action_state == 'RIVER':
+        self.last_actions_river.append((tempstr[-1],tempstr[0],lastelm));
+      else:
+        print "Error: action_state wrong"
+    print 'self.last_actions_preflop:', self.last_actions_preflop;
+    print 'self.last_actions_flop:', self.last_actions_flop;
+    print 'self.last_actions_turn:', self.last_actions_turn;
+    print 'self.last_actions_river:', self.last_actions_river;
     index = index + self.num_last_action
     self.num_legal_action = int(parts[index])
     index = index + 1
     self.legal_actions = parts[index:(index+self.num_legal_action)]
     index = index + self.num_legal_action
     self.timebank = float(parts[index])
+
+
+
 
   def handover(self, parts):
     self.stack_sizes = [int(x) for x in parts[1:4]]
