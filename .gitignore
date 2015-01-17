@@ -3,6 +3,7 @@ test.*
 *reload*
 *.out
 *.pyc
+*.csv
 .spyderproject
 sqlite.db
 .sconsign.dblite

@@ -23,14 +23,20 @@ def getFileList(p):
 
 def main():
   LOGPATH = "F:\\Software\\PokerBot\\pokerbot2015\\Analysis"
-  FILENAME = "Day2.csv"
+  FILENAME = "Casino_Day-4_Nuts_p_new_1.csv"
   FILEPATH = LOGPATH + "\\" + FILENAME
   df = pd.read_csv(FILEPATH)
  # df['num_of_player_preflop'] = np.sum(df['is_dealer_enter_preflop'], df['is_SB_enter_preflop'], df['is_BB_enter_preflop'])
-  df['num_of_player_preflop'] = np.sum(df[['is_dealer_enter_preflop','is_SB_enter_preflop','is_BB_enter_preflop']])    
+  df['num_of_player_preflop'] = df['is_dealer_enter_preflop'].astype(int) +df['is_SB_enter_preflop'].astype(int) +df['is_BB_enter_preflop'].astype(int)     
+  df['num_of_player_flop'] = df['is_dealer_enter_flop'].astype(int) +df['is_SB_enter_flop'].astype(int) +df['is_BB_enter_flop'].astype(int)     
+  df['num_of_player_turn'] = df['is_dealer_enter_turn'].astype(int) +df['is_SB_enter_turn'].astype(int) +df['is_BB_enter_turn'].astype(int)     
+  df['num_of_player_river'] = df['is_dealer_enter_river'].astype(int) +df['is_SB_enter_river'].astype(int) +df['is_BB_enter_river'].astype(int)     
+  
   df['actual_dealer_equity_preflop'] = (3-df['num_of_player_preflop'])*df['dealer_equity_2']+(df['num_of_player_preflop']-2)*df['dealer_equity_3']
   df['num_of_player_preflop'] = df['is_dealer_enter_flop'] + df['is_SB_enter_flop'] + df['is_BB_enter_flop']  
   #preflop(df, LOGPATH)
+  
+  
   
 def preflop(df, LogPath):
   Filename = "Preflop Analysis.csv"
