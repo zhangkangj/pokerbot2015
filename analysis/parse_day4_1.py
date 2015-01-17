@@ -7,9 +7,9 @@ def get_card_equities(row):
 	hole_cards=''.join(hole_cards.split(' '))
 	board_card_str = ""
 	card_str_2=hole_cards+':xx'
-	equity_2 = evaluator.evaluate(card_str_2, board_card_str, '', 1000)
+	equity_2 = evaluator.evaluate(card_str_2, board_card_str, '', 100)
 	card_str_3=hole_cards+':xx:xx'
-	equity_3 = evaluator.evaluate(card_str_3, board_card_str, '', 1000)
+	equity_3 = evaluator.evaluate(card_str_3, board_card_str, '', 100)
 	return [hole_cards,equity_2,equity_3]
 
 def gen_result_keys():
@@ -44,7 +44,7 @@ def gen_result_keys():
 
 def main():
 
-	LOGPATH_pref = "//home//pokerbot//logs//Day_4//Casino_Day-4_Nuts_p"
+	LOGPATH_pref = "//home//rongsha//logs//Day_4//Casino_Day-4_Nuts_p"
 	OUT_FILENAME = LOGPATH_pref + '_new_1.csv'
 	OUT_FILE_TEAMS = LOGPATH_pref + '_teams_new_1.csv'
 	resultmat = []
@@ -84,13 +84,13 @@ def main():
 
 						dealer_info = temp_strs[1].split(' ')
 						dealer_name = dealer_info[0];
-						dealer_stack = dealer_info[1].strip('()')
+						dealer_stack = int(dealer_info[1].strip('()'))
 						SB_info = temp_strs[2].split(' ')
 						SB_name = SB_info[0];
-						SB_stack = SB_info[1].strip('()')
+						SB_stack = int(SB_info[1].strip('()'))
 						BB_info = temp_strs[3].split(' ')
 						BB_name = BB_info[0];
-						BB_stack = BB_info[1].strip('()\n')
+						BB_stack = int(BB_info[1].strip('()\n'))
 
 						names = {}
 						names[dealer_name] = 'dealer';
@@ -125,6 +125,10 @@ def main():
 						result['final_potsize'] = 0
 
 						for tempname in ['dealer','SB','BB']:
+							if result[tempname+'_stack'] > 0.5:
+								result['is_'+tempname+'_enter_preflop'] = True
+							else:
+								result['is_'+tempname+'_enter_preflop'] = False
 							for tempstate in ['flop','turn','river']:
 								tempstr = 'is_'+tempname+'_enter_' + tempstate
 								result[tempstr] = False
@@ -172,8 +176,8 @@ def main():
 						result['flopCards'] = ''.join(row[row.index('[')+1:row.index(']')].split(' '))
 						board_card_str = result['flopCards']
 						for tempname in ['dealer','SB','BB']:
-							result[tempname+'_equity_2_flop'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx', board_card_str, '', 1000)
-							result[tempname+'_equity_3_flop'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx:xx', board_card_str, '', 1000)
+							result[tempname+'_equity_2_flop'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx', board_card_str, '', 100)
+							result[tempname+'_equity_3_flop'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx:xx', board_card_str, '', 100)
 
 						# result['dealer_equity_2_flop'] = evaluator.evaluate(result['dealer_hole_cards']+':xx', board_card_str, '', 1000)
 						# result['dealer_equity_3_flop'] = evaluator.evaluate(result['dealer_hole_cards']+':xx:xx', board_card_str, '', 1000)
@@ -188,8 +192,8 @@ def main():
 						result['turnCards'] = ''.join(temp_turnCards.split(' '))
 						board_card_str = result['turnCards']
 						for tempname in ['dealer','SB','BB']:
-							result[tempname+'_equity_2_turn'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx', board_card_str, '', 1000)
-							result[tempname+'_equity_3_turn'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx:xx', board_card_str, '', 1000)
+							result[tempname+'_equity_2_turn'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx', board_card_str, '', 100)
+							result[tempname+'_equity_3_turn'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx:xx', board_card_str, '', 100)
 					elif '*** RIVER ***' in row: 
 						state = 'river'
 						result['turn_potsize'] = row[row.index('(')+1:row.index(')')];
@@ -197,8 +201,8 @@ def main():
 						result['riverCards'] = ''.join(temp_rivercards.split(' '))
 						board_card_str = result['riverCards']
 						for tempname in ['dealer','SB','BB']:
-							result[tempname+'_equity_2_river'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx', board_card_str, '', 1000)
-							result[tempname+'_equity_3_river'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx:xx', board_card_str, '', 1000)
+							result[tempname+'_equity_2_river'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx', board_card_str, '', 100)
+							result[tempname+'_equity_3_river'] = evaluator.evaluate(result[tempname+'_hole_cards']+':xx:xx', board_card_str, '', 100)
 					elif 'shows' in row:
 						result['is_showdown'] = True
 						showdown_name = row.split(' ')[0]
@@ -265,6 +269,9 @@ def main():
 
 	f = open(OUT_FILENAME,'a')
 	dict_writer = csv.DictWriter(f,fieldnames=result_keys)
+	if headerflag == 0: 
+		dict_writer.writeheader()
+		headerflag = 1
 	print "write the end";
 	dict_writer.writerows(resultmat)
 	f.close()
