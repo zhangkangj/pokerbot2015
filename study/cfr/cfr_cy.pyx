@@ -14,7 +14,10 @@ cdef class Node(object):
   cpdef bucket_sequence_sb
   cpdef bucket_sequence_bb
   cpdef child_nodes    
+  
   cdef:
+    float* utility_sb_ptr
+    float* utility_bb_ptr
     int active_player
     int num_round
     int pot_size
@@ -151,8 +154,10 @@ cdef class RoundNode(Node):
         self.turn_amount_sb = amount_sb
         self.turn_amount_bb = amount_bb
       self.spawn_check_node(pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0)
-
-
+  def transit(self, p_sb, p_bb):
+    self.child_nodes[0].transit(p_sb, p_bb)
+    self.utility_bb[self.bucket_sequence_bb[self.num_round]] = self.child_nodes[0].utility_bb[self.bucket_sequence_bb[self.num_round]]
+    self.utility_sb[self.bucket_sequence_sb[self.num_round]] = self.child_nodes[0].utility_sb[self.bucket_sequence_sb[self.num_round]]
 cdef class RaiseNode(Node):
   cpdef regret
   cdef float* regret_ptr
@@ -196,6 +201,54 @@ cdef class RaiseNode(Node):
                                 amount_sb+sb_delta_, amount_bb+bb_delta_, raise_amount, num_bet+1, raise_amount)
     self.num_child = len(self.child_nodes)
 
+  cdef void transit(self, p_sb, p_bb):
+    cdef float* act_prob
+    cdef int node_bucket
+    act_prob = (float *)malloc(5 * sizeof(float))  
+    #update action probablity from regret    
+    #traverse tree to compute utilities of child nodes
+    if self.active_player == 'SB':
+      node_bucket = self.bucket_sequence_sb[self.num_round]
+      compute_prob(act_prob, node_bucket)
+      for i in range(0, self.num_child):
+        self.child_nodes[i].translate(p_sb * act_prob[i], p_bb)
+    #compute utility from utilities of child nodes     
+      for i in range(0, self.num_child):
+        self.utility_sb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_sb[node_bucket]
+        self.utility_bb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_bb[node_bucket] 
+    #compute new regrets
+      for i in range(0, self.num_child):
+        self.regret[node_bucket * 5 + i] *= T * 1. / (T + 1)
+        self.regret[node_bucket * 5 + i] += p_bb * (self.child_nodes[i].utility_sb[node_bucket] - self.utility_sb[node_bucket]) / (T + 1)
+    else:
+      node_bucket = self.bucket_sequence_sb[self.num_round]
+      compute_prob(act_prob, node_bucket)
+      for i in range(0, self.num_child):
+        self.child_nodes[i].translate(p_sb, p_bb * act_prob[i])
+    #compute utility from utilities of child nodes     
+      for i in range(0, self.num_child):
+        self.utility_sb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_sb[node_bucket]
+        self.utility_bb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_bb[node_bucket]
+    #compute new regrets
+      for i in range(0, self.num_child):
+        self.regret[node_bucket * 5 + i] *= T * 1. / (T + 1)
+        self.regret[node_bucket * 5 + i] += p_sb * (self.child_nodes[i].utility_bb[node_bucket] - self.utility_bb[node_bucket]) / (T + 1)
+        
+            
+        
+  cdef void compute_prob(float* XXX, int node_bucket):
+    cdef float sum_regret_plus = 0
+    for i in range(0, self.num_child):
+      self.regret[node_bucket + i] = max(self.regret[node_bucket + i], 0)
+      sum_regret_plus += self.regret[node_bucket + i]
+    if sum_regret_plus > 0:
+      for i in range(0, self.num_child):
+        XXX[i] /= sum_regret_plus
+    else:
+      tmp = 1./self.num_child
+      for i in range(0, self.num_child):
+        XXX[i] = tmp
+    return
 
 cdef class CheckNode(Node):
   cpdef regret
@@ -229,6 +282,55 @@ cdef class CheckNode(Node):
                             amount_sb+sb_delta, amount_bb+bb_delta, raise_amount, num_bet=1, raise_amount=raise_amount)
     self.num_child = len(self.child_nodes)
 
+
+  cdef void transit(self, p_sb, p_bb):
+    cdef float* act_prob
+    cdef int node_bucket
+    act_prob = (float *)malloc(5 * sizeof(float))  
+    #update action probablity from regret    
+    #traverse tree to compute utilities of child nodes
+    if self.active_player == 'SB':
+      node_bucket = self.bucket_sequence_sb[self.num_round]
+      compute_prob(act_prob, node_bucket)
+      for i in range(0, self.num_child):
+        self.child_nodes[i].translate(p_sb * act_prob[i], p_bb)
+    #compute utility from utilities of child nodes     
+      for i in range(0, self.num_child):
+        self.utility_sb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_sb[node_bucket]
+        self.utility_bb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_bb[node_bucket] 
+    #compute new regrets
+      for i in range(0, self.num_child):
+        self.regret[node_bucket * 5 + i] *= T * 1. / (T + 1)
+        self.regret[node_bucket * 5 + i] += p_bb * (self.child_nodes[i].utility_sb[node_bucket] - self.utility_sb[node_bucket]) / (T + 1)
+    else:
+      node_bucket = self.bucket_sequence_sb[self.num_round]
+      compute_prob(act_prob, node_bucket)
+      for i in range(0, self.num_child):
+        self.child_nodes[i].translate(p_sb, p_bb * act_prob[i])
+    #compute utility from utilities of child nodes     
+      for i in range(0, self.num_child):
+        self.utility_sb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_sb[node_bucket]
+        self.utility_bb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_bb[node_bucket]
+    #compute new regrets
+      for i in range(0, self.num_child):
+        self.regret[node_bucket * 5 + i] *= T * 1. / (T + 1)
+        self.regret[node_bucket * 5 + i] += p_sb * (self.child_nodes[i].utility_bb[node_bucket] - self.utility_bb[node_bucket]) / (T + 1)
+        
+            
+        
+  cdef void compute_prob(float* XXX, int node_bucket):
+    cdef float sum_regret_plus = 0
+    for i in range(0, self.num_child):
+      self.regret[node_bucket + i] = max(self.regret[node_bucket + i], 0)
+      sum_regret_plus += self.regret[node_bucket + i]
+    if sum_regret_plus > 0:
+      for i in range(0, self.num_child):
+        XXX[i] /= sum_regret_plus
+    else:
+      tmp = 1./self.num_child
+      for i in range(0, self.num_child):
+        XXX[i] = tmp
+    return
 
 cdef class FoldNode(Node):
   cdef int winner
