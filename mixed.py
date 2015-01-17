@@ -12,6 +12,8 @@ import sys
 from bot.mixed import mixed_player
 
 if __name__ == '__main__':
+  from lib import util
+  util.test()
   parser = argparse.ArgumentParser(description='A Pokerbot.', add_help=False, prog='pokerbot')
   parser.add_argument('-h', dest='host', type=str, default='localhost', help='Host to connect to, defaults to localhost')
   parser.add_argument('port', metavar='PORT', type=int, help='Port on host to connect to')
