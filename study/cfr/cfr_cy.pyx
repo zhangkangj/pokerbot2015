@@ -21,6 +21,7 @@ cdef class Node(object):
     int stack_sb, stack_bb
     int amount_sb, amount_bb
     int num_child
+    int num_card_bucket
     
   def __init__(self, active_player, num_round, 
                bucket_sequence_sb, bucket_sequence_bb,
@@ -37,6 +38,16 @@ cdef class Node(object):
     self.amount_sb = amount_sb
     self.amount_bb = amount_bb
     self.child_nodes = []
+    if num_round == 0:
+      self.num_card_bucket = 169
+    elif self.num_round == 1:
+      self.num_card_bucket = 10
+    elif self.num_round == 2:
+      self.num_card_bucket = 10
+    elif self.num_round == 3:
+      self.num_card_bucket = 10
+    else:
+      self.num_card_bucket = 0
 
   cdef get_next_player(self):
     cdef int next_player
@@ -49,9 +60,9 @@ cdef class Node(object):
       next_player = self.active_player % 2 + 1
     return next_player
 
-  def spawn_round_node(self, pot_size, stack_sb, stack_bb):
+  def spawn_round_node(self, pot_size, stack_sb, stack_bb, final_amount_sb, final_amount_bb):
     node = RoundNode(self.num_round+1, self.bucket_sequence_sb, self.bucket_sequence_bb,
-                 pot_size, stack_sb, stack_bb)
+                     pot_size, stack_sb, stack_bb, final_amount_sb, final_amount_bb)
     self.child_nodes.append(node)
 
   def spawn_raise_node(self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb,
@@ -80,10 +91,6 @@ cdef class Node(object):
                          pot_size, stack_sb, stack_bb)
     self.child_nodes.append(node)
 
-  def transit(self, p_sb, p_bb):
-    pass
-    #return u_sb, u_bb
-
   def traverse(self):
     count = 1
     if len(self.child_nodes) == 0:
@@ -111,20 +118,45 @@ cdef class Node(object):
         count += node.traverse_pot_greater_than(pot_threshold)
       return count
 
+  def transit(self, p_sb, p_bb):
+    pass
+    #return u_sb, u_bb
+
+
 cdef class RoundNode(Node):
-  def __init__(self, num_round, bucket_sequence_sb, bucket_sequence_bb, pot_size, stack_sb, stack_bb):
+  cdef:
+    int preflop_amount_sb, preflop_amount_bb
+    int flop_amount_sb, flop_amount_bb
+    int turn_amount_sb, turn_amount_bb
+    int river_amount_sb, river_amount_bb
+
+  def __init__(self, num_round, bucket_sequence_sb, bucket_sequence_bb,
+               pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0):
     super(RoundNode, self).__init__(0, num_round, bucket_sequence_sb, bucket_sequence_bb, 
-                                    pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0)
+                                    pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    self.num_child = 1
     if self.num_round == 0:
       assert pot_size == 0
       assert stack_sb == stack_bb
       self.amount_sb, self.amount_bb = 1, 2
       self.spawn_raise_node(pot_size, stack_sb-1, stack_bb-2, self.amount_sb, self.amount_bb, min_bet=2, num_bet=0, raise_amount=2)
     else:
-      self.spawn_check_node(pot_size, stack_sb, stack_bb, self.amount_sb, self.amount_bb)
+      if num_round - 1 == 0:
+        self.preflop_amount_sb = amount_sb
+        self.preflop_amount_bb = amount_bb
+      elif num_round - 1 == 1:
+        self.flop_amount_sb = amount_sb
+        self.flop_amount_bb = amount_bb
+      elif num_round - 1 == 2:
+        self.turn_amount_sb = amount_sb
+        self.turn_amount_bb = amount_bb
+      self.spawn_check_node(pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0)
 
 
 cdef class RaiseNode(Node):
+  cpdef regret
+  cdef float* regret_ptr
+
   def __init__(self, active_player, num_round, bucket_sequence_sb, bucket_sequence_bb,
                pot_size, stack_sb, stack_bb, amount_sb, amount_bb, min_bet, num_bet, raise_amount):
     super(RaiseNode, self).__init__(active_player, num_round, bucket_sequence_sb, bucket_sequence_bb, 
@@ -143,7 +175,9 @@ cdef class RaiseNode(Node):
           self.spawn_check_node(pot_size, stack_sb-1, stack_bb, amount_sb=2, amount_bb=2)
         else:
         # player calls before river
-          self.spawn_round_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb-sb_delta, stack_bb-bb_delta)
+          self.spawn_round_node(pot_size+amount_sb+amount_bb+call_amount, 
+                                stack_sb-sb_delta, stack_bb-bb_delta,
+                                final_amount_sb=0, final_amount_bb=0) # TODO fix final amount
       else:
         # player calls at river
         self.spawn_showdown_node(pot_size+amount_sb+amount_bb+call_amount, stack_sb-sb_delta, stack_bb-bb_delta)
@@ -160,9 +194,13 @@ cdef class RaiseNode(Node):
           sb_delta_, bb_delta_ = (raise_amount+sb_delta, 0) if active_player == 1 else (0, raise_amount+bb_delta)
           self.spawn_raise_node(pot_size, stack_sb-sb_delta_, stack_bb-bb_delta_,
                                 amount_sb+sb_delta_, amount_bb+bb_delta_, raise_amount, num_bet+1, raise_amount)
+    self.num_child = len(self.child_nodes)
 
 
 cdef class CheckNode(Node):
+  cpdef regret
+  cdef float* regret_ptr
+
   def __init__(self, active_player, num_round, bucket_sequence_sb, bucket_sequence_bb,
                pot_size, stack_sb, stack_bb, amount_sb, amount_bb):
     super(CheckNode, self).__init__(active_player,num_round, bucket_sequence_sb, bucket_sequence_bb, 
@@ -175,7 +213,8 @@ cdef class CheckNode(Node):
         assert amount_sb==amount_bb==0
         self.spawn_showdown_node(pot_size, stack_sb, stack_bb)
       else:
-        self.spawn_round_node(pot_size+amount_sb+amount_bb, stack_sb, stack_bb)
+        self.spawn_round_node(pot_size+amount_sb+amount_bb, stack_sb, stack_bb,
+                              final_amount_sb=0, final_amount_bb=0) # TODO fix final amount
     # player bets
     raise_limit = stack_sb if active_player == 1 else stack_bb
     desired_amounts = [2 , (pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
@@ -188,6 +227,7 @@ cdef class CheckNode(Node):
       sb_delta, bb_delta = (raise_amount, 0) if active_player == 1 else (0, raise_amount)
       self.spawn_raise_node(pot_size, stack_sb-sb_delta, stack_bb-bb_delta,
                             amount_sb+sb_delta, amount_bb+bb_delta, raise_amount, num_bet=1, raise_amount=raise_amount)
+    self.num_child = len(self.child_nodes)
 
 
 cdef class FoldNode(Node):
@@ -196,9 +236,11 @@ cdef class FoldNode(Node):
     super(FoldNode, self).__init__(0, -1, None, None, 
                                    pot_size, stack_sb, stack_bb, 0, 0)
     self.winner = self.active_player
+    self.num_child = 0
 
 
 cdef class ShowdownNode(Node):
   def __init__(self, bucket_sequence_sb, bucket_sequence_bb, pot_size, stack_sb, stack_bb):
     super(ShowdownNode, self).__init__(0, -1, bucket_sequence_sb, bucket_sequence_bb, 
                                     pot_size, stack_sb, stack_bb, 0, 0)
+    self.num_child = 0
