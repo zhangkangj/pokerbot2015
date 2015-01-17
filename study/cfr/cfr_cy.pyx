@@ -22,7 +22,7 @@ cdef class Node(object):
     int amount_sb, amount_bb
     int num_child
     int num_card_bucket
-    
+
   def __init__(self, active_player, num_round, 
                bucket_sequence_sb, bucket_sequence_bb,
                pot_size, stack_sb, stack_bb, amount_sb, amount_bb):
@@ -184,8 +184,8 @@ cdef class RaiseNode(Node):
       # player raises
       if num_bet < MAX_BET_NUM:
         raise_limit = stack - call_amount
-        # desired_amounts = [2, pot_size+amount_sb+amount_bb+call_amount]
-        desired_amounts = [min_bet , (pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
+        # desired_amounts = [min_bet , (pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
+        desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
         if raise_limit < pot_size + amount_sb + amount_bb + call_amount:
           raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
         else:
@@ -218,7 +218,7 @@ cdef class CheckNode(Node):
     # player bets
     raise_limit = stack_sb if active_player == 1 else stack_bb
     desired_amounts = [2 , (pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
-    # desired_amounts = [2, pot_size+amount_sb+amount_bb]
+    #desired_amounts = [(pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
     if raise_limit < pot_size + amount_sb + amount_bb:
       raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
     else:
