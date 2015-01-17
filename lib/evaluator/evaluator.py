@@ -5,18 +5,10 @@ Created on Sat Jan 10 02:24:21 2015
 @author: zhk
 """
 
-import numpy as np
-from lib import util
 from lib.evaluator import pbots_calc
-try:
-  from lib.evaluator import evaluator_cy
-except:
-  import traceback
-  traceback.print_exc()
-  print 'failed to import evaluator_cy'
 
-def evaluate(player_cards, board, dead, num_evaluation=1000):
-  result = pbots_calc.calc(player_cards, board, dead, num_evaluation)
+def evaluate(player_cards, board, dead, num_iter=1000):
+  result = pbots_calc.calc(player_cards, board, dead, num_iter)
   return result.ev[0]
 
 def evaluate_preflop(mc1_, mc2_, num_iter=1000):
@@ -72,5 +64,5 @@ def evaluate_river(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_, bc5_):
   bc4 = util.card_to_num(bc4_)
   bc5 = util.card_to_num(bc5_)  
   mean = evaluator_cy.evaluate_river(mc1, mc2, bc1, bc2, bc3, bc4, bc5)
-  bucket = 0
+  bucket = round(mean * 100) / 10
   return bucket, mean

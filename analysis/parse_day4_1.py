@@ -45,15 +45,15 @@ def gen_result_keys():
 def main():
 
 	LOGPATH_pref = "//home//pokerbot//logs//Day_4//Casino_Day-4_Nuts_p"
-	OUT_FILENAME = LOGPATH_pref + '_new.csv'
-	OUT_FILE_TEAMS = LOGPATH_pref + '_teams_new.csv'
+	OUT_FILENAME = LOGPATH_pref + '_new_1.csv'
+	OUT_FILE_TEAMS = LOGPATH_pref + '_teams_new_1.csv'
 	resultmat = []
 	teamsmat = []
 	result_keys = gen_result_keys()
 	headerflag = 0;
 	count = 0;
-	# for game_index in [1]:
-	for game_index in range(1,7):
+	for game_index in [1]:
+	# for game_index in range(1,7):
 		LOGPATH = LOGPATH_pref+str(game_index) + '//'
 		for MATCHNAME in os.listdir(LOGPATH):
 			# OUT_FILENAME = LOGPATH + MATCHNAME + '.csv'
@@ -66,7 +66,7 @@ def main():
 					if count > 1000:
 						f = open(OUT_FILENAME,'a')
 						dict_writer = csv.DictWriter(f,fieldnames=result_keys)
-						print result_keys;
+						print "write once";
 						if headerflag == 0: 
 							dict_writer.writeheader()
 						dict_writer.writerows(resultmat)
@@ -263,6 +263,11 @@ def main():
 			
 
 
+	f = open(OUT_FILENAME,'a')
+	dict_writer = csv.DictWriter(f,fieldnames=result_keys)
+	print "write the end";
+	dict_writer.writerows(resultmat)
+	f.close()
 
 	f2 = open(OUT_FILE_TEAMS,'w')
 	dict_writer2 = csv.DictWriter(f2,fieldnames=['win','loss'])

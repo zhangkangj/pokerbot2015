@@ -19,9 +19,6 @@ def onpick(event):
     idx = event.ind
     print cards[idx[0]], means[idx[0]], varis[idx[0]]
 
-evaluator.evaluate_flop(*['Tc', 'Ah', 'Th', '3h', 'Td'])
-evaluator.evaluate('Ts7c:xx', '6c7dTh', '')
-
 means = np.zeros(1000)
 varis = np.zeros(1000)
 cards = []

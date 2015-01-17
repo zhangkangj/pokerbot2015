@@ -188,5 +188,5 @@ class ShowdownNode(Node):
 
 
 if __name__ == "__main__":
-  root = RoundNode(0, None, None, 0, 8, 8)
+  root = RoundNode(0, None, None, 0, 300, 300)
   print Node.count, Node.round_count, Node.raise_count, Node.check_count, Node.fold_count, Node.showdown_count

@@ -47,6 +47,30 @@ def flop_idx(int c1, int c2, int c3, int c4, int c5):
   board_index = c3 * (c3-1) * (c3-2) / 6 + c4 * (c4-1) / 2 + c5
   return hole_index * 22100 + board_index
 
+def flop_bucket(float mean, float var):
+  if var < 0.07:
+    return min(max(int((mean - 0.1) / 0.075), 0), 11)
+  elif var < 0.11:
+    return 12 + min(max(int((mean - 0.15) / 0.05), 0), 12)
+  elif var < 0.15:
+    return 25 + min(max(int((mean - 0.2) / 0.1), 0), 4)
+  elif mean < 0.4:
+    return 30
+  else:
+    return 31
+
+def turn_bucket(float mean, float var):
+  if var < 0.04:
+    return min(max(int((mean - 0.05) / 0.05), 0), 18)
+  elif var < 0.09:
+    return 19 + min(max(int((mean - 0.1) / 0.075), 0), 7)
+  elif var < 0.15:
+    return 27 + min(max(int((mean - 0.2) / 0.1), 0), 4)
+  elif mean < 0.4:
+    return 30
+  else:
+    return 31
+
 def evaluate_cards(unsigned int a, unsigned int b,
                    unsigned int c, unsigned int d, unsigned int e, unsigned int f, unsigned int g):
   return evaluate_nums_c(a, b, c, d, e, f, g)
