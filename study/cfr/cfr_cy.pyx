@@ -10,12 +10,12 @@ cimport numpy as np
 
 cdef:
   int MAX_BET_NUM = 3
-  int TOTAL_STACK = 10
+  int TOTAL_STACK = 600
 
 cdef class Node(object):
-  cpdef child_nodes
-  cpdef utility_sb
-  cpdef utility_bb
+  cpdef public child_nodes
+  cpdef public utility_sb
+  cpdef public utility_bb
   
   cdef:
     float* utility_sb_ptr
@@ -35,7 +35,7 @@ cdef class Node(object):
     elif self.num_round == 3:
       self.num_card_bucket = 32
     else:
-      self.num_card_bucket = 16
+      self.num_card_bucket = 8
     self.child_nodes = []
   
   def initialize(self):
@@ -76,34 +76,23 @@ cdef class Node(object):
   cdef void spawn_showdown_node(self, int pot_size):
     node = ShowdownNode(pot_size)
     self.child_nodes.append(node)
-    self.num_round += 1
+    self.num_child += 1
 
-  def traverse(self):
-    count = 1
+  def traverse(self, game_round):
+    total_count = 1 if self.num_round == game_round else 0
+    round_count = 0
+    raise_count = 0
+    check_count = 0
     if self.num_child == 0:
-      return count
+      return total_count, round_count, raise_count, check_count
     else:
       for node in self.child_nodes:
-        count += node.traverse()
-      return count
-
-  def traverse_game_round(self, game_round):
-    count = 0
-    if self.num_child == 0:
-      return count
-    else:
-      for node in self.child_nodes:
-        count += node.traverse_game_round(game_round)
-      return count
-
-  def traverse_round_node(self, game_round):
-    count = 0
-    if self.num_child == 0:
-      return count
-    else:
-      for node in self.child_nodes:
-        count += node.traverse_round_node(game_round)
-      return count
+        a, b, c, d = node.traverse()
+        total_count += a
+        round_count += b
+        raise_count += c
+        check_count += d        
+      return total_count, round_count, raise_count, check_count
 
 '''
   def transit(self, p_sb, p_bb):
@@ -145,14 +134,20 @@ cdef class RoundNode(Node):
     self.initialize()
     assert len(self.child_nodes) > 0
 
-  def traverse_round_node(self, game_round):
-    count = 1 if self.num_round == game_round else 0
-    if self.num_child == 0:
-      return count
-    else:
+  def traverse(self, game_round):
+    total_count = 1 if self.num_round == game_round else 0
+    round_count = 1 if self.num_round == game_round else 0
+    raise_count = 0
+    check_count = 0
+    if self.num_child != 0:
       for node in self.child_nodes:
-        count += node.traverse_round_node(game_round)
-      return count
+        a, b, c, d = node.traverse(game_round)
+        total_count += a
+        round_count += b
+        raise_count += c
+        check_count += d        
+    return total_count, round_count, raise_count, check_count
+
 '''
   def transit(self, p_sb, p_bb):
     self.child_nodes[0].transit(p_sb, p_bb)
@@ -180,12 +175,6 @@ cdef class PlayerNode(Node):
     self.regret = regret_
     self.regret_ptr = <float*> regret_.data     
 
-  def traverse_game_round(self, game_round):
-    count = 1 if self.num_round == game_round else 0
-    for node in self.child_nodes:
-      count += node.traverse_game_round(game_round)
-    return count
-
 
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
@@ -197,8 +186,16 @@ cdef class RaiseNode(PlayerNode):
     # player folds
     self.spawn_fold_node(sb_win=(not is_sb), pot_size=pot_size+amount_sb+amount_bb)
     # player calls
-    call_amount = abs(amount_bb - amount_sb)
-    stack, sb_delta, bb_delta = (stack_sb, call_amount, 0) if is_sb else (stack_bb, 0, call_amount)
+    cdef:
+      int stack, sb_delta=0, bb_delta=0, call_amount
+    if is_sb:
+      stack = stack_sb
+      call_amount = amount_bb - amount_sb
+      sb_delta = call_amount
+    else:
+      stack = stack_bb
+      call_amount = amount_sb - amount_bb
+      bb_delta = call_amount
     if stack <= call_amount:
       self.spawn_showdown_node(pot_size+amount_sb+amount_bb+call_amount)
     else:
@@ -217,7 +214,7 @@ cdef class RaiseNode(PlayerNode):
       # player raises
       if num_bet < MAX_BET_NUM:
         raise_limit = stack - call_amount
-        # desired_amounts = [min_bet , (pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
+        #desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/3, (pot_size+amount_sb+amount_bb+call_amount)*2/3, pot_size+amount_sb+amount_bb+call_amount]
         desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
         if raise_limit < pot_size + amount_sb + amount_bb + call_amount:
           raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
@@ -228,6 +225,20 @@ cdef class RaiseNode(PlayerNode):
           self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta_, stack_bb-bb_delta_,
                                 amount_sb+sb_delta_, amount_bb+bb_delta_, raise_amount, num_bet+1, raise_amount)
     self.initialize()
+
+  def traverse(self, game_round):
+    total_count = 1 if self.num_round == game_round else 0
+    round_count = 0
+    raise_count = 1 if self.num_round == game_round else 0
+    check_count = 0
+    if self.num_child != 0:
+      for node in self.child_nodes:
+        a, b, c, d = node.traverse(game_round)
+        total_count += a
+        round_count += b
+        raise_count += c
+        check_count += d        
+    return total_count, round_count, raise_count, check_count
 
 '''
   cdef void transit(self, p_sb, p_bb):
@@ -286,7 +297,7 @@ cdef class CheckNode(PlayerNode):
     assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     super(CheckNode, self).__init__(is_sb, num_round)
     # player checks
-    if (num_round == 0 and is_sb) or (num_round > 0 and not is_sb):
+    if is_sb:
       self.spawn_check_node(not is_sb, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     else:
       if num_round == 3:
@@ -298,7 +309,6 @@ cdef class CheckNode(PlayerNode):
     # player bets
     raise_limit = stack_sb if is_sb else stack_bb
     desired_amounts = [2 , (pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
-    #desired_amounts = [(pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
     if raise_limit < pot_size + amount_sb + amount_bb:
       raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
     else:
@@ -308,54 +318,21 @@ cdef class CheckNode(PlayerNode):
       self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta, stack_bb-bb_delta,
                             amount_sb+sb_delta, amount_bb+bb_delta, raise_amount, num_bet=1, raise_amount=raise_amount)
     self.initialize()
-'''
-  cdef void transit(self, p_sb, p_bb):
-    cdef float* act_prob
-    cdef int node_bucket
-    act_prob = (float *)malloc(5 * sizeof(float))  
-    #update action probablity from regret    
-    #traverse tree to compute utilities of child nodes
-    if self.active_player == 'SB':
-      node_bucket = self.bucket_sequence_sb[self.num_round]
-      compute_prob(act_prob, node_bucket)
-      for i in range(0, self.num_child):
-        self.child_nodes[i].translate(p_sb * act_prob[i], p_bb)
-    #compute utility from utilities of child nodes     
-      for i in range(0, self.num_child):
-        self.utility_sb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_sb[node_bucket]
-        self.utility_bb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_bb[node_bucket] 
-    #compute new regrets
-      for i in range(0, self.num_child):
-        self.regret[node_bucket * 5 + i] *= T * 1. / (T + 1)
-        self.regret[node_bucket * 5 + i] += p_bb * (self.child_nodes[i].utility_sb[node_bucket] - self.utility_sb[node_bucket]) / (T + 1)
-    else:
-      node_bucket = self.bucket_sequence_sb[self.num_round]
-      compute_prob(act_prob, node_bucket)
-      for i in range(0, self.num_child):
-        self.child_nodes[i].translate(p_sb, p_bb * act_prob[i])
-    #compute utility from utilities of child nodes     
-      for i in range(0, self.num_child):
-        self.utility_sb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_sb[node_bucket]
-        self.utility_bb[node_bucket] += act_prb[i] * self.child_nodes[i].utility_bb[node_bucket]
-    #compute new regrets
-      for i in range(0, self.num_child):
-        self.regret[node_bucket * 5 + i] *= T * 1. / (T + 1)
-        self.regret[node_bucket * 5 + i] += p_sb * (self.child_nodes[i].utility_bb[node_bucket] - self.utility_bb[node_bucket]) / (T + 1)
-        
-  cdef void compute_prob(float* XXX, int node_bucket):
-    cdef float sum_regret_plus = 0
-    for i in range(0, self.num_child):
-      self.regret[node_bucket + i] = max(self.regret[node_bucket + i], 0)
-      sum_regret_plus += self.regret[node_bucket + i]
-    if sum_regret_plus > 0:
-      for i in range(0, self.num_child):
-        XXX[i] /= sum_regret_plus
-    else:
-      tmp = 1./self.num_child
-      for i in range(0, self.num_child):
-        XXX[i] = tmp
-    return
-'''
+
+
+  def traverse(self, game_round):
+    total_count = 1 if self.num_round == game_round else 0
+    round_count = 0
+    raise_count = 0
+    check_count = 1 if self.num_round == game_round else 0
+    if self.num_child != 0:
+      for node in self.child_nodes:
+        a, b, c, d = node.traverse(game_round)
+        total_count += a
+        round_count += b
+        raise_count += c
+        check_count += d        
+    return total_count, round_count, raise_count, check_count
 
 
 cdef class FoldNode(Node):
