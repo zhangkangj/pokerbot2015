@@ -14,8 +14,8 @@ from lib import util
 
 reload(cfr_cy)
 root = cfr_cy.RoundNode(0, 0, 300, 300)
-raise_node = root.child_nodes[0]
 root.test_transit(np.array([0, 0, 0, 0, 1]), np.array([0, 0, 0, 0, 0]))
+raise_node = root.child_n1odes[0]
 print raise_node.child_nodes, raise_node.regret[:2]
 
 seq1 = np.array([0, 0, 0, 0, 0])
