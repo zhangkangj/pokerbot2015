@@ -20,7 +20,7 @@ print raise_node.child_nodes, raise_node.regret[:2]
 
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
-for i in range(500):
+for i in range(100):
   mc1, mc2, oc1, oc2, bc1, bc2, bc3, bc4, bc5 = np.random.choice(52, 9, replace=True)
   seq1[0] = evaluator_cy.preflop_idx(mc1, mc2)
   seq2[0] = evaluator_cy.preflop_idx(bc1, bc2)

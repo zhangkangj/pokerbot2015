@@ -118,7 +118,7 @@ cdef class Node(object):
     result_ptr = <float*> result.data
     self.dump_(result_ptr, start_index=0, test=False)
     if filename is not None:
-      pass
+      np.save(filename, result.astype(np.float16))
     return result
     
   cdef int dump_(self, float* result, int start_index, bint test):
@@ -129,15 +129,24 @@ cdef class Node(object):
       start_index = node.dump_(result, start_index, test)
     return start_index
 
-'''  
-  def load(self, np.ndarray[float, ndim=1]):
-    pass
+  def load(self, data_):
+    cdef np.ndarray[float, ndim=1] data
+    cdef float* data_ptr
+    if isinstance(data_, basestring):
+      data = np.load(data_).astype(np.float32)
+    else:
+      data = data_.astype(np.float32)
+    data_ptr = <float*> data.data
+    self.load_(data_ptr, start_index=0)
   
-  cdef void load(float* data, int start_index):
+  cdef int load_(self, float* data, int start_index):
+    cdef Node node
+    cdef int i
     for i in range(self.num_child):
       node = <Node> self.child_nodes[i]
-      node.load(result, start_index)
-'''
+      start_index = node.load_(data, start_index)
+    return start_index
+
 
 cdef class RoundNode(Node):
   cdef:
@@ -280,6 +289,17 @@ cdef class PlayerNode(Node):
     for i in range(self.num_child):
       node = <Node> self.child_nodes[i]
       start_index = node.dump_(result, start_index, test)
+    return start_index
+
+  cdef int load_(self, float* data, int start_index):
+    cdef Node node
+    cdef int i
+    for i in range(self.num_card_bucket * self.num_child):
+        self.regret_ptr[i] = data[i+start_index]
+    start_index += self.num_card_bucket * self.num_child    
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      start_index = node.load_(data, start_index)
     return start_index
 
 
