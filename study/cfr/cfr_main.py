@@ -11,7 +11,7 @@ pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator'
 from study.cfr import cfr_cy
 
 reload(cfr_cy)
-root = cfr_cy.RoundNode(0, 0, 300, 300)
+root = cfr_cy.RoundNode(0, 0, 2, 2)
 print root.traverse(0)
 print root.traverse(1)
 print root.traverse(2)

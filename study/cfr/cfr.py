@@ -125,8 +125,7 @@ class RaiseNode(Node):
       if num_bet < MAX_BET_NUM:
  #       print min_bet, pot_size, amount_bb,amount_sb
         raise_limit = stack - call_amount
-        # desired_amounts = [2, pot_size+amount_sb+amount_bb+call_amount]
-        desired_amounts = [min_bet , (pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
+        desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
         if raise_limit < pot_size+amount_sb+amount_bb+call_amount:
           raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
         else:
