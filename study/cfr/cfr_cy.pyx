@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 15 16:19:06 2015
-
-@author: zhk
-"""
+#cython: boundscheck=False
+#cython: wraparound=False
+#cython: cdivision=True
 
 import numpy as np
 cimport numpy as np
 from libc.stdlib cimport malloc, free
 
-
 cdef:
   int MAX_BET_NUM = 3
-  int TOTAL_STACK = 4
+  int TOTAL_STACK = 600
 
 cdef class Node(object):
   cpdef public child_nodes
@@ -51,7 +47,7 @@ cdef class Node(object):
 
   cdef void spawn_round_node(self, int pot_size, int stack_sb, int stack_bb,
                              int final_amount_sb, int final_amount_bb):
-    assert self.num_round >= 0
+    # assert self.num_round >= 0
     node = RoundNode(self.num_round+1, pot_size, stack_sb, stack_bb, final_amount_sb, final_amount_bb)
     self.num_child += 1
     self.child_nodes.append(node)
@@ -96,17 +92,18 @@ cdef class Node(object):
         check_count += d        
       return total_count, round_count, raise_count, check_count
 
-  def test_transit(self):
+  def test_transit(self, bucket_seq_sb_, bucket_seq_bb_):
     cdef:
-      np.ndarray[int, ndim=1] bucket_seq_sb = np.zeros(5, dtype=np.int32)
-      np.ndarray[int, ndim=1] bucket_seq_bb = np.zeros(5, dtype=np.int32)
+      np.ndarray[int, ndim=1, cast=True] bucket_seq_sb = bucket_seq_sb_.astype(np.int32)
+      np.ndarray[int, ndim=1, cast=True] bucket_seq_bb = bucket_seq_bb_.astype(np.int32)
       np.ndarray[float, ndim=1] util_sb = np.zeros(1, dtype=np.float32)
       np.ndarray[float, ndim=1] util_bb = np.zeros(1, dtype=np.float32)
       float* util_sb_ptr = <float*> util_sb.data
       float* util_bb_ptr = <float*> util_bb.data
       int* bucket_seq_sb_ptr = <int*> bucket_seq_sb.data
       int* bucket_seq_bb_ptr = <int*> bucket_seq_bb.data
-    self.transit(0, 0, util_sb_ptr, util_bb_ptr, bucket_seq_sb_ptr, bucket_seq_bb_ptr)
+    self.transit(1, 1, util_sb_ptr, util_bb_ptr, bucket_seq_sb_ptr, bucket_seq_bb_ptr)
+    print util_sb[0], util_bb[0]
         
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
@@ -122,11 +119,11 @@ cdef class RoundNode(Node):
   def __init__(self, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb=0, int amount_bb=0):
     super(RoundNode, self).__init__(num_round)
-    assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
-    assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     if num_round == 0:
-      assert pot_size == 0, ('invalid pot size', pot_size, num_round)
-      assert stack_sb == stack_bb
+      # assert pot_size == 0, ('invalid pot size', pot_size, num_round)
+      # assert stack_sb == stack_bb
       amount_sb, amount_bb = 1, 2
       self.spawn_raise_node(True, pot_size, stack_sb-1, stack_bb-2,
                             amount_sb, amount_bb, min_bet=2, num_bet=0, raise_amount=2)
@@ -143,7 +140,7 @@ cdef class RoundNode(Node):
       # TODO: update values
       self.spawn_check_node(True, pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0)
     # self.initialize()
-    assert len(self.child_nodes) > 0
+    # assert len(self.child_nodes) > 0
 
   def traverse(self, game_round):
     total_count = 1 if self.num_round == game_round else 0
@@ -165,9 +162,8 @@ cdef class RoundNode(Node):
       Node node = <Node> self.child_nodes[0]
     node.transit(p_sb, p_bb, util_sb, util_bb, bucket_seq_sb, bucket_seq_bb)
 
-
 cdef class PlayerNode(Node):
-  cpdef regret
+  cpdef public regret
   cdef:
     bint is_sb
     float* regret_ptr
@@ -195,7 +191,7 @@ cdef class PlayerNode(Node):
     #update action probablity from regret    
     #traverse tree to compute utilities of child nodes
     if self.is_sb:
-      node_bucket = self.bucket_sequence_sb[self.num_round]
+      node_bucket = bucket_seq_sb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child)
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
@@ -203,13 +199,13 @@ cdef class PlayerNode(Node):
                      util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
     #compute utility from utilities of child nodes     
       for i in range(0, self.num_child):
-        util_sb[0] = act_prob[i] * util_sb_child[i]
-        util_bb[0] = act_prob[i] * util_bb_child[i]
+        util_sb[0] += act_prob[i] * util_sb_child[i]
+        util_bb[0] += act_prob[i] * util_bb_child[i]
     #compute new regrets
       for i in range(0, self.num_child):
         self.regret_ptr[node_bucket * self.num_child + i] += p_bb * (util_sb_child[i] - util_sb[0])
     else:
-      node_bucket = self.bucket_sequence_bb[self.num_round]
+      node_bucket = bucket_seq_bb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child)
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
@@ -217,8 +213,8 @@ cdef class PlayerNode(Node):
                      util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
       #compute utility from utilities of child nodes     
       for i in range(0, self.num_child):
-        util_sb[0] = act_prob[i] * util_sb_child[i]
-        util_bb[0] = act_prob[i] * util_bb_child[i]
+        util_sb[0] += act_prob[i] * util_sb_child[i]
+        util_bb[0] += act_prob[i] * util_bb_child[i]
       #compute new regrets
       for i in range(0, self.num_child):
         self.regret_ptr[node_bucket * self.num_child + i] += p_sb * (util_bb_child[i] - util_bb[0])
@@ -234,17 +230,17 @@ cdef class PlayerNode(Node):
       sum_regret_plus += result[i]
     if sum_regret_plus > 0:
       for i in range(0, self.num_child):
-        result[i] /= sum_regret_plus
+        result[i] = result[i] / sum_regret_plus
     else:
       for i in range(0, self.num_child):
-        result[i] = 1./self.num_child
+        result[i] = 1.0 /self.num_child
 
 
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb, int amount_bb, int min_bet, int num_bet, int raise_amount):
-    assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
-    assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     super(RaiseNode, self).__init__(is_sb, num_round)
     self.raise_amount = raise_amount
     # player folds
@@ -309,15 +305,15 @@ cdef class CheckNode(PlayerNode):
 
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb, int amount_bb):
-    assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
-    assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     super(CheckNode, self).__init__(is_sb, num_round)
     # player checks
     if is_sb:
       self.spawn_check_node(not is_sb, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     else:
       if num_round == 3:
-        assert amount_sb==amount_bb==0
+        # assert amount_sb==amount_bb==0
         self.spawn_showdown_node(pot_size)
       else:
         self.spawn_round_node(pot_size+amount_sb+amount_bb, stack_sb, stack_bb,
@@ -369,7 +365,6 @@ cdef class FoldNode(Node):
     else:
       util_sb[0] = -self.win_amount
       util_bb[0] = self.win_amount      
-
   
 cdef class ShowdownNode(Node):
   cdef int pot_size
