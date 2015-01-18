@@ -9,7 +9,7 @@ from libc.stdlib cimport malloc, free
 
 cdef:
   int MAX_BET_NUM = 3
-  int TOTAL_STACK = 6
+  int TOTAL_STACK = 600
 
 cdef class Node(object):
   cpdef public child_nodes
@@ -109,6 +109,35 @@ cdef class Node(object):
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
     pass
+  
+  def dump(self, filename=None):
+    cdef np.ndarray[float, ndim=1] result = np.zeros(1, dtype=np.float32)
+    cdef float* result_ptr = <float*> result.data
+    cdef int n = self.dump_(result_ptr, start_index=0, test=True)
+    result = np.zeros(n, dtype=np.float32)
+    result_ptr = <float*> result.data
+    self.dump_(result_ptr, start_index=0, test=False)
+    if filename is not None:
+      pass
+    return result
+    
+  cdef int dump_(self, float* result, int start_index, bint test):
+    cdef Node node
+    cdef int i
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      start_index = node.dump_(result, start_index, test)
+    return start_index
+
+'''  
+  def load(self, np.ndarray[float, ndim=1]):
+    pass
+  
+  cdef void load(float* data, int start_index):
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      node.load(result, start_index)
+'''
 
 cdef class RoundNode(Node):
   cdef:
@@ -163,6 +192,7 @@ cdef class RoundNode(Node):
       Node node = <Node> self.child_nodes[0]
     node.transit(p_sb, p_bb, util_sb, util_bb, bucket_seq_sb, bucket_seq_bb)
     #print 'round node', p_sb, p_bb, util_sb[0], util_bb[0]
+
 
 cdef class PlayerNode(Node):
   cpdef public regret
@@ -240,6 +270,18 @@ cdef class PlayerNode(Node):
       for i in range(0, self.num_child):
         result[i] = 1./self.num_child
 
+  cdef int dump_(self, float* result, int start_index, bint test):
+    cdef Node node
+    cdef int i
+    if not test:
+      for i in range(self.num_card_bucket * self.num_child):
+        result[i+start_index] = self.regret_ptr[i]
+    start_index += self.num_card_bucket * self.num_child
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      start_index = node.dump_(result, start_index, test)
+    return start_index
+
 
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
@@ -282,9 +324,9 @@ cdef class RaiseNode(PlayerNode):
         #desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/3, (pot_size+amount_sb+amount_bb+call_amount)*2/3, pot_size+amount_sb+amount_bb+call_amount]
         desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
         if raise_limit < pot_size + amount_sb + amount_bb + call_amount:
-          raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
+          raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit]))
         else:
-          raise_amounts = set(desired_amounts)
+          raise_amounts = sorted(set(desired_amounts))
         for raise_amount in raise_amounts:
           sb_delta_, bb_delta_ = (raise_amount+sb_delta, 0) if is_sb else (0, raise_amount+bb_delta)
           self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta_, stack_bb-bb_delta_,
@@ -327,9 +369,9 @@ cdef class CheckNode(PlayerNode):
     raise_limit = stack_sb if is_sb else stack_bb
     desired_amounts = [2 , (pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
     if raise_limit < pot_size + amount_sb + amount_bb:
-      raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
+      raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit]))
     else:
-      raise_amounts = set(desired_amounts)
+      raise_amounts = sorted(set(desired_amounts))
     for raise_amount in raise_amounts:
       sb_delta, bb_delta = (raise_amount, 0) if is_sb else (0, raise_amount)
       self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta, stack_bb-bb_delta,

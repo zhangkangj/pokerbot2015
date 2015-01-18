@@ -42,11 +42,3 @@ print evaluator_cy.preflop_idx(8, 29)
 
 
 
-
-
-
-root = cfr_cy.RoundNode(0, 0, 2, 2)
-print root.traverse(0)
-print root.traverse(1)
-print root.traverse(2)
-print root.traverse(3)
