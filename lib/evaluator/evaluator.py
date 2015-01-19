@@ -8,7 +8,12 @@ Created on Sat Jan 10 02:24:21 2015
 import numpy as np
 
 from lib import util
-from lib.evaluator import pbots_calc, evaluator_cy
+from lib.evaluator import pbots_calc
+try:
+  
+  from lib.evaluator import evaluator_cy
+except:
+  print "can not import pbots_calc, evaluator_cy"
 
 def evaluate(player_cards, board, dead, num_iter=1000):
   result = pbots_calc.calc(player_cards, board, dead, num_iter)
