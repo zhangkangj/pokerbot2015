@@ -13,7 +13,8 @@ sqlite.db
 config.txt
 /pokerbot.sh
 
-/log/test
+/log
+/logs
 /data
 
 /backup

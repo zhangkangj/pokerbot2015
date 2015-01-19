@@ -64,10 +64,8 @@ def turn_bucket(float mean, float var):
     return min(max(int((mean - 0.05) / 0.05), 0), 18)
   elif var < 0.09:
     return 19 + min(max(int((mean - 0.1) / 0.075), 0), 7)
-  elif var < 0.15:
-    return 27 + min(max(int((mean - 0.2) / 0.1), 0), 4)
-  elif mean < 0.4:
-    return 30
+  elif var < 0.10:
+    return 27 + min(max(int((mean - 0.1) / 0.1), 0), 3)
   else:
     return 31
 
