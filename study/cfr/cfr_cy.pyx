@@ -9,7 +9,7 @@ from libc.stdlib cimport malloc, free
 
 cdef:
   int MAX_BET_NUM = 3
-  int TOTAL_STACK = 6
+  int TOTAL_STACK = 60
 
 cdef class Node(object):
   cpdef public child_nodes
@@ -103,13 +103,22 @@ cdef class Node(object):
       float* util_bb_ptr = <float*> util_bb.data
       int* bucket_seq_sb_ptr = <int*> bucket_seq_sb.data
       int* bucket_seq_bb_ptr = <int*> bucket_seq_bb.data
+   # print 'bucket sb', bucket_seq_sb_ptr[0]
     self.transit(1, 1, util_sb_ptr, util_bb_ptr, bucket_seq_sb_ptr, bucket_seq_bb_ptr)
-    print util_sb[0], util_bb[0]
+    #print util_sb[0], util_bb[0]
         
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
     pass
 
+  def test_find_node(self, child_seq):
+    cdef Node node = <Node> self
+    for i in child_seq:
+      assert i < node.num_child
+      node = <Node> node.child_nodes[i]
+    return node
+    
+  
 cdef class RoundNode(Node):
   cdef:
     int preflop_amount_sb, preflop_amount_bb
@@ -207,7 +216,17 @@ cdef class PlayerNode(Node):
         util_bb[0] += act_prob[i] * util_bb_child[i]
     #compute new regrets
       for i in range(0, self.num_child):
+#        print 'round and child number',self.num_round, self.num_child
+#        print 'regret before',self.regret_ptr[node_bucket * self.num_child + i]
         self.regret_ptr[node_bucket * self.num_child + i] += p_bb * (util_sb_child[i] - util_sb[0])
+#        print 'node bucket', node_bucket
+#        print 'p_bb', p_bb
+#        print 'util:', util_sb_child[i] , util_sb[0]
+#        print 'node in regret array', node_bucket * self.num_child + i
+#        print 'regret after',self.regret_ptr[node_bucket * self.num_child + i]
+#        print
+
+        
     else:
       node_bucket = bucket_seq_bb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child)
@@ -240,6 +259,30 @@ cdef class PlayerNode(Node):
       for i in range(0, self.num_child):
         result[i] = 1./self.num_child
 
+  def test_find_regret(self, bucket_seq = None):
+    reg_tmp = []
+    if bucket_seq == None:
+      for i in range(0, self.num_card_bucket * self.num_child):
+        reg_tmp.append(self.regret_ptr[i])
+    else:
+      for i in range(0,self.num_child):
+        reg_tmp.append(self.regret_ptr[bucket_seq[self.num_round] * self.num_child + i])
+    return reg_tmp
+      
+  def test_find_prob(self, bucket_seq = None):
+    prob_tmp = []
+    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))  
+    if bucket_seq == None:
+      for i in range(0, self.num_card_bucket):    
+        self.compute_prob(act_prob, i * self.num_child)
+        for j in range(0, self.num_child):
+          prob_tmp.append(act_prob[j])
+    else:
+      self.compute_prob(act_prob, bucket_seq[self.num_round] * self.num_child)    
+      for i in range(0,self.num_child):
+        prob_tmp.append(act_prob[i])
+    free(act_prob)
+    return prob_tmp
 
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
