@@ -240,8 +240,8 @@ cdef class PlayerNode(Node):
 
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
-    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))  
-    cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))  
+    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))
+    cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef float* util_bb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef int node_bucket, i
     cdef Node node

@@ -1,3 +1,5 @@
+import base_opponent
+
 class BasePlayer(object):
   
   def __init__(self):
@@ -33,6 +35,7 @@ class BasePlayer(object):
     self.num_legal_action = None
     self.legal_actions = None
     self.action_state=None
+    self.opponents = None
 
   def new_game(self, parts):
     self.player_name = parts[1]
@@ -48,6 +51,11 @@ class BasePlayer(object):
     pass
 
   def new_hand(self, parts):
+
+    self.opp1 = base_opponent.BaseOpponent(self.opp1_name);
+    self.opp2 = base_opponent.BaseOpponent(self.opp2_name);
+    self.opponents = [self.opp1,self.opp2];
+
     self.hand_id = int(parts[1])
     self.seat = int(parts[2])
     self.hole_cards = parts[3:5]
@@ -67,6 +75,14 @@ class BasePlayer(object):
     self.last_actions_turn=[]
     self.last_actions_river=[]
     self.action_state='PREFLOP';
+
+
+
+  def UpdateOpponents(self,action_state,one_action):
+    if self.opp1_name in one_action[-1]:
+      self.opp1.Oppo_update(action_state,one_action[:-1]);
+    elif self.opp2_name in one_action[-1]:
+      self.opp2.Oppo_update(action_state,one_action[:-1]);
 
   def action(self, parts):
     self.pot_size = int(parts[1])
@@ -94,6 +110,8 @@ class BasePlayer(object):
         continue
       else:
         print "Error: Last Action parsing wrong"
+
+      self.UpdateOpponents(self.action_state,tempstr)
       if self.action_state == 'PREFLOP': 
         self.last_actions_preflop.append((tempstr[-1],tempstr[0],lastelm))
       elif self.action_state=='FLOP':
@@ -104,10 +122,7 @@ class BasePlayer(object):
         self.last_actions_river.append((tempstr[-1],tempstr[0],lastelm));
       else:
         print "Error: action_state wrong"
-    print 'self.last_actions_preflop:', self.last_actions_preflop;
-    print 'self.last_actions_flop:', self.last_actions_flop;
-    print 'self.last_actions_turn:', self.last_actions_turn;
-    print 'self.last_actions_river:', self.last_actions_river;
+
     index = index + self.num_last_action
     self.num_legal_action = int(parts[index])
     index = index + 1
@@ -119,6 +134,28 @@ class BasePlayer(object):
 
 
   def handover(self, parts):
+
+    print 'self.last_actions_preflop:', self.last_actions_preflop;
+    print 'self.last_actions_flop:', self.last_actions_flop;
+    print 'self.last_actions_turn:', self.last_actions_turn;
+    print 'self.last_actions_river:', self.last_actions_river;
+
+    print self.opponents[1].oppo_name
+    for action in self.opponents[1].all_actions:
+      print 'action.phase:'+str(action.phase)
+      print 'action.call_seqs:'+str(action.call_seqs)
+      print 'action.call_amounts'+str(action.call_amounts)
+      print 'action.raise_seqs'+str(action.raise_seqs)
+      print 'action.raise_amounts'+str(action.raise_amounts)
+      print 'action.bet_seqs'+str(action.bet_seqs)
+      print 'action.bet_amounts'+str(action.bet_amounts)
+      print 'action.post_seqs'+str(action.post_seqs)
+      print 'action.post_amounts'+str(action.post_amounts)
+      print 'action.check_seqs'+str(action.check_seqs)
+      print 'action.fold_seqs'+str(action.fold_seqs)
+      print 'action.action_count'+str(action.action_count)
+
+
     self.stack_sizes = [int(x) for x in parts[1:4]]
     self.num_board_card = int(parts[4])
     self.board_cards = parts[5:(5+self.num_board_card)]
