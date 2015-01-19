@@ -9,46 +9,8 @@ import numpy as np
 np.set_printoptions(precision=3, suppress=True)
 import pyximport
 pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator']}, reload_support=True, inplace=True)
-from study.cfr import cfr_cy
+from study.cfr import cfr_cy2
 import itertools
-
-
-reload(cfr_cy)
-
-root = cfr_cy.RoundNode(3, 2, 1, 1)
-root.initialize_regret()
-seq1 = np.array([0, 0, 0, 0, 0])
-seq2 = np.array([0, 0, 0, 0, 0])
-
-seq1[3] = seq1[4] = 1
-seq2[3] = seq2[4] = 1
-util_sb_, util_bb_ = root.run_cfr(seq1, seq2)
-print 'sb: root              ', root.child_nodes[0].regret[0:6]
-print 'bb: sb check          ', root.child_nodes[0].child_nodes[0].regret[0:6]
-print 'bb: sb raise          ', root.child_nodes[0].child_nodes[1].regret[0:6]
-print 'sb: sb check, bb raise', root.child_nodes[0].child_nodes[0].child_nodes[1].regret[0:6]
-print util_sb_, util_bb_
-
-seq1[3] = seq1[4] = 1
-seq2[3] = seq2[4] = 1
-util_sb_, util_bb_ = root.run_cfr(seq1, seq2)
-print 'sb: root              ', root.child_nodes[0].regret[0:6]
-print 'bb: sb check          ', root.child_nodes[0].child_nodes[0].regret[0:6]
-print 'bb: sb raise          ', root.child_nodes[0].child_nodes[1].regret[0:6]
-print 'sb: sb check, bb raise', root.child_nodes[0].child_nodes[0].child_nodes[1].regret[0:6]
-print util_sb_, util_bb_
-
-seq1[3] = seq1[4] = 1
-seq2[3] = seq2[4] = 2
-util_sb_, util_bb_ = root.run_cfr(seq1, seq2)
-print 'sb: root              ', root.child_nodes[0].regret[0:6]
-print 'bb: sb check          ', root.child_nodes[0].child_nodes[0].regret[0:6]
-print 'bb: sb raise          ', root.child_nodes[0].child_nodes[1].regret[0:6]
-print 'sb: sb check, bb raise', root.child_nodes[0].child_nodes[0].child_nodes[1].regret[0:6]
-print util_sb_, util_bb_
-
-
-
 
 
 def normalize(array):
@@ -58,10 +20,10 @@ def normalize(array):
   coeff[1::2] = coeff[0::2]
   return array/coeff
 
-reload(cfr_cy)
+reload(cfr_cy2)
 
 # ordered cards
-root = cfr_cy.RoundNode(3, 2, 1, 1)
+root = cfr_cy2.RoundNode(3, 2, 1, 1)
 root.initialize_regret()
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
@@ -83,7 +45,7 @@ print 'bb: sb raise          ', normalize(root.child_nodes[0].child_nodes[1].ave
 print 'sb: sb check, bb raise', normalize(root.child_nodes[0].child_nodes[0].child_nodes[1].average_prob[0:6])
 
 # random cards
-root = cfr_cy.RoundNode(3, 2, 1, 1)
+root = cfr_cy2.RoundNode(3, 2, 1, 1)
 root.initialize_regret()
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
