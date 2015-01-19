@@ -74,16 +74,16 @@ class NaiveBot(base_bot.BaseBot):
       up = 0.8
       mid = 0.65
       down = 0.5
-    upperPotSize = 59
-    lowerPotSize= 29
+    upperPotSize = 99
+    lowerPotSize= 49
     if can_bet and equity >= mid and equity < up:
       result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]
       print 'betting', result  
     elif can_bet and equity >= up:
-      result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]
-      print 'betting', result  
+      result = 'CHECK'
+      print 'CheckRaise'
+      print 'checking', result  
     elif can_raise and equity >= up and self.player.pot_size <=upperPotSize: 
-      print "can_raise & equity >=up & potsize < upperpotsize"
       result = 'RAISE:' + str(int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]) + int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2])/2)
       print 'raising', result
     elif can_call and equity >= up and self.player.pot_size >upperPotSize:        
@@ -117,14 +117,15 @@ class NaiveBot(base_bot.BaseBot):
       up = 0.8
       mid = 0.65
       down = 0.5
-    upperPotSize = 80
-    lowerPotSize= 49
+    upperPotSize = 129
+    lowerPotSize= 69
     if can_bet and equity >= mid and equity < up:
       result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]
       print 'betting', result  
     elif can_bet and equity >= up:
-      result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]
-      print 'betting', result  
+      result = 'CHECK'
+      print 'CheckRaise'
+      print 'checking', result  
     elif can_raise and equity >= up and self.player.pot_size <=upperPotSize:        
       result = 'RAISE:' + str(int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]) + int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2])/2)
       print 'raising', result
@@ -159,14 +160,15 @@ class NaiveBot(base_bot.BaseBot):
       up = 0.85
       mid = 0.7
       down = 0.5
-    upperPotSize = 100
-    lowerPotSize= 69
+    upperPotSize = 129
+    lowerPotSize= 79
     if can_bet and equity >= mid and equity < up:
       result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]
       print 'betting', result  
     elif can_bet and equity >= up:
-      result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]
-      print 'betting', result 
+      result = 'CHECK'
+      print 'checking', result  
+      print 'CheckRaise'
     elif can_raise and equity >= up and self.player.pot_size <=upperPotSize:        
       result = 'RAISE:' + str(int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]) + int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2])/2)
       print 'raising', result
