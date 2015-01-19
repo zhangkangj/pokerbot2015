@@ -384,6 +384,7 @@ cdef class PlayerNode(Node):
     for i in range(0, self.num_child):
       util_sb[0] += act_prob[i] / total_prob * util_sb_child[i]
       util_bb[0] += act_prob[i] / total_prob * util_bb_child[i]
+    #print self.is_sb, util_sb[0], util_bb[0], self
     free(util_sb_child)
     free(util_bb_child)
 
@@ -591,15 +592,15 @@ cdef class FoldNode(Node):
       util_bb[0] = self.win_amount      
     #print 'fold node', p_sb, p_bb, util_sb[0], util_bb[0]
 
-cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
-                        int* bucket_seq_sb, int* bucket_seq_bb):
+  cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
+                          int* bucket_seq_sb, int* bucket_seq_bb):
     if self.sb_win:
       util_sb[0] = self.win_amount
       util_bb[0] = -self.win_amount
     else:
       util_sb[0] = -self.win_amount
       util_bb[0] = self.win_amount
-
+    #print 'fold node', p_sb, p_bb, util_sb[0], util_bb[0]
 
 cdef class ShowdownNode(Node):
   cdef int pot_size
@@ -632,3 +633,4 @@ cdef class ShowdownNode(Node):
     else:
       util_sb[0] = 0
       util_bb[0] = 0
+    #print 'showdown node', p_sb, p_bb, util_sb[0], util_bb[0]
