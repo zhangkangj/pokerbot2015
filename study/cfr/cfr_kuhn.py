@@ -64,7 +64,7 @@ seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
 
 util_sb_ave = 0
-for i in range(1000000):
+for i in range(100000):
   util_sb = util_bb = 0.0
   for sb, bb, _ in itertools.permutations([0,1,2]):
     seq1[3] = seq1[4] = sb

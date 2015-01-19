@@ -16,7 +16,7 @@ import itertools
 reload(cfr_cy)
 
 root = cfr_cy.RoundNode(3, 2, 1, 1)
-root.initialize_regret()
+#root.initialize_regret()
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
 
@@ -62,7 +62,7 @@ reload(cfr_cy)
 
 # ordered cards
 root = cfr_cy.RoundNode(3, 2, 1, 1)
-root.initialize_regret()
+#root.initialize_regret()
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
 for i in range(1000000):
