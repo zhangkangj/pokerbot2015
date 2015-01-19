@@ -8,8 +8,9 @@ from libc.stdlib cimport malloc, free
 
 
 cdef:
+  int MIN_BET = 2
   int MAX_BET_NUM = 3
-  int TOTAL_STACK = 60
+  int TOTAL_STACK = 600
 
 cdef class Node(object):
   cpdef public child_nodes
@@ -48,7 +49,7 @@ cdef class Node(object):
 
   cdef void spawn_round_node(self, int pot_size, int stack_sb, int stack_bb,
                              int final_amount_sb, int final_amount_bb):
-    assert self.num_round >= 0
+    # assert self.num_round >= 0
     node = RoundNode(self.num_round+1, pot_size, stack_sb, stack_bb, final_amount_sb, final_amount_bb)
     self.num_child += 1
     self.child_nodes.append(node)
@@ -93,7 +94,7 @@ cdef class Node(object):
         check_count += d        
       return total_count, round_count, raise_count, check_count
 
-  def test_transit(self, bucket_seq_sb_, bucket_seq_bb_):
+  def run_cfr(self, bucket_seq_sb_, bucket_seq_bb_):
     cdef:
       np.ndarray[int, ndim=1, cast=True] bucket_seq_sb = bucket_seq_sb_.astype(np.int32)
       np.ndarray[int, ndim=1, cast=True] bucket_seq_bb = bucket_seq_bb_.astype(np.int32)
@@ -106,10 +107,49 @@ cdef class Node(object):
    # print 'bucket sb', bucket_seq_sb_ptr[0]
     self.transit(1, 1, util_sb_ptr, util_bb_ptr, bucket_seq_sb_ptr, bucket_seq_bb_ptr)
     #print util_sb[0], util_bb[0]
+    return util_sb[0], util_bb[0]
         
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
     pass
+  
+  def dump(self, filename=None):
+    cdef np.ndarray[float, ndim=1] result = np.zeros(1, dtype=np.float32)
+    cdef float* result_ptr = <float*> result.data
+    cdef int n = self.dump_(result_ptr, start_index=0, test=True)
+    result = np.zeros(n, dtype=np.float32)
+    result_ptr = <float*> result.data
+    self.dump_(result_ptr, start_index=0, test=False)
+    if filename is not None:
+      np.save(filename, result.astype(np.float16))
+    return result
+    
+  cdef int dump_(self, float* result, int start_index, bint test):
+    cdef Node node
+    cdef int i
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      start_index = node.dump_(result, start_index, test)
+    return start_index
+
+  def load(self, data_):
+    cdef np.ndarray[float, ndim=1] data
+    cdef float* data_ptr
+    if isinstance(data_, basestring):
+      data = np.load(data_).astype(np.float32)
+    else:
+      data = data_.astype(np.float32)
+    data_ptr = <float*> data.data
+    self.load_(data_ptr, start_index=0)
+  
+  cdef int load_(self, float* data, int start_index):
+    cdef Node node
+    cdef int i
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      start_index = node.load_(data, start_index)
+    return start_index
+
 
   def test_find_node(self, child_seq):
     cdef Node node = <Node> self
@@ -129,14 +169,14 @@ cdef class RoundNode(Node):
   def __init__(self, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb=0, int amount_bb=0):
     super(RoundNode, self).__init__(num_round)
-    assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
-    assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     if num_round == 0:
-      assert pot_size == 0, ('invalid pot size', pot_size, num_round)
-      assert stack_sb == stack_bb
+      # assert pot_size == 0, ('invalid pot size', pot_size, num_round)
+      # assert stack_sb == stack_bb
       amount_sb, amount_bb = 1, 2
       self.spawn_raise_node(True, pot_size, stack_sb-1, stack_bb-2,
-                            amount_sb, amount_bb, min_bet=2, num_bet=0, raise_amount=2)
+                            amount_sb, amount_bb, min_bet=MIN_BET, num_bet=0, raise_amount=2)
     else:
       if num_round - 1 == 0:
         self.preflop_amount_sb = amount_sb
@@ -150,7 +190,7 @@ cdef class RoundNode(Node):
       # TODO: update values
       self.spawn_check_node(True, pot_size, stack_sb, stack_bb, amount_sb=0, amount_bb=0)
     # self.initialize()
-    assert len(self.child_nodes) > 0
+    # assert len(self.child_nodes) > 0
 
   def traverse(self, game_round):
     total_count = 1 if self.num_round == game_round else 0
@@ -172,6 +212,7 @@ cdef class RoundNode(Node):
       Node node = <Node> self.child_nodes[0]
     node.transit(p_sb, p_bb, util_sb, util_bb, bucket_seq_sb, bucket_seq_bb)
     #print 'round node', p_sb, p_bb, util_sb[0], util_bb[0]
+
 
 cdef class PlayerNode(Node):
   cpdef public regret
@@ -284,11 +325,35 @@ cdef class PlayerNode(Node):
     free(act_prob)
     return prob_tmp
 
+  cdef int dump_(self, float* result, int start_index, bint test):
+    cdef Node node
+    cdef int i
+    if not test:
+      for i in range(self.num_card_bucket * self.num_child):
+        result[i+start_index] = self.regret_ptr[i]
+    start_index += self.num_card_bucket * self.num_child
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      start_index = node.dump_(result, start_index, test)
+    return start_index
+
+  cdef int load_(self, float* data, int start_index):
+    cdef Node node
+    cdef int i
+    for i in range(self.num_card_bucket * self.num_child):
+        self.regret_ptr[i] = data[i+start_index]
+    start_index += self.num_card_bucket * self.num_child    
+    for i in range(self.num_child):
+      node = <Node> self.child_nodes[i]
+      start_index = node.load_(data, start_index)
+    return start_index
+
+
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb, int amount_bb, int min_bet, int num_bet, int raise_amount):
-    assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
-    assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     super(RaiseNode, self).__init__(is_sb, num_round)
     self.raise_amount = raise_amount
     # player folds
@@ -325,9 +390,9 @@ cdef class RaiseNode(PlayerNode):
         #desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/3, (pot_size+amount_sb+amount_bb+call_amount)*2/3, pot_size+amount_sb+amount_bb+call_amount]
         desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
         if raise_limit < pot_size + amount_sb + amount_bb + call_amount:
-          raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
+          raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit]))
         else:
-          raise_amounts = set(desired_amounts)
+          raise_amounts = sorted(set(desired_amounts))
         for raise_amount in raise_amounts:
           sb_delta_, bb_delta_ = (raise_amount+sb_delta, 0) if is_sb else (0, raise_amount+bb_delta)
           self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta_, stack_bb-bb_delta_,
@@ -353,15 +418,15 @@ cdef class CheckNode(PlayerNode):
 
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb, int amount_bb):
-    assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
-    assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
+    # assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     super(CheckNode, self).__init__(is_sb, num_round)
     # player checks
     if is_sb:
       self.spawn_check_node(not is_sb, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     else:
       if num_round == 3:
-        assert amount_sb==amount_bb==0
+        # assert amount_sb==amount_bb==0
         self.spawn_showdown_node(pot_size)
       else:
         self.spawn_round_node(pot_size+amount_sb+amount_bb, stack_sb, stack_bb,
@@ -370,9 +435,9 @@ cdef class CheckNode(PlayerNode):
     raise_limit = stack_sb if is_sb else stack_bb
     desired_amounts = [2 , (pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
     if raise_limit < pot_size + amount_sb + amount_bb:
-      raise_amounts = set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit])
+      raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit]))
     else:
-      raise_amounts = set(desired_amounts)
+      raise_amounts = sorted(set(desired_amounts))
     for raise_amount in raise_amounts:
       sb_delta, bb_delta = (raise_amount, 0) if is_sb else (0, raise_amount)
       self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta, stack_bb-bb_delta,
