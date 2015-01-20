@@ -140,7 +140,6 @@ class BasePlayer(object):
   def action(self, parts):
     #debug
     print "-------======> enter action(), parts:" + str(parts)
-
     self.pot_size = int(parts[1])
     self.num_board_card = int(parts[2])
     self.board_cards = parts[3:(3+self.num_board_card)]

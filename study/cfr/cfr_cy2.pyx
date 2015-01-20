@@ -194,7 +194,9 @@ cdef class Node(object):
       node = <Node> self.child_nodes[i]
       start_index = node.load_prob_(data, start_index)
     return start_index
- 
+  
+  def get_num_child(self):
+    return self.num_child
 cdef class RoundNode(Node):
   cdef:
     int preflop_amount_sb, preflop_amount_bb
@@ -436,7 +438,17 @@ cdef class PlayerNode(Node):
     return self.raise_amount
   def get_pot_size(self):
     return self.pot_size
-
+    
+  def get_act_prob(self, bucket):
+    prob_tmp = []
+    prob_sum_tmp = 0
+    for i in range(0,self.num_child):
+      prob_tmp.append(self.average_prob[bucket * self.num_child + i] + 0.000001)   
+      prob_sum_tmp += prob_tmp[i]
+    for i in range(0,self.num_child):
+      prob_tmp[i] /= prob_sum_tmp
+    return prob_tmp
+    
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb, int amount_bb, int min_bet, int num_bet, int raise_amount):
