@@ -17,7 +17,7 @@ class MixedoppnewBot(base_bot.BaseBot):
     hole_card_str = ''.join(self.player.hole_cards)
     board_card_str = ''.join(self.player.board_cards)
     card_str = hole_card_str+':xx'*(self.player.num_active_player-1)
-    equity = evaluator.evaluate(card_str, board_card_str, '', 100)
+    equity = evaluator.evaluate(card_str, board_card_str, '', 500)
     can_raise = False
     can_bet = False
     can_call = False
