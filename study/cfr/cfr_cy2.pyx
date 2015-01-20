@@ -142,12 +142,12 @@ cdef class Node(object):
 
   def load_regret(self, data_):
     self.initialize_regret()
-    cdef np.ndarray[float, ndim=1] data
+    cdef np.ndarray[double, ndim=1] data
     cdef double* data_ptr
     if isinstance(data_, basestring):
       data = np.load(data_).astype(np.float64)
     else:
-      data = data_.astype(np.float32)
+      data = data_.astype(np.float64)
     data_ptr = <double*> data.data
     self.load_regret_(data_ptr, start_index=0)
   
@@ -350,7 +350,7 @@ cdef class PlayerNode(Node):
       for i in range(0, self.num_child):
         result[i] = 1./self.num_child
     for i in range(0, self.num_child):
-      self.average_prob_ptr[node_bucket_times_num_child + i] = self.average_prob_ptr[node_bucket_times_num_child + i] * 0.9995 + weight * result[i]  * (1 - exp(-self.t/10000.0))
+      self.average_prob_ptr[node_bucket_times_num_child + i] = self.average_prob_ptr[node_bucket_times_num_child + i] + weight * result[i]  #* (1 - exp(-self.t/10000.0))
 
   cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                           int* bucket_seq_sb, int* bucket_seq_bb):

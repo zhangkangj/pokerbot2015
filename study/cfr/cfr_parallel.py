@@ -15,10 +15,16 @@ from lib.evaluator import evaluator_cy, evaluator
 from study.cfr import cfr_cy2
 
 
-def run_cfr(index, num_iter=10000):
+def run_cfr(args):
+  index, initial_regret, initial_prob, num_iter, num_gen = args
   print 'starting', index
   root = cfr_cy2.RoundNode(0, 0, 4, 4)
-  root.initialize_regret()
+  if initial_regret is None:
+    root.initialize_regret()
+  else:
+    root.load_regret(initial_regret)
+  if initial_prob is not None:
+    root.load_regret(initial_prob)
   seq1 = np.array([0, 0, 0, 0, 0])
   seq2 = np.array([0, 0, 0, 0, 0])
   util_sb = util_bb = 0
@@ -38,20 +44,45 @@ def run_cfr(index, num_iter=10000):
     util_sb += util_sb_
     util_bb += util_bb_
     if i%100 == 0:
-      print i, util_sb/i, util_bb/i
-  regret = root.dump_regret('data/regret_300_' + str(index))
-  prob = root.dump_prob('data/prob_300_' + str(index))
+      print num_gen, index, i, util_sb/i, util_bb/i
+  regret = root.dump_regret()
+  prob = root.dump_prob()
   return regret, prob
 
 NUM_THREAD = 4
-thread_pool = multiprocessing.Pool(4)
-results = thread_pool.map(run_cfr, range(NUM_THREAD))
-total_regret, total_prob = results[0]
-for (regret, prob) in results[1:]:
-  total_regret += regret
-  total_prob   += prob
-total_regret = total_regret
-total_prob   = total_prob
-np.save('data/regret_300_total', total_regret)
-np.save('data/prob_300_total', total_prob)
+NUM_ITER = 1000
+REGRET_FILE = 'data/regret_300_total' 
+PROB_FILE = 'data/prob_300_total'
 
+initial_regret = None
+try:
+  initial_regret = np.load(REGRET_FILE+'.npy')
+except:
+  pass
+initial_prob = None
+try:
+  initial_prob = np.load(PROB_FILE+'.npy')
+except:
+  pass
+
+if initial_regret is None or initial_prob is None:
+  thread_pool = multiprocessing.Pool(4)
+  results = thread_pool.map(run_cfr, [(x, None, None, NUM_ITER, 0) for x in range(NUM_THREAD)])
+  total_regret, total_prob = results[0]
+  for (regret, prob) in results[1:]:
+    total_regret += regret
+    total_prob   += prob
+  total_regret = total_regret
+  total_prob   = total_prob
+  np.save(REGRET_FILE, total_regret)
+  np.save(PROB_FILE, total_prob)
+
+for i in range(1, 100):
+  thread_pool = multiprocessing.Pool(4)
+  results = thread_pool.map(run_cfr, [(x, total_regret, total_prob, NUM_ITER, i) for x in range(NUM_THREAD)])
+  total_regret, total_prob = results[0]
+  for (regret, prob) in results[1:]:
+    total_regret += regret * i**(1/2)
+    total_prob   += prob * i**(1/2)
+  np.save(REGRET_FILE, total_regret)
+  np.save(PROB_FILE, total_prob)
