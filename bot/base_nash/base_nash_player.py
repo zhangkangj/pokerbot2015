@@ -29,6 +29,7 @@ class Base_nashPlayer(base_player.BasePlayer):
     	print 'Now change to nash bot for new hand'
     elif self.num_active_player == 3 and (self.current_bot_type != 'MIXED'):
     	self.current_bot = mixedoppnew_bot.MixedoppnewBot(self)
+    	self.current_bot_type = 'MIXED'
     	print 'Now change to mixed bot for new hand'
     else:
     	print 'Current player:' + self.current_bot_type
@@ -36,23 +37,62 @@ class Base_nashPlayer(base_player.BasePlayer):
   def handover(self, parts):
     super(Base_nashPlayer, self).handover(parts)
 
+
+  def prepare_last_actions(self,active_name,inactive_name,last_acts):
+  	modified_acts = [];
+  	modstate=0
+  	for act in last_acts:
+  		if (act[0] != inactive_name) and (modstate == 0):
+  			modified_acts.append(act);
+  		elif (act[0] == active_name) and (modstate == 1):
+  			modstate = 0;
+  			newtup = (act[0],'RAISE',act[-1])
+  			modified_acts.append(newtup)
+  		elif act[0] == inactive_name:
+  			if ('RAISE' not in act[1]) and ('BET' not in act[1]):
+  				pass
+  			else:
+  				if len(modified_acts) == 0:
+  					modstate = 1;
+  				else:
+  					lastelm = modified_acts.pop()
+  					if lastelm[0] == active_name:
+  						newtup = (lastelm[0],'RAISE',act[-1])
+  						modified_acts.append(newtup)
+  					else:
+  						modstate = 1
+  						modified_acts.append(lastelm)
+  		else:
+  			print 'ERROR in mapping 3->2 in base_nash_player'
+  	return modified_acts
+
+
   def action(self,parts):
   	super(Base_nashPlayer, self).action(parts);
-  # 	if self.num_active_player_dynamic == 2 and (self.current_bot_type != 'NASH'):
+  	if self.num_active_player_dynamic == 2 and (self.current_bot_type != 'NASH'):
+		print 'Now change to nash bot for new action'
+		print 'self.last_actions_preflop:'+str(self.last_actions_preflop);
+		print 'self.last_actions_flop:', self.last_actions_flop;
+		print 'self.last_actions_turn:', self.last_actions_turn;
+		print 'self.last_actions_river:', self.last_actions_river;
+		self.last_actions_preflop_init = self.prepare_last_actions(self.active_name,self.inactive_name,self.last_actions_preflop)
+  		self.last_actions_flop_init = self.prepare_last_actions(self.active_name,self.inactive_name,self.last_actions_flop)
+  		self.last_actions_turn_init = self.prepare_last_actions(self.active_name,self.inactive_name,self.last_actions_turn)
+  		self.last_actions_river_init = self.prepare_last_actions(self.active_name,self.inactive_name,self.last_actions_river)
 
-
-  # 		# self.last_actions_preflop_init,self.last_actions_flop_init,self.last_actions_turn_init,self.last_actions_river_init = \
-  # 		# self.prepare_last_actions(active_name,inactive_name,self.last_actions_preflop,self.last_actions_flop,self.last_actions_turn,self.last_actions_river);
-
-		# self.current_bot = base_nash_bot.Base_nashBot(self, 100, ' ')
-		# self.current_bot_type = 'NASH'
-  #   	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################
-  #   	#### INIT bot based on last_actions_init lists!!########
-  #   	##
-  #   	##
-  #   	##
-  #   	##
-  #   	print 'Now change to nash bot for new action'
+  		print 'last_actions_preflop_init:::' + str(self.last_actions_preflop_init)
+  		print 'last_actions_flop_init:::' + str(self.last_actions_flop_init)
+  		print 'last_actions_turn_init:::' + str(self.last_actions_turn_init)
+  		print 'last_actions_river_init:::' + str(self.last_actions_river_init)
+#		self.current_bot = base_nash_bot.Base_nashBot(self, 100, ' ')
+		self.current_bot_type = 'NASH'
+    	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################
+    	#### INIT bot based on last_actions_init lists!!########
+    	##
+    	##
+    	##
+    	##
+		
 
 
 
