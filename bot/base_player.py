@@ -37,6 +37,8 @@ class BasePlayer(object):
     self.action_state=None
     self.opponents = None
 
+    self.current_stacksize = None
+
   def new_game(self, parts):
     self.player_name = parts[1]
     self.opp1_name = parts[2]
@@ -46,15 +48,29 @@ class BasePlayer(object):
     self.max_num_hand = int(parts[6])
     self.game_init_timebank = float(parts[7])
 
+    self.create_opponents();
+    self.opponents = [self.opp1, self.opp2];
+
+  def create_opponents(self):
+    #debug
+    print "-------------###--MixedoppnewPlayer.create_opponents()"    
+    self.opp1 = base_opponent.BaseOpponent(self.opp1_name, self);
+    self.opp2 = base_opponent.BaseOpponent(self.opp2_name, self);
 
   def key_value(self, parts):
     pass
 
   def new_hand(self, parts):
 
-    self.opp1 = base_opponent.BaseOpponent(self.opp1_name);
-    self.opp2 = base_opponent.BaseOpponent(self.opp2_name);
-    self.opponents = [self.opp1,self.opp2];
+    print "-------====>enter: new_hand()"
+
+    # self.opp1 = base_opponent.BaseOpponent(self.opp1_name);
+    # self.opp2 = base_opponent.BaseOpponent(self.opp2_name);
+    # self.opponents = [self.opp1,self.opp2];
+
+    for opponent in self.opponents:
+      # clear the stats in opponents
+      opponent.reset()
 
     self.hand_id = int(parts[1])
     self.seat = int(parts[2])
@@ -76,15 +92,55 @@ class BasePlayer(object):
     self.last_actions_river=[]
     self.action_state='PREFLOP';
 
+    self.player_names = parts[8:11]
 
+    # since the sequence changes every hand, we need to grap the data by finding the index
+    # for each player
+    opp1_idx = -1
+    opp2_idx = -1
+    player_idx = -1
+
+    for i in range(0,2):
+      if self.player_names[i] == self.opp1.oppo_name:
+        opp1_idx = i 
+      elif self.player_names[i] == self.opp2.oppo_name:
+        opp2_idx = i
+      elif self.player_names[i] == self.player_name:
+        player_idx = i
+      else: 
+        print "-------======>ERROR: self.player_names[" + str(i) + "]=" + str(self.player_names[i]) + " is not a valid name for player or opponents"
+    
+    self.opp1.is_active_in_game = bool(self.active_players[opp1_idx]) 
+    self.opp1.stack_size_new_hand = int(self.stack_sizes[opp1_idx])
+
+    self.opp2.is_active_in_game = bool(self.active_players[opp2_idx]) 
+    self.opp2.stack_size_new_hand = int(self.stack_sizes[opp2_idx])   
+
+    print "-------======>self.opp1.oppo_name: " + str(self.opp1.oppo_name) + ", self.opp1.is_active_in_game:" + str(self.opp1.is_active_in_game) + ", self.opp1.stack_size_new_hand:" + str(self.opp1.stack_size_new_hand)
+    print "-------======>self.opp2.oppo_name: " + str(self.opp2.oppo_name) + ", self.opp2.is_active_in_game:" + str(self.opp1.is_active_in_game) + ", self.opp2.stack_size_new_hand:" + str(self.opp1.stack_size_new_hand)
+
+    print "-------====>exit: new_hand()..."
 
   def UpdateOpponents(self,action_state,one_action):
-    if self.opp1_name in one_action[-1]:
+
+    #debug
+    print "-------======> enter UpdateOpponents(): action_state: " + str(action_state) + ", one_action: " + str(one_action)
+       
+    if self.opp1.is_active_in_game and self.opp1.is_active_in_hand and (self.opp1_name in one_action[-1]):
+      print "-------========> action is for oppo1: " + self.opp1.oppo_name + ", one_action:" + str(one_action)
       self.opp1.Oppo_update(action_state,one_action[:-1]);
-    elif self.opp2_name in one_action[-1]:
+    elif self.opp2.is_active_in_game and self.opp2.is_active_in_hand and (self.opp2_name in one_action[-1]):
+      print "-------========> action is for oppo2: " + self.opp2.oppo_name + ", one_action:" + str(one_action)
       self.opp2.Oppo_update(action_state,one_action[:-1]);
+    elif self.player_name in one_action[-1]:
+      print "-------========> action is for player, not opponent, one_action:" + str(one_action)
+    else:
+      print "-------========> ERROR: it is not possible to have both opponent (in-hand or in-game) inactive or if they are active, there is no action message for their last actions"
 
   def action(self, parts):
+    #debug
+    print "-------======> enter action(), parts:" + str(parts)
+
     self.pot_size = int(parts[1])
     self.num_board_card = int(parts[2])
     self.board_cards = parts[3:(3+self.num_board_card)]
@@ -111,7 +167,9 @@ class BasePlayer(object):
       else:
         print "Error: Last Action parsing wrong"
 
+      # Update Opponents with last action str
       self.UpdateOpponents(self.action_state,tempstr)
+
       if self.action_state == 'PREFLOP': 
         self.last_actions_preflop.append((tempstr[-1],tempstr[0],lastelm))
       elif self.action_state=='FLOP':
@@ -130,30 +188,32 @@ class BasePlayer(object):
     index = index + self.num_legal_action
     self.timebank = float(parts[index])
 
-
+    print '-----------stack_sizes:' + str(self.stack_sizes) + ', seat:' + str(self.seat)
+    self.current_stacksize = int(self.stack_sizes[int(self.seat-1)])
+    print '-----------self.current_stacksize:' + str(self.current_stacksize)
 
 
   def handover(self, parts):
 
-    print 'self.last_actions_preflop:', self.last_actions_preflop;
-    print 'self.last_actions_flop:', self.last_actions_flop;
-    print 'self.last_actions_turn:', self.last_actions_turn;
-    print 'self.last_actions_river:', self.last_actions_river;
+    # print 'handover: self.last_actions_preflop:', self.last_actions_preflop;
+    # print 'handover: self.last_actions_flop:', self.last_actions_flop;
+    # print 'handover: self.last_actions_turn:', self.last_actions_turn;
+    # print 'handover: self.last_actions_river:', self.last_actions_river;
 
-    print self.opponents[1].oppo_name
-    for action in self.opponents[1].all_actions:
-      print 'action.phase:'+str(action.phase)
-      print 'action.call_seqs:'+str(action.call_seqs)
-      print 'action.call_amounts'+str(action.call_amounts)
-      print 'action.raise_seqs'+str(action.raise_seqs)
-      print 'action.raise_amounts'+str(action.raise_amounts)
-      print 'action.bet_seqs'+str(action.bet_seqs)
-      print 'action.bet_amounts'+str(action.bet_amounts)
-      print 'action.post_seqs'+str(action.post_seqs)
-      print 'action.post_amounts'+str(action.post_amounts)
-      print 'action.check_seqs'+str(action.check_seqs)
-      print 'action.fold_seqs'+str(action.fold_seqs)
-      print 'action.action_count'+str(action.action_count)
+    # print self.opponents[1].oppo_name
+    # for action in self.opponents[1].all_actions:
+    #   print 'handover: action.state:'+str(action.state) + "----------"
+    #   print 'handover: action.call_seqs:'+str(action.call_seqs)
+    #   print 'handover: action.call_amounts'+str(action.call_amounts)
+    #   print 'handover: action.raise_seqs'+str(action.raise_seqs)
+    #   print 'handover: action.raise_amounts'+str(action.raise_amounts)
+    #   print 'handover: action.bet_seqs'+str(action.bet_seqs)
+    #   print 'handover: action.bet_amounts'+str(action.bet_amounts)
+    #   print 'handover: action.post_seqs'+str(action.post_seqs)
+    #   print 'handover: action.post_amounts'+str(action.post_amounts)
+    #   print 'handover: action.check_seqs'+str(action.check_seqs)
+    #   print 'handover: handover: action.fold_seqs'+str(action.fold_seqs)
+    #   print 'handover: action.action_count'+str(action.action_count)
 
 
     self.stack_sizes = [int(x) for x in parts[1:4]]
@@ -214,3 +274,4 @@ class BasePlayer(object):
         print result
         input_socket.send(result + '\n')
     input_socket.close()
+
