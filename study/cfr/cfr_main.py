@@ -104,3 +104,21 @@ for i in range(51):
   for j in range(i+1, 52):
     idx = evaluator_cy.preflop_idx(i, j)
     print util.n2c([i,j]), idx, result[idx]
+
+
+
+
+
+
+
+
+# parallel
+root = cfr_cy2.RoundNode(0, 0, 4, 4)
+root.load_regret('data/regret_300_total.npy')
+root.load_prob('data/prob_300_total.npy')
+n = 3
+result = np.reshape(normalize(root.child_nodes[0].average_prob[:(n*169)], n=n), (169,n))
+for i in range(51):
+  for j in range(i+1, 52):
+    idx = evaluator_cy.preflop_idx(i, j)
+    print util.n2c([i,j]), idx, result[idx]
