@@ -5,7 +5,7 @@
 import numpy as np
 cimport numpy as np
 from libc.stdlib cimport malloc, free
-
+from libc.math cimport exp
 
 cdef:
   int MIN_BET = 2
@@ -122,17 +122,17 @@ cdef class Node(object):
                           int* bucket_seq_sb, int* bucket_seq_bb):
     pass  
   def dump_regret(self, filename=None):
-    cdef np.ndarray[float, ndim=1] result = np.zeros(1, dtype=np.float32)
-    cdef float* result_ptr = <float*> result.data
+    cdef np.ndarray[float, ndim=1] result = np.zeros(1, dtype=np.float64)
+    cdef double* result_ptr = <double*> result.data
     cdef int n = self.dump_regret_(result_ptr, start_index=0, test=True)
     result = np.zeros(n, dtype=np.float32)
-    result_ptr = <float*> result.data
+    result_ptr = <double*> result.data
     self.dump_regret_(result_ptr, start_index=0, test=False)
     if filename is not None:
       np.save(filename, result.astype(np.float16))
     return result
     
-  cdef int dump_regret_(self, float* result, int start_index, bint test):
+  cdef int dump_regret_(self, double* result, int start_index, bint test):
     cdef Node node
     cdef int i
     for i in range(self.num_child):
@@ -143,15 +143,15 @@ cdef class Node(object):
   def load_regret(self, data_):
     self.initialize_regret()
     cdef np.ndarray[float, ndim=1] data
-    cdef float* data_ptr
+    cdef double* data_ptr
     if isinstance(data_, basestring):
-      data = np.load(data_).astype(np.float32)
+      data = np.load(data_).astype(np.float64)
     else:
       data = data_.astype(np.float32)
-    data_ptr = <float*> data.data
+    data_ptr = <double*> data.data
     self.load_regret_(data_ptr, start_index=0)
   
-  cdef int load_regret_(self, float* data, int start_index):
+  cdef int load_regret_(self, double* data, int start_index):
     cdef Node node
     cdef int i
     for i in range(self.num_child):
@@ -269,13 +269,15 @@ cdef class PlayerNode(Node):
   cpdef public average_prob
   cdef:
     bint is_sb
-    float* regret_ptr
+    double* regret_ptr
     float* average_prob_ptr
     int raise_amount
+    int t
 
   def __init__(self, bint is_sb, int num_round):
     self.is_sb = is_sb
     self.raise_amount = 0
+    self.t = 0
     super(PlayerNode, self).__init__(num_round)
 
   cdef void initialize_prob(self):
@@ -286,9 +288,9 @@ cdef class PlayerNode(Node):
 
   def initialize_regret(self):
     cdef:
-      np.ndarray[float, ndim=1] regret_ = np.zeros(self.num_card_bucket*self.num_child, dtype=np.float32)
+      np.ndarray[double, ndim=1] regret_ = np.zeros(self.num_card_bucket*self.num_child, dtype=np.float64)
     self.regret = regret_
-    self.regret_ptr = <float*> regret_.data
+    self.regret_ptr = <double*> regret_.data
     cdef Node node
     cdef int i
     for i in range(self.num_child):
@@ -297,7 +299,7 @@ cdef class PlayerNode(Node):
     
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
-    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))
+    cdef double* act_prob = <double*> malloc(self.num_child * sizeof(double))
     cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef float* util_bb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef int node_bucket, i
@@ -337,10 +339,11 @@ cdef class PlayerNode(Node):
     free(act_prob)
     free(util_sb_child)
     free(util_bb_child)
+    self.t += 1
     #print 'player node', p_sb, p_bb, util_sb[0], util_bb[0]
     
-  cdef void compute_prob(self, float* result, int node_bucket_times_num_child, float weight):
-    cdef float sum_regret_plus = 0
+  cdef void compute_prob(self, double* result, int node_bucket_times_num_child, float weight):
+    cdef double sum_regret_plus = 0
     cdef int i
     for i in range(0, self.num_child):
       result[i] = max(self.regret_ptr[node_bucket_times_num_child + i], 0)
@@ -352,12 +355,12 @@ cdef class PlayerNode(Node):
       for i in range(0, self.num_child):
         result[i] = 1./self.num_child
     for i in range(0, self.num_child):
-      self.average_prob_ptr[node_bucket_times_num_child + i] += weight * result[i]
+      self.average_prob_ptr[node_bucket_times_num_child + i] = self.average_prob_ptr[node_bucket_times_num_child + i] * 0.9995 + weight * result[i]  * (1 - exp(-self.t/10000.0))
 
   cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                           int* bucket_seq_sb, int* bucket_seq_bb):
     cdef int node_bucket, i
-    cdef float* act_prob
+    cdef double* act_prob
     cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef float* util_bb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef Node node
@@ -366,8 +369,7 @@ cdef class PlayerNode(Node):
     util_bb[0] = 0
     if self.is_sb:
       node_bucket = bucket_seq_sb[self.num_round]
-      act_prob = <float*> (self.average_prob_ptr + node_bucket*self.num_child)
-      print 'sb', act_prob[0],act_prob[1], bucket_seq_sb[3], bucket_seq_bb[3]
+     act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
       for i in range(self.num_child):
         total_prob += act_prob[i]
       for i in range(0, self.num_child):
@@ -377,9 +379,7 @@ cdef class PlayerNode(Node):
                           util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
     else:
       node_bucket = bucket_seq_bb[self.num_round]
-      act_prob = <float*> (self.average_prob_ptr + node_bucket*self.num_child)
-      print 'bb', act_prob[0],act_prob[1], bucket_seq_sb[3], bucket_seq_bb[3]
-
+     act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
       for i in range(self.num_child):
         total_prob += act_prob[i]
       for i in range(0, self.num_child):
@@ -390,7 +390,7 @@ cdef class PlayerNode(Node):
     for i in range(0, self.num_child):
       util_sb[0] += act_prob[i] / total_prob * util_sb_child[i]
       util_bb[0] += act_prob[i] / total_prob * util_bb_child[i]
-    print util_sb[0], util_bb[0], self.is_sb 
+    #print self.is_sb, util_sb[0], util_bb[0], self
     free(util_sb_child)
     free(util_bb_child)
 
@@ -408,20 +408,20 @@ cdef class PlayerNode(Node):
 #don't use this function for now, it calls compute_prob and changes average_prob     
   def test_find_prob(self, bucket_seq = None):
     prob_tmp = []
-    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))  
+    cdef double* act_prob = <double*> malloc(self.num_child * sizeof(double))
     if bucket_seq == None:
       for i in range(0, self.num_card_bucket):    
         self.compute_prob(act_prob, i * self.num_child,0)
         for j in range(0, self.num_child):
           prob_tmp.append(act_prob[j])
     else:
-      self.compute_prob(act_prob, bucket_seq[self.num_round] * self.num_child,0)    
+      self.compute_prob(act_prob, bucket_seq[self.num_round] * self.num_child,0)
       for i in range(0,self.num_child):
         prob_tmp.append(act_prob[i])
     free(act_prob)
     return prob_tmp
 
-  cdef int dump_regret_(self, float* result, int start_index, bint test):
+  cdef int dump_regret_(self, double* result, int start_index, bint test):
     cdef Node node
     cdef int i
     if not test:
@@ -433,7 +433,7 @@ cdef class PlayerNode(Node):
       start_index = node.dump_regret_(result, start_index, test)
     return start_index
 
-  cdef int load_regret_(self, float* data, int start_index):
+  cdef int load_regret_(self, double* data, int start_index):
     cdef Node node
     cdef int i
     for i in range(self.num_card_bucket * self.num_child):
@@ -601,14 +601,14 @@ cdef class FoldNode(Node):
     #print 'fold node', p_sb, p_bb, util_sb[0], util_bb[0]
 
   cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
-                        int* bucket_seq_sb, int* bucket_seq_bb):
+    											int* bucket_seq_sb, int* bucket_seq_bb):
     if self.sb_win:
       util_sb[0] = self.win_amount
       util_bb[0] = -self.win_amount
     else:
       util_sb[0] = -self.win_amount
       util_bb[0] = self.win_amount
-
+    #print 'fold node', p_sb, p_bb, util_sb[0], util_bb[0]
 
 cdef class ShowdownNode(Node):
   cdef int pot_size
@@ -641,3 +641,4 @@ cdef class ShowdownNode(Node):
     else:
       util_sb[0] = 0
       util_bb[0] = 0
+    #print 'showdown node', p_sb, p_bb, util_sb[0], util_bb[0]

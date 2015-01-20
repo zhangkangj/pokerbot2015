@@ -22,21 +22,36 @@ def getFileList(p):
   return res
 
 def main():
-  LOGPATH = "F:\\Software\\PokerBot\\pokerbot2015\\Analysis"
-  FILENAME = "Casino_Day-4_Nuts_p_new_1.csv"
+  LOGPATH = "F:\\Software\\PokerBot\\pokerbot2015\\Analysis\\Casino_Hand\\Day4"
+  FILENAME = "Casino_Day-4_Nuts_p_new_2.csv"
   FILEPATH = LOGPATH + "\\" + FILENAME
   df = pd.read_csv(FILEPATH)
- # df['num_of_player_preflop'] = np.sum(df['is_dealer_enter_preflop'], df['is_SB_enter_preflop'], df['is_BB_enter_preflop'])
+  # df['num_of_player_preflop'] = np.sum(df['is_dealer_enter_preflop'], df['is_SB_enter_preflop'], df['is_BB_enter_preflop'])
   df['num_of_player_preflop'] = df['is_dealer_enter_preflop'].astype(int) +df['is_SB_enter_preflop'].astype(int) +df['is_BB_enter_preflop'].astype(int)     
   df['num_of_player_flop'] = df['is_dealer_enter_flop'].astype(int) +df['is_SB_enter_flop'].astype(int) +df['is_BB_enter_flop'].astype(int)     
   df['num_of_player_turn'] = df['is_dealer_enter_turn'].astype(int) +df['is_SB_enter_turn'].astype(int) +df['is_BB_enter_turn'].astype(int)     
   df['num_of_player_river'] = df['is_dealer_enter_river'].astype(int) +df['is_SB_enter_river'].astype(int) +df['is_BB_enter_river'].astype(int)     
   
   df['actual_dealer_equity_preflop'] = (3-df['num_of_player_preflop'])*df['dealer_equity_2']+(df['num_of_player_preflop']-2)*df['dealer_equity_3']
-  df['num_of_player_preflop'] = df['is_dealer_enter_flop'] + df['is_SB_enter_flop'] + df['is_BB_enter_flop']  
+  df['actual_SB_equity_preflop'] = (3-df['num_of_player_preflop'])*df['SB_equity_2']+(df['num_of_player_preflop']-2)*df['SB_equity_3']
+  df['actual_BB_equity_preflop'] = (3-df['num_of_player_preflop'])*df['BB_equity_2']+(df['num_of_player_preflop']-2)*df['BB_equity_3']
+    
+  df['actual_dealer_equity_flop'] = (df['num_player_flop']!=0)*((3-df['num_of_player_flop'])*df['dealer_equity_2_flop']+(df['num_of_player_flop']-2)*df['dealer_equity_3_flop'])
+  df['actual_SB_equity_flop'] = (df['num_player_flop']!=0)*((3-df['num_of_player_flop'])*df['SB_equity_2_flop']+(df['num_of_player_flop']-2)*df['SB_equity_3_flop'])
+  df['actual_BB_equity_flop'] = (df['num_player_flop']!=0)*((3-df['num_of_player_flop'])*df['BB_equity_2_flop']+(df['num_of_player_flop']-2)*df['BB_equity_3_flop'])
+  
+  df['actual_dealer_equity_turn'] = (df['num_player_turn']!=0)*((3-df['num_of_player_turn'])*df['dealer_equity_2_turn']+(df['num_of_player_turn']-2)*df['dealer_equity_3_turn'])
+  df['actual_SB_equity_turn'] = (df['num_player_turn']!=0)*((3-df['num_of_player_turn'])*df['SB_equity_2_turn']+(df['num_of_player_turn']-2)*df['SB_equity_3_turn'])
+  df['actual_BB_equity_turn'] = (df['num_player_turn']!=0)*((3-df['num_of_player_turn'])*df['BB_equity_2_turn']+(df['num_of_player_turn']-2)*df['BB_equity_3_turn'])
+
+  df['actual_dealer_equity_river'] = (df['num_player_river']!=0)*((3-df['num_of_player_river'])*df['dealer_equity_2_river']+(df['num_of_player_river']-2)*df['dealer_equity_3_river'])
+  df['actual_SB_equity_river'] = (df['num_player_river']!=0)*((3-df['num_of_player_river'])*df['SB_equity_2_river']+(df['num_of_player_river']-2)*df['SB_equity_3_river'])
+  df['actual_BB_equity_river'] = (df['num_player_river']!=0)*((3-df['num_of_player_river'])*df['BB_equity_2_river']+(df['num_of_player_river']-2)*df['BB_equity_3_river'])
+  
+  
+  
   #preflop(df, LOGPATH)
-  
-  
+
   
 def preflop(df, LogPath):
   Filename = "Preflop Analysis.csv"
