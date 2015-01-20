@@ -141,7 +141,6 @@ cdef class Node(object):
     return start_index
 
   def load_regret(self, data_):
-    self.initialize_regret()
     cdef np.ndarray[double, ndim=1] data
     cdef double* data_ptr
     if isinstance(data_, basestring):
