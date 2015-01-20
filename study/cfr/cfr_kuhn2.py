@@ -28,13 +28,13 @@ root = cfr_cy2.RoundNode(3, 2, 1, 1)
 root.initialize_regret()
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
-for i in range(1000000):
+for i in range(1000):
   util_sb = util_bb = 0.0
   for sb, bb, _ in itertools.permutations([0,1,2]):
     seq1[3] = seq1[4] = sb
     seq2[3] = seq2[4] = bb
     root.run_cfr(seq1, seq2)
-    if i%1000 == 0:      
+    if 1:   
       util_sb_, util_bb_ = root.compute_util(seq1, seq2)
       util_sb += util_sb_
       util_bb += util_bb_
@@ -46,25 +46,25 @@ print 'bb: sb raise          ', normalize(root.child_nodes[0].child_nodes[1].ave
 print 'sb: sb check, bb raise', normalize(root.child_nodes[0].child_nodes[0].child_nodes[1].average_prob[0:6])
 
 # random cards
-root = cfr_cy2.RoundNode(3, 2, 1, 1)
-root.initialize_regret()
-seq1 = np.array([0, 0, 0, 0, 0])
-seq2 = np.array([0, 0, 0, 0, 0])
-for i in range(1000000):
-  sb, bb = np.random.choice(3, 2, replace=False)
-  seq1[3] = seq1[4] = sb
-  seq2[3] = seq2[4] = bb
-  root.run_cfr(seq1, seq2)
-  if i%1000 == 999:
-    util_sb = util_bb = 0.0
-    for sb, bb, _ in itertools.permutations([0,1,2]):
-      seq1[3] = seq1[4] = sb
-      seq2[3] = seq2[4] = bb
-      util_sb_, util_bb_ = root.compute_util(seq1, seq2)
-      util_sb += util_sb_
-      util_bb += util_bb_
-    print i, util_sb/6, util_bb/6
-print 'sb: root              ', normalize(root.child_nodes[0].average_prob[0:6])
-print 'bb: sb check          ', normalize(root.child_nodes[0].child_nodes[0].average_prob[0:6])
-print 'bb: sb raise          ', normalize(root.child_nodes[0].child_nodes[1].average_prob[0:6])
-print 'sb: sb check, bb raise', normalize(root.child_nodes[0].child_nodes[0].child_nodes[1].average_prob[0:6])
+#root = cfr_cy2.RoundNode(3, 2, 1, 1)
+#root.initialize_regret()
+#seq1 = np.array([0, 0, 0, 0, 0])
+#seq2 = np.array([0, 0, 0, 0, 0])
+#for i in range(100):
+#  sb, bb = np.random.choice(3, 2, replace=False)
+#  seq1[3] = seq1[4] = sb
+#  seq2[3] = seq2[4] = bb
+#  root.run_cfr(seq1, seq2)
+#  if i%1000 == 999:
+#    util_sb = util_bb = 0.0
+#    for sb, bb, _ in itertools.permutations([0,1,2]):
+#      seq1[3] = seq1[4] = sb
+#      seq2[3] = seq2[4] = bb
+#      util_sb_, util_bb_ = root.compute_util(seq1, seq2)
+#      util_sb += util_sb_
+#      util_bb += util_bb_
+#    print i, util_sb/6, util_bb/6
+#print 'sb: root              ', normalize(root.child_nodes[0].average_prob[0:6])
+#print 'bb: sb check          ', normalize(root.child_nodes[0].child_nodes[0].average_prob[0:6])
+#print 'bb: sb raise          ', normalize(root.child_nodes[0].child_nodes[1].average_prob[0:6])
+#print 'sb: sb check, bb raise', normalize(root.child_nodes[0].child_nodes[0].child_nodes[1].average_prob[0:6])
