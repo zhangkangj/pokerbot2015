@@ -265,6 +265,7 @@ cdef class PlayerNode(Node):
     bint is_sb
     double* regret_ptr
     float* average_prob_ptr
+    int pot_size
     int raise_amount
     int t
 
@@ -432,7 +433,10 @@ cdef class PlayerNode(Node):
       node = <Node> self.child_nodes[i]
       start_index = node.load_prob_(data, start_index)
     return start_index
-
+  def get_raise_amount(self):
+    return self.raise_amount
+  def get_pot_size(self):
+    return self.pot_size
 
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
@@ -454,6 +458,10 @@ cdef class RaiseNode(PlayerNode):
       stack = stack_bb
       call_amount = amount_sb - amount_bb
       bb_delta = call_amount
+    
+    #the pot size if the oppnent calls, use with caution
+    self.pot_size = pot_size + amount_sb + amount_bb + call_amount
+    
     if stack <= call_amount:
       self.spawn_showdown_node(pot_size+amount_sb+amount_bb+call_amount)
     else:
@@ -509,6 +517,7 @@ cdef class CheckNode(PlayerNode):
     # assert pot_size + stack_sb + stack_bb + amount_sb + amount_bb == TOTAL_STACK, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     # assert pot_size >= 0 and stack_sb >= 0 and stack_bb >= 0 and amount_sb >= 0 and amount_bb >= 0, (self, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
     super(CheckNode, self).__init__(is_sb, num_round)
+    self.pot_size = pot_size + amount_sb + amount_bb  
     # player checks
     if is_sb:
       self.spawn_check_node(not is_sb, pot_size, stack_sb, stack_bb, amount_sb, amount_bb)
