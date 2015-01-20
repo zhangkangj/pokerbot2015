@@ -14,24 +14,17 @@ from lib.evaluator import evaluator_cy, evaluator
 from lib import util
 import multiprocessing
 
-def normalize(array):
-  array = np.clip(array, 0, np.inf) + 1e-10
-  coeff = np.empty(array.size)
-  coeff[0::3] = array[::3] + array[1::3] + array[2::3]
-  coeff[1::3] = coeff[0::3]
-  coeff[2::3] = coeff[0::3]
-  return array/coeff
-
 
 def run_cfr(index):
-  root = cfr_cy2.RoundNode(0, 0, 300, 300)
+  root = cfr_cy2.RoundNode(0, 0, 4, 4)
   root.initialize_regret()
   seq1 = np.array([0, 0, 0, 0, 0])
   seq2 = np.array([0, 0, 0, 0, 0])
-  for i in range(1,10000):
-    mc1, mc2, oc1, oc2, bc1, bc2, bc3, bc4, bc5 = np.random.choice(52, 9, replace=True)
+  util_sb = util_bb = 0
+  for i in range(1,100):
+    mc1, mc2, oc1, oc2, bc1, bc2, bc3, bc4, bc5 = np.random.choice(52, 9, replace=False)
     seq1[0] = evaluator_cy.preflop_idx(mc1, mc2)
-    seq2[0] = evaluator_cy.preflop_idx(bc1, bc2)
+    seq2[0] = evaluator_cy.preflop_idx(oc1, oc2)
     seq1[1], _, _  = evaluator.evaluate_flop(mc1, mc2, bc1, bc2, bc3)
     seq2[1], _, _  = evaluator.evaluate_flop(oc1, oc2, bc1, bc2, bc3)
     seq1[2], _, _  = evaluator.evaluate_turn(mc1, mc2, bc1, bc2, bc3, bc4)
@@ -45,9 +38,8 @@ def run_cfr(index):
     util_bb += util_bb_
     if i%100 == 0:
       print i, util_sb/i, util_bb/i
-  root.dump_regret('dat/regret_300' + str(i))
-  root.dump_prob('dat/prob_300' + str(i))
-  result = np.reshape(normalize(root.child_nodes[0].average_prob[:507]), (169,3))
+  root.dump_regret('dat/regret_300_' + str(i))
+  root.dump_prob('dat/prob_300_' + str(i))
 
 thread_pool = multiprocessing.Pool(5)
 result = thread_pool.map(run_cfr, [1, 2, 3])

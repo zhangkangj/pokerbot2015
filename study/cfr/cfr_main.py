@@ -75,7 +75,7 @@ for i in range(51):
 
 
 
-root = cfr_cy2.RoundNode(0, 0, 4, 4)
+root = cfr_cy2.RoundNode(0, 0, 30, 30)
 root.initialize_regret()
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
