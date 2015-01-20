@@ -129,7 +129,7 @@ cdef class Node(object):
     result_ptr = <double*> result.data
     self.dump_regret_(result_ptr, start_index=0, test=False)
     if filename is not None:
-      np.save(filename, result.astype(np.float16))
+      np.save(filename, result)
     return result
 
   cdef int dump_regret_(self, double* result, int start_index, bint test):
@@ -166,7 +166,7 @@ cdef class Node(object):
     result_ptr = <float*> result.data
     self.dump_prob_(result_ptr, start_index=0, test=False)
     if filename is not None:
-      np.save(filename, result.astype(np.float16))
+      np.save(filename, result)
     return result
     
   cdef int dump_prob_(self, float* result, int start_index, bint test):
