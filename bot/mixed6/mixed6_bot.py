@@ -8,13 +8,13 @@ Created on Mon Jan 12 12:58:46 2015
 from .. import base_bot
 from lib.evaluator import evaluator
 
-class Mixed4Bot(base_bot.BaseBot):
+class Mixed6Bot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
     board_card_str = ''.join(self.player.board_cards)
     card_str = hole_card_str+':xx'*(self.player.num_active_player-1)
-    equity = evaluator.evaluate(card_str, board_card_str, '', 100)
+    equity = evaluator.evaluate(card_str, board_card_str, '', 300)
     can_raise = False
     can_bet = False
     can_call = False
@@ -22,7 +22,7 @@ class Mixed4Bot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(Mixed4Bot, self).action(equity, can_raise, can_bet, can_call)
+    return super(Mixed6Bot, self).action(equity, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
@@ -477,6 +477,7 @@ class Mixed4Bot(base_bot.BaseBot):
     top_card_band_factor = 1
 
     top_strategy_idx = self.random_select_from_list([2,3,5])
+
     result = self.action_get_top_strategy(equity, can_raise, can_bet, can_call, top_card_band_factor, top_strategy_idx)
 
     print "--- exit top_card_turn(), result: " + result
@@ -499,6 +500,11 @@ class Mixed4Bot(base_bot.BaseBot):
   def flop(self, equity, can_raise, can_bet, can_call):
     #debug
     print "--- enter flop(), equity: " + str(equity)
+
+
+    # maximum percentage we should discount the equity for opponent observing result
+    max_discount_factor_for_opponent = 0.1
+    equity = self.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
     #result = 'CHECK'
     # min_to_bet_lower = 0.4
@@ -532,6 +538,10 @@ class Mixed4Bot(base_bot.BaseBot):
     #debug
     print "--- enter turn(), equity: " + str(equity)
 
+    # maximum percentage we should discount the equity for opponent observing result
+    max_discount_factor_for_opponent = 0.2
+    equity = self.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)    
+
     #result = 'CHECK'
     min_to_bet = 0.5
     min_to_bet_1 = 0.7
@@ -555,10 +565,13 @@ class Mixed4Bot(base_bot.BaseBot):
     return result
 
   def river(self, equity, can_raise, can_bet, can_call):
-
-
     #debug
     print "--- enter river(), equity: " + str(equity)
+
+    # maximum percentage we should discount the equity for opponent observing result
+    max_discount_factor_for_opponent = 0.3
+    equity = self.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
+
 
     min_to_bet = 0.5
     min_to_bet_1 = 0.7
@@ -589,3 +602,16 @@ class Mixed4Bot(base_bot.BaseBot):
     else:
       print 'ERROR: equity: ', equity, ' is out of legal range - river()'
     return result
+ 
+  def discount_equity_for_opponent(self, original_equity, max_discount_factor=0):
+    #debug
+    print "-------------discount_equity_for_opponent(), original_equity: " + str(original_equity) + ", active_players: " + str(self.player.active_players)
+    opponent_equity_discount = self.player.eval_opponents() * max_discount_factor
+    #debug
+    print "-------------discount_equity_for_opponent(), opponent_equity_discount: " + str(opponent_equity_discount) + ", original equity:" + str(original_equity)
+    discounted_equity = (1-opponent_equity_discount) * original_equity
+    #debug
+    print "-------------discount_equity_for_opponent(), oppo discounted equity:" + str(discounted_equity)
+    return discounted_equity
+
+
