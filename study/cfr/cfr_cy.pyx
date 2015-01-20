@@ -104,7 +104,9 @@ cdef class Node(object):
       float* util_bb_ptr = <float*> util_bb.data
       int* bucket_seq_sb_ptr = <int*> bucket_seq_sb.data
       int* bucket_seq_bb_ptr = <int*> bucket_seq_bb.data
+   # print 'bucket sb', bucket_seq_sb_ptr[0]
     self.transit(1, 1, util_sb_ptr, util_bb_ptr, bucket_seq_sb_ptr, bucket_seq_bb_ptr)
+    #print util_sb[0], util_bb[0]
     return util_sb[0], util_bb[0]
         
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
@@ -149,6 +151,14 @@ cdef class Node(object):
     return start_index
 
 
+  def test_find_node(self, child_seq):
+    cdef Node node = <Node> self
+    for i in child_seq:
+      assert i < node.num_child
+      node = <Node> node.child_nodes[i]
+    return node
+    
+  
 cdef class RoundNode(Node):
   cdef:
     int preflop_amount_sb, preflop_amount_bb
@@ -206,9 +216,11 @@ cdef class RoundNode(Node):
 
 cdef class PlayerNode(Node):
   cpdef public regret
+  cpdef public average_prob
   cdef:
     bint is_sb
     float* regret_ptr
+    float* average_prob_ptr
     int raise_amount
 
   def __init__(self, bint is_sb, int num_round):
@@ -220,13 +232,16 @@ cdef class PlayerNode(Node):
     # super(PlayerNode, self).initialize()
     cdef:
       np.ndarray[float, ndim=1] regret_ = np.zeros(self.num_card_bucket*self.num_child, dtype=np.float32)
+      np.ndarray[float, ndim=1] average_prob_ = np.zeros(self.num_card_bucket*self.num_child, dtype=np.float32)
     self.regret = regret_
-    self.regret_ptr = <float*> regret_.data     
+    self.average_prob = average_prob_
+    self.regret_ptr = <float*> regret_.data 
+    self.average_prob_ptr = <float*> average_prob_.data    
 
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
-    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))  
-    cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))  
+    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))
+    cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef float* util_bb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef int node_bucket, i
     cdef Node node
@@ -236,7 +251,7 @@ cdef class PlayerNode(Node):
     #traverse tree to compute utilities of child nodes
     if self.is_sb:
       node_bucket = bucket_seq_sb[self.num_round]
-      self.compute_prob(act_prob, node_bucket*self.num_child)
+      self.compute_prob(act_prob, node_bucket*self.num_child, p_sb)
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
         node.transit(p_sb * act_prob[i], p_bb, 
@@ -247,10 +262,20 @@ cdef class PlayerNode(Node):
         util_bb[0] += act_prob[i] * util_bb_child[i]
     #compute new regrets
       for i in range(0, self.num_child):
+#        print 'round and child number',self.num_round, self.num_child
+#        print 'regret before',self.regret_ptr[node_bucket * self.num_child + i]
         self.regret_ptr[node_bucket * self.num_child + i] += p_bb * (util_sb_child[i] - util_sb[0])
+#        print 'node bucket', node_bucket
+#        print 'p_bb', p_bb
+#        print 'util:', util_sb_child[i] , util_sb[0]
+#        print 'node in regret array', node_bucket * self.num_child + i
+#        print 'regret after',self.regret_ptr[node_bucket * self.num_child + i]
+#        print
+
+        
     else:
       node_bucket = bucket_seq_bb[self.num_round]
-      self.compute_prob(act_prob, node_bucket*self.num_child)
+      self.compute_prob(act_prob, node_bucket*self.num_child, p_bb)
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
         node.transit(p_sb, p_bb * act_prob[i], 
@@ -267,7 +292,7 @@ cdef class PlayerNode(Node):
     free(util_bb_child)
     #print 'player node', p_sb, p_bb, util_sb[0], util_bb[0]
     
-  cdef void compute_prob(self, float* result, int node_bucket_times_num_child):
+  cdef void compute_prob(self, float* result, int node_bucket_times_num_child, weight):
     cdef float sum_regret_plus = 0
     cdef int i
     for i in range(0, self.num_child):
@@ -279,6 +304,35 @@ cdef class PlayerNode(Node):
     else:
       for i in range(0, self.num_child):
         result[i] = 1./self.num_child
+    for i in range(0, self.num_child):
+      self.average_prob_ptr[node_bucket_times_num_child + i] += weight * result[i]
+
+  def test_find_regret(self, bucket_seq = None):
+    reg_tmp = []
+    if bucket_seq == None:
+      for i in range(0, self.num_card_bucket * self.num_child):
+        reg_tmp.append(self.regret_ptr[i])
+    else:
+      for i in range(0,self.num_child):
+        reg_tmp.append(self.regret_ptr[bucket_seq[self.num_round] * self.num_child + i])
+    return reg_tmp
+ 
+
+#don't use this function for now, it calls compute_prob and changes average_prob     
+  def test_find_prob(self, bucket_seq = None):
+    prob_tmp = []
+    cdef float* act_prob = <float*> malloc(self.num_child * sizeof(float))  
+    if bucket_seq == None:
+      for i in range(0, self.num_card_bucket):    
+        self.compute_prob(act_prob, i * self.num_child,0)
+        for j in range(0, self.num_child):
+          prob_tmp.append(act_prob[j])
+    else:
+      self.compute_prob(act_prob, bucket_seq[self.num_round] * self.num_child,0)    
+      for i in range(0,self.num_child):
+        prob_tmp.append(act_prob[i])
+    free(act_prob)
+    return prob_tmp
 
   cdef int dump_(self, float* result, int start_index, bint test):
     cdef Node node

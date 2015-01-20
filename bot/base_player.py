@@ -155,6 +155,9 @@ class BasePlayer(object):
     index = index + 1
     self.last_actions = parts[index:(index+self.num_last_action)]
     
+    
+    
+    last_actions_tmp = []
     for last_action in self.last_actions:
       tempstr = last_action.split(':')
       if len(tempstr) == 2 and ('DEAL' not in last_action): # check or fold, not Deal
@@ -166,8 +169,9 @@ class BasePlayer(object):
         continue
       else:
         print "Error: Last Action parsing wrong"
-
+      
       # Update Opponents with last action str
+      last_actions_tmp.append((tempstr[-1],tempstr[0],lastelm))
       self.UpdateOpponents(self.action_state,tempstr)
 
       if self.action_state == 'PREFLOP': 
@@ -180,7 +184,7 @@ class BasePlayer(object):
         self.last_actions_river.append((tempstr[-1],tempstr[0],lastelm));
       else:
         print "Error: action_state wrong"
-
+    self.last_actions = last_actions_tmp
     index = index + self.num_last_action
     self.num_legal_action = int(parts[index])
     index = index + 1
