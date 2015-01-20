@@ -255,7 +255,7 @@ cdef class RoundNode(Node):
       Node node = <Node> self.child_nodes[0]
     node.compute_util_(p_sb, p_bb, util_sb, util_bb, bucket_seq_sb, bucket_seq_bb)
 
-  def get_node_type():
+  def get_node_type(self):
     return 'RoundNode'
 
 
@@ -364,7 +364,7 @@ cdef class PlayerNode(Node):
     util_bb[0] = 0
     if self.is_sb:
       node_bucket = bucket_seq_sb[self.num_round]
-     act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
+      act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
       for i in range(self.num_child):
         total_prob += act_prob[i]
       for i in range(0, self.num_child):
@@ -374,7 +374,7 @@ cdef class PlayerNode(Node):
                           util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
     else:
       node_bucket = bucket_seq_bb[self.num_round]
-     act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
+      act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
       for i in range(self.num_child):
         total_prob += act_prob[i]
       for i in range(0, self.num_child):
@@ -499,7 +499,7 @@ cdef class RaiseNode(PlayerNode):
         check_count += d        
     return total_count, round_count, raise_count, check_count
 
-  def get_node_type():
+  def get_node_type(self):
     return 'RaiseNode'
 
 
@@ -546,7 +546,8 @@ cdef class CheckNode(PlayerNode):
         raise_count += c
         check_count += d        
     return total_count, round_count, raise_count, check_count
-  def get_node_type():
+
+  def get_node_type(self):
     return 'CheckNode'
 
 cdef class FoldNode(Node):
