@@ -122,16 +122,16 @@ cdef class Node(object):
                           int* bucket_seq_sb, int* bucket_seq_bb):
     pass  
   def dump_regret(self, filename=None):
-    cdef np.ndarray[float, ndim=1] result = np.zeros(1, dtype=np.float64)
+    cdef np.ndarray[double, ndim=1] result = np.zeros(1, dtype=np.float64)
     cdef double* result_ptr = <double*> result.data
     cdef int n = self.dump_regret_(result_ptr, start_index=0, test=True)
-    result = np.zeros(n, dtype=np.float32)
+    result = np.zeros(n, dtype=np.float64)
     result_ptr = <double*> result.data
     self.dump_regret_(result_ptr, start_index=0, test=False)
     if filename is not None:
       np.save(filename, result.astype(np.float16))
     return result
-    
+
   cdef int dump_regret_(self, double* result, int start_index, bint test):
     cdef Node node
     cdef int i
@@ -195,13 +195,6 @@ cdef class Node(object):
       node = <Node> self.child_nodes[i]
       start_index = node.load_prob_(data, start_index)
     return start_index
-
-  def test_find_node(self, child_seq):
-    cdef Node node = <Node> self
-    for i in child_seq:
-      assert i < node.num_child
-      node = <Node> node.child_nodes[i]
-    return node
     
   
 cdef class RoundNode(Node):
@@ -261,8 +254,10 @@ cdef class RoundNode(Node):
     cdef:
       Node node = <Node> self.child_nodes[0]
     node.compute_util_(p_sb, p_bb, util_sb, util_bb, bucket_seq_sb, bucket_seq_bb)
+
   def get_node_type():
     return 'RoundNode'
+
 
 cdef class PlayerNode(Node):
   cpdef public regret
@@ -390,36 +385,8 @@ cdef class PlayerNode(Node):
     for i in range(0, self.num_child):
       util_sb[0] += act_prob[i] / total_prob * util_sb_child[i]
       util_bb[0] += act_prob[i] / total_prob * util_bb_child[i]
-    #print self.is_sb, util_sb[0], util_bb[0], self
     free(util_sb_child)
     free(util_bb_child)
-
-
-  def test_find_regret(self, bucket_seq = None):
-    reg_tmp = []
-    if bucket_seq == None:
-      for i in range(0, self.num_card_bucket * self.num_child):
-        reg_tmp.append(self.regret_ptr[i])
-    else:
-      for i in range(0,self.num_child):
-        reg_tmp.append(self.regret_ptr[bucket_seq[self.num_round] * self.num_child + i])
-    return reg_tmp
- 
-#don't use this function for now, it calls compute_prob and changes average_prob     
-  def test_find_prob(self, bucket_seq = None):
-    prob_tmp = []
-    cdef double* act_prob = <double*> malloc(self.num_child * sizeof(double))
-    if bucket_seq == None:
-      for i in range(0, self.num_card_bucket):    
-        self.compute_prob(act_prob, i * self.num_child,0)
-        for j in range(0, self.num_child):
-          prob_tmp.append(act_prob[j])
-    else:
-      self.compute_prob(act_prob, bucket_seq[self.num_round] * self.num_child,0)
-      for i in range(0,self.num_child):
-        prob_tmp.append(act_prob[i])
-    free(act_prob)
-    return prob_tmp
 
   cdef int dump_regret_(self, double* result, int start_index, bint test):
     cdef Node node
@@ -531,8 +498,10 @@ cdef class RaiseNode(PlayerNode):
         raise_count += c
         check_count += d        
     return total_count, round_count, raise_count, check_count
+
   def get_node_type():
     return 'RaiseNode'
+
 
 cdef class CheckNode(PlayerNode):
 
