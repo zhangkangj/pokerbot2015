@@ -59,6 +59,7 @@ class Base_nashBot(base_bot.BaseBot):
         self.last_round_pot_size += 2 * self.last_raise_amount
         self.last_raise_amount = 0
       elif action[1] == 'RAISE' or action[1] == 'BET':
+        print self.current_node.get_node_type(), 'should be raise or check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'       
         raise_amount = action[2] - self.last_raise_amount
         #compute the ratio of this bet/raise, bug!
         raise_ratio = raise_amount * 1. / (self.last_round_pot_size + 2 * self.last_raise_amount)
@@ -73,6 +74,8 @@ class Base_nashBot(base_bot.BaseBot):
           index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
           self.current_node = self.current_node.child_nodes[index + 1]
         elif self.current_node.get_node_type() == 'RaiseNode':
+  #        print action[2], self.last_raise_amount, self.current_node.get_num_child()
+          
           if self.current_node.get_num_child() == 2:
             #if there are only 2 child nodes, it means in the tree there are no raise nodes, only fold and call node
             if self.current_node.child_nodes[1].get_node_type() == 'ShowdownNode':
@@ -99,7 +102,13 @@ class Base_nashBot(base_bot.BaseBot):
           print 'wrong node type'
           return 'CHECK'
     #finished evolving nodes, choose action next
+    #situation 0:
+    if self.current_node.get_node_type() == 'ShowdownNode':
+      return self.all_in(can_raise,can_bet,can_call)    
     bucket = self.get_bucket()
+    
+    print self.current_node.get_node_type(), 'node type yooooooooo', bucket, 'bucket yooooo'
+    print self.player.last_actions
     prob = self.current_node.get_act_prob(bucket)
     #draw random number from uniform(0,1), then choose the corresponding node
     r = np.random.uniform(0,1)
@@ -110,9 +119,10 @@ class Base_nashBot(base_bot.BaseBot):
         index = i
         break
     #chose index as the next action, find call_amount in legal action for later use
-    call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])              
+
     #situation 1:   
     if not can_raise and not can_bet:
+      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])              
       #if can't bet, we should be able to fold-call-raise. If can't raise at the same time. it means the call option means all-in, which means the hand will end after this decision anyway
       if index == 0:
         return 'FOLD'
@@ -122,6 +132,7 @@ class Base_nashBot(base_bot.BaseBot):
     raise_amount_min = int([action for action in self.player.legal_actions if ('RAISE' in action or 'BET' in action)][0].split(':')[1])
     raise_amount_max = int([action for action in self.player.legal_actions if ('RAISE' in action or 'BET' in action)][0].split(':')[2])    
     tree_pot_size = self.current_node.get_pot_size()    
+    print self.current_node.get_node_type(), 'action node yoooooooooooooo',index
     is_check_node = (self.current_node.get_node_type() == 'CheckNode')
     self.current_node = self.current_node.child_nodes[index]
     #situation 2
@@ -132,9 +143,18 @@ class Base_nashBot(base_bot.BaseBot):
         tree_raise_ratio = self.current_node.get_raise_amount() / tree_pot_size
         raise_amount_propose = int(tree_raise_ratio * self.player.pot_size)
         raise_amount_final = min(raise_amount_max, max(raise_amount_min, raise_amount_propose))
-        return 'BET:' + str(raise_amount_final)
+        print 'bet yooooo:', str(raise_amount_final)
+        self.last_raise_amount = raise_amount_final        
+        if can_raise:
+          return 'RAISE:' + str(raise_amount_final)
+        elif can_bet:
+          return 'BET:' + str(raise_amount_final)
+        else:
+          assert 0
+          return 'CHECK'
     #situation 3
     else:
+      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])              
       #if not a check node, it has to be a raise node
       if index == 0:
         return 'FOLD'
@@ -145,6 +165,7 @@ class Base_nashBot(base_bot.BaseBot):
         #bug, don't know how to get pot_size if call.
         raise_amount_propose = int(tree_raise_ratio * (self.last_round_pot_size + call_amount * 2)) + call_amount
         raise_amount_final = min(raise_amount_max, max(raise_amount_min, raise_amount_propose))
+        self.last_raise_amount = raise_amount_final
         return 'RAISE:' + str(raise_amount_final)          
     return super(Base_nashBot, self).action(0, can_raise, can_bet, can_call)
             
@@ -160,6 +181,7 @@ class Base_nashBot(base_bot.BaseBot):
     elif self.player.num_board_card == 4:
       bc1, bc2, bc3, bc4 = util.c2n(self.player.board_cards)      
       bucket, _, _  = evaluator.evaluate_turn(mc1, mc2, bc1, bc2, bc3, bc4)
+      return bucket
     else:
       assert self.player.num_board_card == 5
       bc1, bc2, bc3, bc4, bc5 = util.c2n(self.player.board_cards)      

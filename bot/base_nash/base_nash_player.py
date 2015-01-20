@@ -1,5 +1,5 @@
 from .. import base_player
-#import base_nash_bot
+import base_nash_bot
 
 import mixedoppnew_bot
 
@@ -10,9 +10,10 @@ import fold_bot
 
 class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
-	super(Base_nashPlayer, self).__init__()
-	self.current_bot = mixedoppnew_bot.MixedoppnewBot(self) ## by defalt it uses mixed_opp_new
-	self.current_bot_type = 'MIXED'
+    super(Base_nashPlayer, self).__init__()
+    self.current_bot = mixedoppnew_bot.MixedoppnewBot(self) ## by defalt it uses mixed_opp_new
+    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, ' ')
+    self.current_bot_type = 'MIXED'
 
 
   def new_game(self, parts):
@@ -22,7 +23,7 @@ class Base_nashPlayer(base_player.BasePlayer):
   def new_hand(self, parts):
     super(Base_nashPlayer, self).new_hand(parts);
     if self.num_active_player == 2 and (self.current_bot_type != 'NASH'):
-    	self.current_bot = fold_bot.FoldBot(self)
+    	self.current_bot = self.nash_bot1
     	#self.current_bot = base_nash_bot.Base_nashBot(self, 100, ' ')
     	self.current_bot_type = 'NASH'
     	print 'Now change to nash bot for new hand'

@@ -166,6 +166,7 @@ class BasePlayer(object):
         lastelm = int(tempstr[1]);
       elif 'DEAL' in last_action:
         self.action_state = tempstr[-1]
+        last_actions_tmp.append((tempstr[-1], tempstr[0], None))
         continue
       else:
         print "Error: Last Action parsing wrong"
