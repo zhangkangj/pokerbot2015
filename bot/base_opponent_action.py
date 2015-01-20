@@ -16,7 +16,7 @@ class BaseOpponentAction(object):
 		self.opponent = opponent
 
 	def Action_update(self,action_list):# action_list is
-		print "-----------##====> enter Action_update(): self.opponent.oppo_name:" + self.opponent.oppo_name + ", action_list:" + str(action_list) 
+#		print "-----------##====> enter Action_update(): self.opponent.oppo_name:" + self.opponent.oppo_name + ", action_list:" + str(action_list) 
 
 		if action_list[0] == 'POST':
 			action_amount = int(action_list[1])
@@ -48,11 +48,11 @@ class BaseOpponentAction(object):
 			# set the opponent to be inactive
 			self.opponent.is_active_in_hand = False
 			#debug
-			print "-----------##======> self.opponent.oppo_name:" + self.opponent.oppo_name + " folded, set self.opponent.is_active_in_hand:" + str(self.opponent.is_active_in_hand)
+#			print "-----------##======> self.opponent.oppo_name:" + self.opponent.oppo_name + " folded, set self.opponent.is_active_in_hand:" + str(self.opponent.is_active_in_hand)
 		else:
-			print "ACTION TYPE ERROR in BaseOpponentAction"
-
-		print "-----------##====> exit Action_update()...: self.opponent.oppo_name:" + self.opponent.oppo_name + ", action_list:" + str(action_list) 
+#			print "ACTION TYPE ERROR in BaseOpponentAction"
+			pass
+#		print "-----------##====> exit Action_update()...: self.opponent.oppo_name:" + self.opponent.oppo_name + ", action_list:" + str(action_list) 
 
 		self.action_count +=1
 

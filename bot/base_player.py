@@ -53,7 +53,7 @@ class BasePlayer(object):
 
   def create_opponents(self):
     #debug
-    print "-------------###--MixedoppnewPlayer.create_opponents()"    
+#    print "-------------###--MixedoppnewPlayer.create_opponents()"    
     self.opp1 = base_opponent.BaseOpponent(self.opp1_name, self);
     self.opp2 = base_opponent.BaseOpponent(self.opp2_name, self);
 
@@ -62,7 +62,7 @@ class BasePlayer(object):
 
   def new_hand(self, parts):
 
-    print "-------====>enter: new_hand()"
+#    print "-------====>enter: new_hand()"
 
     # self.opp1 = base_opponent.BaseOpponent(self.opp1_name);
     # self.opp2 = base_opponent.BaseOpponent(self.opp2_name);
@@ -108,38 +108,39 @@ class BasePlayer(object):
       elif self.player_names[i] == self.player_name:
         player_idx = i
       else: 
-        print "-------======>ERROR: self.player_names[" + str(i) + "]=" + str(self.player_names[i]) + " is not a valid name for player or opponents"
-    
+#        print "-------======>ERROR: self.player_names[" + str(i) + "]=" + str(self.player_names[i]) + " is not a valid name for player or opponents"
+        pass    
     self.opp1.is_active_in_game = bool(self.active_players[opp1_idx]) 
     self.opp1.stack_size_new_hand = int(self.stack_sizes[opp1_idx])
 
     self.opp2.is_active_in_game = bool(self.active_players[opp2_idx]) 
     self.opp2.stack_size_new_hand = int(self.stack_sizes[opp2_idx])   
 
-    print "-------======>self.opp1.oppo_name: " + str(self.opp1.oppo_name) + ", self.opp1.is_active_in_game:" + str(self.opp1.is_active_in_game) + ", self.opp1.stack_size_new_hand:" + str(self.opp1.stack_size_new_hand)
-    print "-------======>self.opp2.oppo_name: " + str(self.opp2.oppo_name) + ", self.opp2.is_active_in_game:" + str(self.opp1.is_active_in_game) + ", self.opp2.stack_size_new_hand:" + str(self.opp1.stack_size_new_hand)
+    # print "-------======>self.opp1.oppo_name: " + str(self.opp1.oppo_name) + ", self.opp1.is_active_in_game:" + str(self.opp1.is_active_in_game) + ", self.opp1.stack_size_new_hand:" + str(self.opp1.stack_size_new_hand)
+    # print "-------======>self.opp2.oppo_name: " + str(self.opp2.oppo_name) + ", self.opp2.is_active_in_game:" + str(self.opp1.is_active_in_game) + ", self.opp2.stack_size_new_hand:" + str(self.opp1.stack_size_new_hand)
 
-    print "-------====>exit: new_hand()..."
+    # print "-------====>exit: new_hand()..."
 
   def UpdateOpponents(self,action_state,one_action):
 
     #debug
-    print "-------======> enter UpdateOpponents(): action_state: " + str(action_state) + ", one_action: " + str(one_action)
+#    print "-------======> enter UpdateOpponents(): action_state: " + str(action_state) + ", one_action: " + str(one_action)
        
     if self.opp1.is_active_in_game and self.opp1.is_active_in_hand and (self.opp1_name in one_action[-1]):
-      print "-------========> action is for oppo1: " + self.opp1.oppo_name + ", one_action:" + str(one_action)
+#      print "-------========> action is for oppo1: " + self.opp1.oppo_name + ", one_action:" + str(one_action)
       self.opp1.Oppo_update(action_state,one_action[:-1]);
     elif self.opp2.is_active_in_game and self.opp2.is_active_in_hand and (self.opp2_name in one_action[-1]):
-      print "-------========> action is for oppo2: " + self.opp2.oppo_name + ", one_action:" + str(one_action)
+#      print "-------========> action is for oppo2: " + self.opp2.oppo_name + ", one_action:" + str(one_action)
       self.opp2.Oppo_update(action_state,one_action[:-1]);
     elif self.player_name in one_action[-1]:
-      print "-------========> action is for player, not opponent, one_action:" + str(one_action)
+#      print "-------========> action is for player, not opponent, one_action:" + str(one_action)
+      pass
     else:
-      print "-------========> ERROR: it is not possible to have both opponent (in-hand or in-game) inactive or if they are active, there is no action message for their last actions"
-
+#      print "-------========> ERROR: it is not possible to have both opponent (in-hand or in-game) inactive or if they are active, there is no action message for their last actions"
+      pass
   def action(self, parts):
     #debug
-    print "-------======> enter action(), parts:" + str(parts)
+#    print "-------======> enter action(), parts:" + str(parts)
     self.pot_size = int(parts[1])
     self.num_board_card = int(parts[2])
     self.board_cards = parts[3:(3+self.num_board_card)]
@@ -191,9 +192,9 @@ class BasePlayer(object):
     index = index + self.num_legal_action
     self.timebank = float(parts[index])
 
-    print '-----------stack_sizes:' + str(self.stack_sizes) + ', seat:' + str(self.seat)
+#    print '-----------stack_sizes:' + str(self.stack_sizes) + ', seat:' + str(self.seat)
     self.current_stacksize = int(self.stack_sizes[int(self.seat-1)])
-    print '-----------self.current_stacksize:' + str(self.current_stacksize)
+#    print '-----------self.current_stacksize:' + str(self.current_stacksize)
 
 
   def handover(self, parts):
