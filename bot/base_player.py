@@ -81,6 +81,7 @@ class BasePlayer(object):
     self.init_num_active_player = int(parts[11])
     self.init_active_players = [True if x == 'true' else False for x in parts[12:15]]
     self.num_active_player = self.init_num_active_player
+    self.num_active_player_dynamic = self.num_active_player;
     self.active_players = self.init_active_players
     self.init_timebank = float(parts[15])
     self.timebank = self.init_timebank
@@ -160,6 +161,12 @@ class BasePlayer(object):
     last_actions_tmp = []
     for last_action in self.last_actions:
       tempstr = last_action.split(':')
+      if 'FOLD' in last_action:
+        self.num_active_player_dynamic -=1;
+        self.inactive_name = tempstr[-1]
+        for tempname in [self.opp1_name,self.opp2_name]:
+          if tempname != self.inactive_name:
+            self.active_name = tempname
       if len(tempstr) == 2 and ('DEAL' not in last_action): # check or fold, not Deal
         lastelm = None;
       elif len(tempstr) == 3:
@@ -191,6 +198,7 @@ class BasePlayer(object):
     self.legal_actions = parts[index:(index+self.num_legal_action)]
     index = index + self.num_legal_action
     self.timebank = float(parts[index])
+    print 'self.num_active_player_dynamic: '+str(self.num_active_player_dynamic)
 
 #    print '-----------stack_sizes:' + str(self.stack_sizes) + ', seat:' + str(self.seat)
     self.current_stacksize = int(self.stack_sizes[int(self.seat-1)])
@@ -199,25 +207,6 @@ class BasePlayer(object):
 
   def handover(self, parts):
 
-    # print 'handover: self.last_actions_preflop:', self.last_actions_preflop;
-    # print 'handover: self.last_actions_flop:', self.last_actions_flop;
-    # print 'handover: self.last_actions_turn:', self.last_actions_turn;
-    # print 'handover: self.last_actions_river:', self.last_actions_river;
-
-    # print self.opponents[1].oppo_name
-    # for action in self.opponents[1].all_actions:
-    #   print 'handover: action.state:'+str(action.state) + "----------"
-    #   print 'handover: action.call_seqs:'+str(action.call_seqs)
-    #   print 'handover: action.call_amounts'+str(action.call_amounts)
-    #   print 'handover: action.raise_seqs'+str(action.raise_seqs)
-    #   print 'handover: action.raise_amounts'+str(action.raise_amounts)
-    #   print 'handover: action.bet_seqs'+str(action.bet_seqs)
-    #   print 'handover: action.bet_amounts'+str(action.bet_amounts)
-    #   print 'handover: action.post_seqs'+str(action.post_seqs)
-    #   print 'handover: action.post_amounts'+str(action.post_amounts)
-    #   print 'handover: action.check_seqs'+str(action.check_seqs)
-    #   print 'handover: handover: action.fold_seqs'+str(action.fold_seqs)
-    #   print 'handover: action.action_count'+str(action.action_count)
 
 
     self.stack_sizes = [int(x) for x in parts[1:4]]
