@@ -138,7 +138,7 @@ class Base_nashPlayer(base_player.BasePlayer):
           if self.last_actions_preflop_init[i][1] in ['RAISE','BET']:
             raiseflag = 1;
           elif raiseflag == 1 and self.last_actions_preflop_init[i][1] in ['CALL','CHECK']:
-            newtup = (self.last_actions_preflop_init[i][0],'RAISE',self.last_actions_preflop_init[i][2]+1);
+            newtup = (self.last_actions_preflop_init[i][0],'RAISE',max(0,self.last_actions_flop_init[i][2])+1);
             self.last_actions_preflop_init[i] = newtup;
             raiseflag = 0;
       if len(self.last_actions_flop_init) > 2 and self.last_actions_flop_init[-1][1] == 'CALL' and self.last_actions_flop_init[-2][1] == 'CALL':
@@ -149,7 +149,7 @@ class Base_nashPlayer(base_player.BasePlayer):
           if self.last_actions_flop_init[i][1] in ['RAISE','BET'] : 
             raiseflag = 1;
           elif raiseflag == 1 and self.last_actions_flop_init[i][1] in ['CALL','CHECK']:      
-            newtup = (self.last_actions_flop_init[i][0],'RAISE',self.last_actions_flop_init[i][2]+1);
+            newtup = (self.last_actions_flop_init[i][0],'RAISE',max(0,self.last_actions_flop_init[i][2])+1);
             self.last_actions_flop_init[i] = newtup;
             raiseflag = 0;
       if len(self.last_actions_turn_init) > 2 and self.last_actions_turn_init[-1][1] == 'CALL' and self.last_actions_turn_init[-2][1] == 'CALL':
@@ -160,7 +160,7 @@ class Base_nashPlayer(base_player.BasePlayer):
           if self.last_actions_turn_init[i][1] in ['RAISE','BET'] :
             raiseflag = 1;
           elif raiseflag == 1 and self.last_actions_turn_init[i][1] in ['CALL','CHECK']:
-            newtup = (self.last_actions_turn_init[i][0],'RAISE',self.last_actions_turn_init[i][2]+1);
+            newtup = (self.last_actions_turn_init[i][0],'RAISE',max(0,self.last_actions_flop_init[i][2])+1);
             self.last_actions_turn_init[i] = newtup;
             raiseflag = 0;
       if len(self.last_actions_river_init) > 2 and self.last_actions_river_init[-1][1] == 'CALL' and self.last_actions_river_init[-2][1] == 'CALL':
@@ -171,7 +171,7 @@ class Base_nashPlayer(base_player.BasePlayer):
           if self.last_actions_river_init[i][1] in ['RAISE','BET'] :
             raiseflag = 1;
           elif raiseflag == 1 and self.last_actions_river_init[i][1] in ['CALL','CHECK']:
-            newtup = (self.last_actions_river_init[i][0],'RAISE',self.last_actions_river_init[i][2]+1);
+            newtup = (self.last_actions_river_init[i][0],'RAISE',max(0,self.last_actions_flop_init[i][2])+1);
             self.last_actions_river_init[i] = newtup;
             raiseflag = 0;
 
