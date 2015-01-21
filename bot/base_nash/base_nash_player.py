@@ -152,9 +152,11 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'last_actions_turn_init:::' + str(self.last_actions_turn_init)
       print 'last_actions_river_init:::' + str(self.last_actions_river_init)
 
-      if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
-        self.current_bot = self.nash_bot1
-        self.current_bot_type = 'NASH'
+      if max(len(self.last_actions_preflop_init),len(self.last_actions_flop_init),len(self.last_actions_turn_init),len(self.last_actions_river_init)) < 7:
+        # max < 7 then can change bot
+        if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
+          self.current_bot = self.nash_bot1
+          self.current_bot_type = 'NASH'
       
 
     	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################
