@@ -12,7 +12,7 @@ class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
     self.current_bot = mixedoppnew_bot.MixedoppnewBot(self) ## by defalt it uses mixed_opp_new
-    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, ' ')
+    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 300, '../../data/prob_300_total.npy')
  #   self.nash_bot1 = base_nash_bot.Base_nashBot(self)
     self.current_bot_type = 'MIXED'
 
@@ -146,10 +146,10 @@ class Base_nashPlayer(base_player.BasePlayer):
         print "Should be legal..."
         # delete redundant calls
 
-      self.last_actions_preflop_init = further_process_init(self.last_actions_preflop_init)
-      self.last_actions_flop_init = further_process_init(self.last_actions_flop_init)
-      self.last_actions_turn_init = further_process_init(self.last_actions_turn_init)
-      self.last_actions_river_init = further_process_init(self.last_actions_river_init)
+      self.last_actions_preflop_init = self.further_process_init(self.last_actions_preflop_init)
+      self.last_actions_flop_init = self.further_process_init(self.last_actions_flop_init)
+      self.last_actions_turn_init = self.further_process_init(self.last_actions_turn_init)
+      self.last_actions_river_init = self.further_process_init(self.last_actions_river_init)
 
 
       # if len(self.last_actions_preflop_init) > 2 and self.last_actions_preflop_init[-1][1] == 'CALL' and self.last_actions_preflop_init[-2][1] == 'CALL':

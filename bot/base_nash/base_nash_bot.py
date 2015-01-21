@@ -12,7 +12,7 @@ from lib import util
 import numpy as np
 from study.cfr import cfr_cy2
 
-
+import os
 
 class Base_nashBot(base_bot.BaseBot):
   
@@ -23,7 +23,7 @@ class Base_nashBot(base_bot.BaseBot):
     self.last_raise_amount = 0
     self.last_round_pot_size = 0
     #the stack and the data file should match! no check
-#    self.root.load_prob(data_)
+    self.root.load_prob(data_)
     self.current_node = self.root
   def action(self):
     can_raise = False
