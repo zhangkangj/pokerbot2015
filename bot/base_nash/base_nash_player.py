@@ -86,7 +86,7 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'last_actions_river_init:::' + str(self.last_actions_river_init)
 
       # if I am SB: I post 1, oppo1 posts2, oppo2 called/fold.
-      if self.last_actions_preflop[0][0] == self.player_name and self.last_actions_preflop_init[1][1] == 'POST':
+      if self.last_actions_preflop[0][0] == self.player_name and self.last_actions_preflop[2][1] in ['CALL','FOLD']:
         self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2)]+self.last_actions_preflop_init
@@ -148,8 +148,7 @@ class Base_nashPlayer(base_player.BasePlayer):
         for i in range(-1,-len(self.last_actions_flop_init)-1,-1):
           if self.last_actions_flop_init[i][1] == 'RAISE' or self.last_actions_flop_init[i][1] == 'BET':
             raiseflag = 1;
-          elif raiseflag == 1 and self.last_actions_flop_init[i][1] == 'CALL':
-
+          elif raiseflag == 1 and self.last_actions_flop_init[i][1] == 'CALL':        
             newtup = (self.last_actions_flop_init[i][0],'RAISE',self.last_actions_flop_init[i][2]+1);
             self.last_actions_flop_init[i] = newtup;
             raiseflag = 0;
