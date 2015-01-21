@@ -132,6 +132,13 @@ class Base_nashPlayer(base_player.BasePlayer):
         # delete redundant calls
       if len(self.last_actions_preflop_init) > 2 and self.last_actions_preflop_init[-1][1] == 'CALL' and self.last_actions_preflop_init[-2][1] == 'CALL':
         self.last_actions_preflop_init.pop()
+        raiseflag = 0;
+        for i in range(-1,-len(self.last_actions_preflop_init)-1,-1):
+          if self.last_actions_preflop_init[i][1] == 'RAISE':
+            raiseflag = 1;
+          elif raiseflag == 1 and self.last_actions_preflop_init[i][1] == 'CALL':
+            newtup = (self.last_actions_preflop_init[i][0],'RAISE',self.last_actions_preflop_init[i][2]+1);
+            self.last_actions_preflop_init[i] = newtup;
       if len(self.last_actions_flop_init) > 2 and self.last_actions_flop_init[-1][1] == 'CALL' and self.last_actions_flop_init[-2][1] == 'CALL':
         self.last_actions_flop_init.pop()
       if len(self.last_actions_turn_init) > 2 and self.last_actions_turn_init[-1][1] == 'CALL' and self.last_actions_turn_init[-2][1] == 'CALL':
@@ -152,11 +159,13 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'last_actions_turn_init:::' + str(self.last_actions_turn_init)
       print 'last_actions_river_init:::' + str(self.last_actions_river_init)
 
-      if max(len(self.last_actions_preflop_init),len(self.last_actions_flop_init),len(self.last_actions_turn_init),len(self.last_actions_river_init)) < 7:
-        # max < 7 then can change bot
-        if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
-          self.current_bot = self.nash_bot1
-          self.current_bot_type = 'NASH'
+      # if max(len(self.last_actions_preflop_init),len(self.last_actions_flop_init),len(self.last_actions_turn_init),len(self.last_actions_river_init)) < 7:
+      #   # max < 7 then can change bot
+      
+
+      if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
+        self.current_bot = self.nash_bot1
+        self.current_bot_type = 'NASH'
       
 
     	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################
