@@ -10,7 +10,11 @@ sqlite.db
 *~
 *.dump
 *.zip
-config.txt
+
+.gitignore
+
+
+/config.txt
 /pokerbot.sh
 
 /log
@@ -18,3 +22,5 @@ config.txt
 /data
 
 /backup
+
+/big_hand_data

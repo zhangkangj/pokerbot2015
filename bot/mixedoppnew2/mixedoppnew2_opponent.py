@@ -1,6 +1,6 @@
 from .. import base_opponent
 
-class MixedoppnewOpponent(base_opponent.BaseOpponent):
+class Mixedoppnew2Opponent(base_opponent.BaseOpponent):
 
   def eval_opponent(self):
     max_opp_eval_result = 1

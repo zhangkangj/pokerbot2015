@@ -11,7 +11,7 @@ from lib.evaluator import evaluator
 import bot_action_lib
 import top_play_lib
 
-class MixedoppnewBot(base_bot.BaseBot):
+class Mixedoppnew2Bot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
@@ -25,7 +25,7 @@ class MixedoppnewBot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(MixedoppnewBot, self).action(equity, can_raise, can_bet, can_call)
+    return super(Mixedoppnew2Bot, self).action(equity, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
@@ -48,7 +48,7 @@ class MixedoppnewBot(base_bot.BaseBot):
     preflop_raisehand_raise_limit = 20
     preflop_callhand_call_limit = 4
 
-    preflop_nogoodhand_call_limit = 4
+    preflop_nogoodhand_call_limit = 2
 
     if is_raise_hand:
         #debug
@@ -71,7 +71,6 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     return result
 
-
   def low_card(self, equity, can_raise, can_bet, can_call):
     #debug
     print "--------> enter low_card()"
@@ -91,7 +90,7 @@ class MixedoppnewBot(base_bot.BaseBot):
     print "--------> enter mid_card_river()"
 
     equity_band_factor = 1
-    call_limit = self.player.current_stacksize * 0.2
+    call_limit = self.player.current_stacksize * equity * 0.5
 
     # at river you know that for sure you only have a mid hand, play conservatively with lower call limit
     result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, call_limit)
@@ -114,7 +113,7 @@ class MixedoppnewBot(base_bot.BaseBot):
     #debug
     print "--------> enter mid_card()"
     equity_band_factor = 1
-    call_limit = self.player.current_stacksize * 0.4
+    call_limit = self.player.current_stacksize * equity * 1.0
 
     # call with a limit to leave room to improve
     result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, call_limit)
@@ -139,8 +138,12 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     equity_band_factor = 1
 
-    raise_limit = self.player.current_stacksize * 0.3
-    call_limit = self.player.current_stacksize * 0.6
+    # raise_limit = self.player.current_stacksize * 0.3
+    # call_limit = self.player.current_stacksize * 0.6
+
+    call_limit = None
+    # use a raise limit to reduce loss if we end up losing, given this is not the 'top' card spectrum 
+    raise_limit = self.player.current_stacksize * equity * 0.5
 
     result = bot_action_lib.BotActionLib.action_equity_raise_call(self.player, equity, can_raise, can_bet, can_call, equity_band_factor, raise_limit, call_limit)   
     
@@ -155,8 +158,12 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     equity_band_factor = 1
 
-    raise_limit = self.player.current_stacksize * 0.4
-    call_limit = self.player.current_stacksize * 0.8
+    # raise_limit = self.player.current_stacksize * 0.4
+    # call_limit = self.player.current_stacksize * 0.8
+
+    call_limit = None
+    # use a raise limit to reduce loss if we end up losing, given this is not the 'top' card spectrum 
+    raise_limit = self.player.current_stacksize * equity
 
     result = bot_action_lib.BotActionLib.action_equity_raise_call(self.player, equity, can_raise, can_bet, can_call, equity_band_factor, raise_limit, call_limit)   
     
@@ -180,7 +187,7 @@ class MixedoppnewBot(base_bot.BaseBot):
     equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
     #result = 'CHECK'
-    min_to_bet_mid = 0.5
+    min_to_bet_mid = 0.4
     min_to_bet_high = 0.7
     min_to_bet_top = 0.8
 
@@ -196,7 +203,7 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     if equity < min_to_bet_top:
         print "------> flop(), equity:" + str(equity) + " is less than top card equity, needs discount by observing opponents."
-        max_discount_factor_for_opponent = 0.1
+        max_discount_factor_for_opponent = 0.05
         equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
     else:
         print "------> flop(), equity:" + str(equity) + " is greater than top card equity, ignore opponents action."
@@ -207,7 +214,7 @@ class MixedoppnewBot(base_bot.BaseBot):
       result = self.low_card(equity, can_raise, can_bet, can_call)
     #--Mid Range
     elif equity >= min_to_bet_mid and equity < min_to_bet_high:
-      result = self.mid_card_river(equity, can_raise, can_bet, can_call)
+      result = self.mid_card(equity, can_raise, can_bet, can_call)
     #--High Range
     elif equity >= min_to_bet_high and equity <= min_to_bet_top:
       result = self.high_card(equity, can_raise, can_bet, can_call)
@@ -223,8 +230,8 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     #result = 'CHECK'
     min_to_bet_mid = 0.5
-    min_to_bet_high = 0.75
-    min_to_bet_top = 0.85
+    min_to_bet_high = 0.725
+    min_to_bet_top = 0.825
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4
@@ -238,7 +245,7 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     if equity < min_to_bet_top:
         print "------> turn(), equity:" + str(equity) + " is less than top card equity, needs discount by observing opponents."
-        max_discount_factor_for_opponent = 0.125
+        max_discount_factor_for_opponent = 0.75
         equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
     else:
         print "------> turn(), equity:" + str(equity) + " is greater than top card equity, ignore opponents action."
@@ -278,8 +285,8 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     #result = 'CHECK'
     min_to_bet_mid = 0.5
-    min_to_bet_high = 0.8
-    min_to_bet_top = 0.9
+    min_to_bet_high = 0.75
+    min_to_bet_top = 0.85
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4
@@ -293,7 +300,7 @@ class MixedoppnewBot(base_bot.BaseBot):
 
     if equity < min_to_bet_top:
         print "------> river(), equity:" + str(equity) + " is less than top card equity, needs discount by observing opponents."
-        max_discount_factor_for_opponent = 0.15
+        max_discount_factor_for_opponent = 0.1
         equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
     else:
         print "------> river(), equity:" + str(equity) + " is greater than top card equity, ignore opponents action."

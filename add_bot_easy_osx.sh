@@ -15,7 +15,7 @@ OSX_SED_EXTRA=".sed.bak"
 
 
 if [ $# != 2 ]; then 
-	echo "Usage: $0 <BOT_NAME> <BASE_BOT_COPY_FROM>"
+	echo "Usage: $0 <BOT_NAME> <BASE_BOT_DIR_NAME_COPY_FROM> ; e.g. $0 mybot mixed_fixed"
 	exit
 else
 	BOT_NAME_PREFIX="$(echo $1 | tr '[A-Z]' '[a-z]')"
