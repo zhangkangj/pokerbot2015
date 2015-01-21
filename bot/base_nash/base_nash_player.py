@@ -1,5 +1,5 @@
 from .. import base_player
-import base_nash_bot
+#import base_nash_bot
 
 import mixedoppnew_bot
 
@@ -12,7 +12,8 @@ class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
     self.current_bot = mixedoppnew_bot.MixedoppnewBot(self) ## by defalt it uses mixed_opp_new
-    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, ' ')
+#    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, ' ')
+    self.nash_bot1 = fold_bot.FoldBot(self)
     self.current_bot_type = 'MIXED'
 
 
@@ -69,7 +70,7 @@ class Base_nashPlayer(base_player.BasePlayer):
 
   def action(self,parts):
     super(Base_nashPlayer, self).action(parts);
-    if self.num_active_player_dynamic == 2 and (self.current_bot_type != 'NASH'):
+    if self.num_active_player_dynamic == 2 and self.action_state != 'PREFLOP' and (self.current_bot_type != 'NASH'):
       print 'Now change to nash bot for new action'
       print 'self.last_actions_preflop:'+str(self.last_actions_preflop);
       print 'self.last_actions_flop:', self.last_actions_flop;  
@@ -84,7 +85,7 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'last_actions_turn_init:::' + str(self.last_actions_turn_init)
       print 'last_actions_river_init:::' + str(self.last_actions_river_init)
 
-# if I am SB: I post 1, oppo1 posts2, oppo2 called/fold.
+      # if I am SB: I post 1, oppo1 posts2, oppo2 called/fold.
       if self.last_actions_preflop[0][0] == self.player_name and self.last_actions_preflop_init[1][1] == 'POST':
         pass
       # if I am SB: I post 1, oppo1 posts 2, oppo2 raised. then suppose I called and oppo raised
@@ -104,10 +105,9 @@ class Base_nashPlayer(base_player.BasePlayer):
         self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init = [(self.active_name,'POST',1) , (self.player_name,'POST',2)]+self.last_actions_preflop_init
         # I have to conclude the round. if last one is check. then oppo call and I check.
-        if self.last_actions_preflop_init[-1][1] == 'CHECK':
-          self.last_actions_preflop_init.pop(0)
-          tempnum = self.last_actions_preflop_init.pop(0)[-1]
-          self.last_actions_preflop_init = self.last_actions_preflop_init + [(self.active_name,'CALL',tempnum),(self.player_name,'CHECK',None)]
+        if self.last_actions_preflop[-1][1] == 'CHECK':
+          self.last_actions_preflop_init.pop()
+          self.last_actions_preflop_init = self.last_actions_preflop_init + [(self.active_name,'CALL',2),(self.player_name,'CHECK',None)]
           # if I am dealer and I raised. Then I am BB and SB called, and I raised
       elif self.last_actions_preflop[2][0] == self.player_name and self.last_actions_preflop[2][1] == 'RAISE':            
         self.last_actions_preflop_init.pop(0)
@@ -137,9 +137,9 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'last_actions_turn_init:::' + str(self.last_actions_turn_init)
       print 'last_actions_river_init:::' + str(self.last_actions_river_init)
 
-      if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
-        self.current_bot = self.nash_bot1
-        self.current_bot_type = 'NASH'
+#      if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
+      self.current_bot = self.nash_bot1
+      self.current_bot_type = 'NASH'
 
     	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################
     	#### INIT bot based on last_actions_init lists!!########

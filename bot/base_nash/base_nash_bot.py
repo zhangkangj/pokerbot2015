@@ -6,7 +6,8 @@ Created on Mon Jan 12 12:58:46 2015
 """
 
 from .. import base_bot
-from lib.evaluator import evaluator, evaluator_cy
+from lib.evaluator import evaluator
+# from lib.evaluator import evaluator_cy
 from lib import util
 import numpy as np
 from study.cfr import cfr_cy2
