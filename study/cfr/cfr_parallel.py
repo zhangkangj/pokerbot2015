@@ -22,12 +22,10 @@ REGRET_FILE = 'data/regret_300_total'
 PROB_FILE = 'data/prob_300_total'
 
 def run_cfr(index, initial_regret, initial_prob, num_iter, num_gen):
-  print 'creating root', num_gen, index
+  print 'creating root', num_gen, index, num_iter
   root = cfr_cy2.RoundNode(0, 0, STACK_SIZE, STACK_SIZE)
-  print 'created root', index, initial_regret, initial_prob
-  if initial_regret is None:
-    root.initialize_regret()
-  else:
+  root.initialize_regret()
+  if initial_regret is not None:
     root.load_regret(initial_regret)
   if initial_prob is not None:
     root.load_regret(initial_prob)
@@ -36,6 +34,7 @@ def run_cfr(index, initial_regret, initial_prob, num_iter, num_gen):
   util_sb = util_bb = 0
   print 'starting', index
   start_time = time.time()
+  np.random.seed((int(time.time()*1000000) * index)%429496729)
   for i in range(1, num_iter):
     mc1, mc2, oc1, oc2, bc1, bc2, bc3, bc4, bc5 = np.random.choice(52, 9, replace=False)
     seq1[0] = evaluator_cy.preflop_idx(mc1, mc2)
@@ -51,7 +50,7 @@ def run_cfr(index, initial_regret, initial_prob, num_iter, num_gen):
     util_sb_, util_bb_ = root.run_cfr(seq1, seq2)
     util_sb += util_sb_
     util_bb += util_bb_
-    if i%1000 == 0:
+    if i%100 == 0:
       print num_gen, index, i, time.time()-start_time, util_sb/i, util_bb/i
       start_time = time.time()
   root.dump_regret('data/regret_300_'+str(index))
@@ -89,10 +88,12 @@ else:
   total_regret = initial_regret
   total_prob = initial_prob
 
+print 'initialized'
+
 for j in range(1, 100):
   processes = []
   for i in range(NUM_THREAD):
-    p = multiprocessing.Process(target=run_cfr, args=(i, None, None, NUM_ITER, j))
+    p = multiprocessing.Process(target=run_cfr, args=(i, total_regret, total_prob, NUM_ITER, j))
     p.start()
     processes.append(p)
   for p in processes:
@@ -102,7 +103,7 @@ for j in range(1, 100):
   for i in range(1, NUM_THREAD):
     total_regret += np.load('data/regret_300_%s.npy'%i)
     total_prob   += np.load('data/prob_300_%s.npy'%i)
-  total_regret = total_regret * 0.5
-  total_prob   = total_prob   * 0.5
+  total_regret = total_regret * (i**0.5)
+  total_prob   = total_prob   * (i**0.5)
   np.save(REGRET_FILE, total_regret)
   np.save(PROB_FILE, total_prob)
