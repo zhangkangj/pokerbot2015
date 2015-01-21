@@ -96,6 +96,11 @@ class Base_nashPlayer(base_player.BasePlayer):
       elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[0][0] == self.player_name:
         self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2),(self.player_name,'CALL',2)] + self.last_actions_preflop_init
+        # if last one is check. was conclued by me. should concluded by him.
+        if self.last_actions_preflop[-1][1] == 'CHECK':
+          self.last_actions_preflop_init.pop()
+          self.last_actions_preflop_init.pop()
+          self.last_actions_preflop_init = self.last_actions_preflop_init.pop + [(self.active_name,'CHECK',None)]
         # if I am BB and dealer fold. nothing changed.
       elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[1][0] == self.player_name:
         pass
