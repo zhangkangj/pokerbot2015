@@ -89,10 +89,10 @@ class Base_nashPlayer(base_player.BasePlayer):
       if self.last_actions_preflop[0][0] == self.player_name and self.last_actions_preflop_init[1][1] == 'POST':
         self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init.pop(0)
-        last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2)]+last_actions_preflop_init
+        self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2)]+self.last_actions_preflop_init
         # if used to conclude by check and now conclude by me: should conclude by him
-        if last_actions_preflop_init[-1][0] == self.player_name and self.last_actions_preflop[-1][1] == 'CHECK':
-          last_actions_preflop_init = last_actions_preflop_init + [(self.active_name,'CHECK',None)]
+        if self.last_actions_preflop_init[-1][0] == self.player_name and self.last_actions_preflop[-1][1] == 'CHECK':
+          self.last_actions_preflop_init = self.last_actions_preflop_init + [(self.active_name,'CHECK',None)]
       # if I am SB: I post 1, oppo1 posts 2, oppo2 raised. then suppose I called and oppo raised
       elif self.last_actions_preflop[0][0] == self.player_name and self.last_actions_preflop_init[1][1] == 'RAISE':
         firstelm = self.last_actions_preflop_init.pop(0)
