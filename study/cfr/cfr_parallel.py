@@ -16,7 +16,7 @@ from lib.evaluator import evaluator_cy, evaluator
 from study.cfr import cfr_cy2
 
 NUM_THREAD = 4
-NUM_ITER = 3
+NUM_ITER = 5000
 STACK_SIZE = 300
 REGRET_FILE = 'data/regret_300_total' 
 PROB_FILE = 'data/prob_300_total'
@@ -90,7 +90,7 @@ else:
 
 print 'initialized'
 
-for j in range(1, 2):
+for j in range(1, 100):
   processes = []
   for i in range(NUM_THREAD):
     p = multiprocessing.Process(target=run_cfr, args=(i, total_regret, total_prob, NUM_ITER, j))
