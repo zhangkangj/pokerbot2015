@@ -110,7 +110,7 @@ class Base_nashPlayer(base_player.BasePlayer):
       elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[0][0] == self.player_name and self.last_actions_preflop_init[0][1] == 'RAISE': 
         self.last_actions_preflop_init.pop()
         self.last_actions_preflop_init.pop()
-        self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2)] + last_actions_preflop_init
+        self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2)] + self.last_actions_preflop_init
         # if I am BB and dealer fold. nothing changed.
       elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[1][0] == self.player_name:
         pass
@@ -132,6 +132,7 @@ class Base_nashPlayer(base_player.BasePlayer):
         # delete redundant calls
       if len(self.last_actions_preflop_init) > 2 and self.last_actions_preflop_init[-1][1] == 'CALL' and self.last_actions_preflop_init[-2][1] == 'CALL':
         self.last_actions_preflop_init.pop()
+      if len(self.last_actions_preflop_init) > 2:
         raiseflag = 0;
         for i in range(-1,-len(self.last_actions_preflop_init)-1,-1):
           if self.last_actions_preflop_init[i][1] == 'RAISE' or self.last_actions_preflop_init[i][1] == 'BET':
@@ -142,16 +143,19 @@ class Base_nashPlayer(base_player.BasePlayer):
             raiseflag = 0;
       if len(self.last_actions_flop_init) > 2 and self.last_actions_flop_init[-1][1] == 'CALL' and self.last_actions_flop_init[-2][1] == 'CALL':
         self.last_actions_flop_init.pop()
+      if len(self.last_actions_flop_init) > 2:
         raiseflag = 0;
         for i in range(-1,-len(self.last_actions_flop_init)-1,-1):
           if self.last_actions_flop_init[i][1] == 'RAISE' or self.last_actions_flop_init[i][1] == 'BET':
             raiseflag = 1;
           elif raiseflag == 1 and self.last_actions_flop_init[i][1] == 'CALL':
+
             newtup = (self.last_actions_flop_init[i][0],'RAISE',self.last_actions_flop_init[i][2]+1);
             self.last_actions_flop_init[i] = newtup;
             raiseflag = 0;
       if len(self.last_actions_turn_init) > 2 and self.last_actions_turn_init[-1][1] == 'CALL' and self.last_actions_turn_init[-2][1] == 'CALL':
         self.last_actions_turn_init.pop()
+      if len(self.last_actions_turn_init) > 2:
         raiseflag = 0;
         for i in range(-1,-len(self.last_actions_turn_init)-1,-1):
           if self.last_actions_turn_init[i][1] == 'RAISE' or self.last_actions_turn_init[i][1] == 'BET':
@@ -162,6 +166,7 @@ class Base_nashPlayer(base_player.BasePlayer):
             raiseflag = 0;
       if len(self.last_actions_river_init) > 2 and self.last_actions_river_init[-1][1] == 'CALL' and self.last_actions_river_init[-2][1] == 'CALL':
         self.last_actions_river_init.pop()
+      if len(self.last_actions_river_init) > 2 :
         raiseflag = 0;
         for i in range(-1,-len(self.last_actions_river_init)-1,-1):
           if self.last_actions_river_init[i][1] == 'RAISE' or self.last_actions_river_init[i][1] == 'BET':
