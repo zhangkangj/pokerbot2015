@@ -5,7 +5,7 @@ import mixedoppnew_bot
 
 import mixedoppnew_opponent
 
-import fold_bot
+import base_nash_bot
 
 
 class Base_nashPlayer(base_player.BasePlayer):
@@ -13,7 +13,7 @@ class Base_nashPlayer(base_player.BasePlayer):
     super(Base_nashPlayer, self).__init__()
     self.current_bot = mixedoppnew_bot.MixedoppnewBot(self) ## by defalt it uses mixed_opp_new
 #    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, ' ')
-    self.nash_bot1 = fold_bot.FoldBot(self)
+    self.nash_bot1 = base_nash_bot.Base_nashBot(self)
     self.current_bot_type = 'MIXED'
 
 
@@ -137,9 +137,10 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'last_actions_turn_init:::' + str(self.last_actions_turn_init)
       print 'last_actions_river_init:::' + str(self.last_actions_river_init)
 
-#      if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
-      self.current_bot = self.nash_bot1
-      self.current_bot_type = 'NASH'
+      if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
+        self.current_bot = self.nash_bot1
+        self.current_bot_type = 'NASH'
+      
 
     	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################
     	#### INIT bot based on last_actions_init lists!!########
