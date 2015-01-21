@@ -8,13 +8,13 @@ Created on Mon Jan 12 12:58:46 2015
 from .. import base_bot
 from lib.evaluator import evaluator
 
-class Mixed2Bot(base_bot.BaseBot):
+class Mixed6Bot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
     board_card_str = ''.join(self.player.board_cards)
     card_str = hole_card_str+':xx'*(self.player.num_active_player-1)
-    equity = evaluator.evaluate(card_str, board_card_str, '', 100)
+    equity = evaluator.evaluate(card_str, board_card_str, '', 300)
     can_raise = False
     can_bet = False
     can_call = False
@@ -22,7 +22,7 @@ class Mixed2Bot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(Mixed2Bot, self).action(equity, can_raise, can_bet, can_call)
+    return super(Mixed6Bot, self).action(equity, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
@@ -185,17 +185,17 @@ class Mixed2Bot(base_bot.BaseBot):
         if call_limit is not None:
             if call_amount <= call_limit:
                 #debug
-                print "----------############> enter <=" + "<call limit specified:>" + str(call_limit) + ", call, action_equity_call_fold()"
+                print "----------############> enter <=" + ", call limit specified:" + str(call_limit) + ", call, action_equity_call_fold()"
                 result = 'CALL:' + str(call_amount) 
                 print 'calling', call_amount
             else:
                 #debug
-                print "----------############> enter >" + "<call limit specified:>" + str(call_limit) + ", fold, action_equity_call_fold()"                        
+                print "----------############> enter >" + ", call limit specified:" + str(call_limit) + ", fold, action_equity_call_fold()"                        
                 result = 'FOLD'
                 print 'folding'
         else:
             #debug
-            print "----------############>" + "<call limit not specified:>, call, action_equity_call_fold()"
+            print "----------############>" + ", call limit not specified, call, action_equity_call_fold()"
             result = 'CALL:' + str(call_amount) 
             print 'calling', call_amount
     # Otherwise, we just fall back to default 'Check' 
@@ -222,7 +222,7 @@ class Mixed2Bot(base_bot.BaseBot):
     print "----------####> caculated bet/raise amount:" + str(calc_br_amount) + ", action_betraise_call_fold()"
     if betraise_limit is not None:
         #debug
-        print "----------######>" + "<betraise_limit specified:>" + str(betraise_limit) + ", will " + br_action + ", action_betraise_call_fold()"   
+        print "----------######>" + "betraise_limit specified:" + str(betraise_limit) + ", will " + br_action + ", action_betraise_call_fold()"   
         if br_legal_min >= betraise_limit:
             #debug
             print "----------#######>" + "br_legal_min:" + str(br_legal_min) + ">= betraise_limit: " + str(betraise_limit) + ", will fall back to call"
@@ -251,7 +251,7 @@ class Mixed2Bot(base_bot.BaseBot):
           
     else:
         #debug
-        print "----------######>" + "<betraise_limit not specified:>, will " + br_action + ", action_betraise_call_fold()"        
+        print "----------######>" + "betraise_limit not specified:, will " + br_action + ", action_betraise_call_fold()"        
         # if no limit specified, we bet normally
         actual_br_amount = calc_br_amount
         # extra guard for legal bet/raise
@@ -364,14 +364,15 @@ class Mixed2Bot(base_bot.BaseBot):
     return result
 
   def action_equity_mid(self, equity, can_raise, can_bet, can_call, band_factor):
-    poor_limit = self.player.game_init_stack_size * 0.75
+    # when the poor_limit is 0.5, almost play as good as Mixed
+    poor_limit = self.player.game_init_stack_size * 0.5
     average_limit = self.player.game_init_stack_size * 1.5
 
     #debug
     print "----- enter action_equity_mid"
     if self.player.current_stacksize < poor_limit:
         # when poor, risk less, but not too little
-        poor_call_limit = self.player.game_init_stack_size * 0.2
+        poor_call_limit = self.player.game_init_stack_size * 0.1
 
         #debug
         print "-----> enter action_equity_mid, poor: poor_call_limit:" + str(poor_call_limit)
@@ -406,6 +407,10 @@ class Mixed2Bot(base_bot.BaseBot):
     return result
 
   def low_card(self, equity, can_raise, can_bet, can_call):
+    # between low and mid, use this when we want to 
+    # raise small bet to built up the pot and more aggressively 
+    # 'open' the opportunity to potentially good card later
+
     #debug
     print "---- enter low_card()"
 
@@ -416,11 +421,22 @@ class Mixed2Bot(base_bot.BaseBot):
     # Otherwise, we just fall back to default 'Check' 
     return result
 
+  # def lower_card(self, equity, can_raise, can_bet, can_call):
+  #   #debug
+  #   print "---- enter lower_card()"
+
+  #   result = 'CHECK'
+  #   # If opponent bets, don't want to follow, have to fold
+  #   if can_call:
+  #     result = 'FOLD' 
+  #   # Otherwise, we just fall back to default 'Check' 
+  #   return result
+
   def mid_card(self, equity, can_raise, can_bet, can_call):
     #debug
     print "---- enter mid_card()"
 
-    mid_card_band_factor = 0.8
+    mid_card_band_factor = 1
     result = self.action_equity_mid(equity, can_raise, can_bet, can_call, mid_card_band_factor)
     return result
 
@@ -461,6 +477,7 @@ class Mixed2Bot(base_bot.BaseBot):
     top_card_band_factor = 1
 
     top_strategy_idx = self.random_select_from_list([2,3,5])
+
     result = self.action_get_top_strategy(equity, can_raise, can_bet, can_call, top_card_band_factor, top_strategy_idx)
 
     print "--- exit top_card_turn(), result: " + result
@@ -484,22 +501,33 @@ class Mixed2Bot(base_bot.BaseBot):
     #debug
     print "--- enter flop(), equity: " + str(equity)
 
+
+    # maximum percentage we should discount the equity for opponent observing result
+    max_discount_factor_for_opponent = 0.1
+    equity = self.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
+
     #result = 'CHECK'
-    min_to_bet = 0.5
-    min_to_bet_1 = 0.7
-    min_to_bet_2 = 0.8
+    # min_to_bet_lower = 0.4
+    min_to_bet_mid = 0.4
+    min_to_bet_high = 0.7
+    min_to_bet_top = 0.8
 
     #--Low range
-    if equity >= 0 and equity < min_to_bet: 
+    if equity >= 0 and equity < min_to_bet_mid: 
+    # if equity >= 0 and equity < min_to_bet_lower: 
+    # if equity >= 0 and equity < min_to_bet_lower: 
       result = self.low_card(equity, can_raise, can_bet, can_call)
+    # #--Lower range
+    # if equity >= min_to_bet_lower and equity < min_to_bet_mid: 
+    #   result = self.lower_card(equity, can_raise, can_bet, can_call)
     #--Mid Range
-    elif equity >= min_to_bet and equity < min_to_bet_1:
+    elif equity >= min_to_bet_mid and equity < min_to_bet_high:
       result = self.mid_card(equity, can_raise, can_bet, can_call)
     #--High Range
-    elif equity >= min_to_bet_1 and equity < min_to_bet_2:
+    elif equity >= min_to_bet_high and equity < min_to_bet_top:
       result = self.high_card(equity, can_raise, can_bet, can_call)  
     #--Top Range
-    elif equity >= min_to_bet_2 and equity <= 1.0:
+    elif equity >= min_to_bet_top and equity <= 1.0:
       result = self.top_card_flop(equity, can_raise, can_bet, can_call)
 
     else:
@@ -509,6 +537,10 @@ class Mixed2Bot(base_bot.BaseBot):
   def turn(self, equity, can_raise, can_bet, can_call):
     #debug
     print "--- enter turn(), equity: " + str(equity)
+
+    # maximum percentage we should discount the equity for opponent observing result
+    max_discount_factor_for_opponent = 0.2
+    equity = self.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)    
 
     #result = 'CHECK'
     min_to_bet = 0.5
@@ -535,6 +567,11 @@ class Mixed2Bot(base_bot.BaseBot):
   def river(self, equity, can_raise, can_bet, can_call):
     #debug
     print "--- enter river(), equity: " + str(equity)
+
+    # maximum percentage we should discount the equity for opponent observing result
+    max_discount_factor_for_opponent = 0.3
+    equity = self.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
+
 
     min_to_bet = 0.5
     min_to_bet_1 = 0.7
@@ -565,3 +602,16 @@ class Mixed2Bot(base_bot.BaseBot):
     else:
       print 'ERROR: equity: ', equity, ' is out of legal range - river()'
     return result
+ 
+  def discount_equity_for_opponent(self, original_equity, max_discount_factor=0):
+    #debug
+    print "-------------discount_equity_for_opponent(), original_equity: " + str(original_equity) + ", active_players: " + str(self.player.active_players)
+    opponent_equity_discount = self.player.eval_opponents() * max_discount_factor
+    #debug
+    print "-------------discount_equity_for_opponent(), opponent_equity_discount: " + str(opponent_equity_discount) + ", original equity:" + str(original_equity)
+    discounted_equity = (1-opponent_equity_discount) * original_equity
+    #debug
+    print "-------------discount_equity_for_opponent(), oppo discounted equity:" + str(discounted_equity)
+    return discounted_equity
+
+

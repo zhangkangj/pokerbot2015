@@ -8,7 +8,7 @@ Created on Mon Jan 12 12:58:46 2015
 from .. import base_bot
 from lib.evaluator import evaluator
 
-class MixedBot(base_bot.BaseBot):
+class MixednewBot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
@@ -22,7 +22,7 @@ class MixedBot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(MixedBot, self).action(equity*0.8, can_raise, can_bet, can_call)
+    return super(MixednewBot, self).action(equity*0.8, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
@@ -75,7 +75,7 @@ class MixedBot(base_bot.BaseBot):
     else:
         # if the pot_size is accumulated to too large, it means everyone is raising, we resort to call instead of raise, 
         # to break the potential loop of raising
-        if is_raise_hand or is_call_hand and can_call:
+        if (is_raise_hand or is_call_hand) and can_call:
             # only call this if we have a reasonable hand 
             call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
             result = 'CALL:' + str(call_amount)

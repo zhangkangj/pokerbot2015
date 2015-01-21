@@ -13,21 +13,15 @@ BOT_NAME_PREFIX=""
 OSX_SED_EXTRA=""
 #OSX_SED_EXTRA=".sed.bak"
 
-NAIVE_BOT_NAME_PREFIX="naive"
-NAIVE_BOT_NAME_PREFIX_UPPER="Naive"
-NAIVE_PY_FILE_PATH="./naive.py"
-NAIVE_BOT_PLAYER_DIR_PATH="./bot/naive" 
-NAIVE_BOT_PY_PATH="./bot/naive/naive_bot.py" 
-NAIVE_PLAYER_PY_PATH="./bot/naive/naive_player.py" 
-NAIVE_CONFIG_DIR_PATH="./config/naive" 
 
-if [ $# != 1 ]; then 
-	echo "Usage: $0 <BOT_NAME>"
+if [ $# != 2 ]; then 
+	echo "Usage: $0 <BOT_NAME> <BASE_BOT_DIR_NAME_COPY_FROM> ; e.g. $0 mybot mixed_fixed"
 	exit
 else
 	BOT_NAME_PREFIX="$(echo $1 | tr '[A-Z]' '[a-z]')"
+	NAIVE_BOT_NAME_PREFIX="$(echo $2 | tr '[A-Z]' '[a-z]')"
 	while true; do
-	    read -p "Use '$BOT_NAME_PREFIX' as name? <Y/N> " yn
+	    read -p "Use '$BOT_NAME_PREFIX' as name AND '$NAIVE_BOT_NAME_PREFIX' as base to build your bot player? <Y/N> " yn
 	    case $yn in
 		[Yy]* ) echo "start adding bot with name prefix '$BOT_NAME_PREFIX'..."; 
 			echo "";
@@ -37,6 +31,24 @@ else
 	    esac
 	done
 fi
+
+NAIVE_BOT_NAME_PREFIX_UPPER="$(tr '[:lower:]' '[:upper:]' <<< ${NAIVE_BOT_NAME_PREFIX:0:1})${NAIVE_BOT_NAME_PREFIX:1}"
+echo "NAIVE_BOT_NAME_PREFIX_UPPER=$NAIVE_BOT_NAME_PREFIX_UPPER"
+
+NAIVE_PY_FILE_PATH="./$NAIVE_BOT_NAME_PREFIX.py"
+echo "NAIVE_PY_FILE_PATH=$NAIVE_PY_FILE_PATH"
+
+NAIVE_BOT_PLAYER_DIR_PATH="./bot/$NAIVE_BOT_NAME_PREFIX" 
+echo "NAIVE_BOT_PLAYER_DIR_PATH=$NAIVE_BOT_PLAYER_DIR_PATH"
+
+NAIVE_BOT_PY_PATH="./bot/$NAIVE_BOT_NAME_PREFIX/"$NAIVE_BOT_NAME_PREFIX"_bot.py" 
+echo "NAIVE_BOT_PY_PATH=$NAIVE_BOT_PY_PATH"
+
+NAIVE_PLAYER_PY_PATH="./bot/$NAIVE_BOT_NAME_PREFIX/"$NAIVE_BOT_NAME_PREFIX"_player.py" 
+echo "NAIVE_PLAYER_PY_PATH=$NAIVE_PLAYER_PY_PATH"
+
+NAIVE_CONFIG_DIR_PATH="./config/$NAIVE_BOT_NAME_PREFIX" 
+echo "NAIVE_CONFIG_DIR_PATH=$NAIVE_CONFIG_DIR_PATH"
 
 # Change the first char to uppercase
 BOT_NAME_PREFIX_UPPER="$(tr '[:lower:]' '[:upper:]' <<< ${BOT_NAME_PREFIX:0:1})${BOT_NAME_PREFIX:1}"

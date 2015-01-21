@@ -8,7 +8,7 @@ Created on Mon Jan 12 12:58:46 2015
 from .. import base_bot
 from lib.evaluator import evaluator
 
-class MixedBot(base_bot.BaseBot):
+class Mixed_fixedBot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
@@ -22,7 +22,7 @@ class MixedBot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(MixedBot, self).action(equity*0.8, can_raise, can_bet, can_call)
+    return super(Mixed_fixedBot, self).action(equity*0.8, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
@@ -36,22 +36,49 @@ class MixedBot(base_bot.BaseBot):
     is_raise_hand = (temp_str1 in raise_hand_str or temp_str2 in raise_hand_str)
     is_call_hand = (suit_equal and (temp_str1 in call_hand_str or temp_str2 in call_hand_str))
 
+    #debug
+    print "----------look at the hole_cards: " + str(hole_card_str) 
+    print "----------FLAGS: is_raise_hand: " + str(is_raise_hand) + ", is_call_hand: " + str(is_call_hand) 
+    print "----------equity: " + str(equity)
+    print "----------curr pot_size: " + str(self.player.pot_size) 
+
     if self.player.pot_size <= 20:
+        #debug
+        print "---------- enter <=20"
+
         if is_raise_hand:
+            #debug
+            print "----------## enter is_raise_hand"
+
             if can_bet:
+                #debug
+                print "----------#### enter is_raise_hand, can_bet:"
+
                 result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]
                 print 'betting', result
-            elif can_raise:        
+            elif can_raise:    
+                #debug
+                print "----------#### enter is_raise_hand, can_raise:"
+
                 result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2]
                 print 'raising', result
             elif can_call:
+                #debug
+                print "----------#### enter is_raise_hand, can_call:"  
+
                 call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
                 result = 'CALL:' + str(call_amount)
                 print 'calling', result
             else:
                 print 'For a raise-able hand (<=20): cannot bet, raise, or call, legal_actions:[' + str(self.player.legal_actions) + '], will CHECK'
         elif is_call_hand:
+            #debug
+            print "----------## enter is_call_hand"
+              
             if can_call:
+                #debug
+                print "----------#### enter is_call_hand, can_call:" 
+
                 call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
                 if call_amount <= 10:
                     result = 'CALL:' + str(call_amount) 
@@ -62,31 +89,55 @@ class MixedBot(base_bot.BaseBot):
             else:
                 print 'For a call-able hand (<=20): cannot call, legal_actions:[' + str(self.player.legal_actions) + '], will CHECK'
         elif can_call:
-                # no good card, if the call_amount is small enough, continue
-                call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
-                if call_amount <= 4:
-                    result = 'CALL:' + str(call_amount) 
-                    print 'calling', call_amount
-                else:
-                    result = 'FOLD'
-                    print 'folding'
+            #debug
+            print "----------## enter can_call"
+          
+            # no good card, if the call_amount is small enough, continue
+            call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+            if call_amount <= 4:
+                # debug
+                print "----------#### enter call_amount <= 4"
+
+                result = 'CALL:' + str(call_amount) 
+                print 'calling', call_amount
+            else:
+                # debug
+                print "----------#### enter call_amount > 4"
+
+                result = 'FOLD'
+                print 'folding'
         else:
             print 'For a no good card hand (<=20): cannot call, legal_actions:[' + str(self.player.legal_actions) + '], will CHECK'
     else:
+        #debug
+        print "---------- enter >20"
+
         # if the pot_size is accumulated to too large, it means everyone is raising, we resort to call instead of raise, 
         # to break the potential loop of raising
-        if is_raise_hand or is_call_hand and can_call:
+        if (is_raise_hand or is_call_hand) and can_call:
+            #debug
+            print "----------## enter (is_raise_hand or is_call_hand) and can_call"
+
             # only call this if we have a reasonable hand 
             call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
             result = 'CALL:' + str(call_amount)
             print 'calling', result 
         elif can_call:
+            #debug
+            print "----------## enter can_call"
+
             # no good card, if the call_amount is small enough, continue
             call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
             if call_amount <= 4:
+                # debug
+                print "----------#### enter call_amount <= 4"
+                  
                 result = 'CALL:' + str(call_amount) 
                 print 'calling', call_amount
             else:
+                # debug
+                print "----------#### enter call_amount > 4"
+                 
                 result = 'FOLD'
                 print 'folding'
         else:
@@ -94,9 +145,15 @@ class MixedBot(base_bot.BaseBot):
     return result
 
   def action_equity(self, equity, can_raise, can_bet, can_call, band_factor):
+    #debug
+    print "----------> enter action_equity(), equity: " + str(equity) + ", band_factor:" + str(band_factor)
+
     result = 'CHECK'
     # Raise based on Equity
     if can_bet:
+     #debug
+     print "---------->## enter action_equity(), can_bet:" + str(band_factor)
+
      bet_legal_act = [action for action in self.player.legal_actions if 'BET' in action][0]
      bet_legal_min = int(bet_legal_act.split(':')[1])
      bet_legal_max = int(bet_legal_act.split(':')[2])
@@ -104,6 +161,9 @@ class MixedBot(base_bot.BaseBot):
      result = 'BET:' + str(bet_amount)
      print 'betting', bet_amount
     elif can_raise:
+     #debug
+     print "---------->## enter action_equity(), can_raise:" + str(band_factor)
+
      raise_legal_act = [action for action in self.player.legal_actions if 'RAISE' in action][0]
      raise_legal_min = int(raise_legal_act.split(':')[1])
      raise_legal_max = int(raise_legal_act.split(':')[2])
@@ -111,6 +171,9 @@ class MixedBot(base_bot.BaseBot):
      result = 'RAISE:' + str(raise_amount)
      print 'RAISE', raise_amount
     elif can_call:
+     #debug
+     print "---------->## enter action_equity(), can_call:" + str(band_factor)
+
      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
      result = 'CALL:' + str(call_amount)
      print 'calling', call_amount
@@ -118,6 +181,9 @@ class MixedBot(base_bot.BaseBot):
     return result
 
   def low_card(self, equity, can_raise, can_bet, can_call):
+    #debug
+    print "--------> enter low_card()"
+
     result = 'CHECK'
     # If opponent bets, don't want to follow, have to fold
     if can_call:
@@ -126,14 +192,23 @@ class MixedBot(base_bot.BaseBot):
     return result
 
   def mid_card(self, equity, can_raise, can_bet, can_call):
+    #debug
+    print "--------> enter mid_card()"
+
     result = self.action_equity(equity, can_raise, can_bet, can_call, 0.8);
     return result
 
   def high_card(self, equity, can_raise, can_bet, can_call):
+    #debug
+    print "--------> enter high_card()"
+
     result = self.action_equity(equity, can_raise, can_bet, can_call, 1);   
     return result 
 
   def flop(self, equity, can_raise, can_bet, can_call):
+    #debug
+    print "------> enter flop(), equity:" + str(equity)
+
     #result = 'CHECK'
     min_to_bet = 0.5
     min_to_bet_1 = 0.75
@@ -153,6 +228,9 @@ class MixedBot(base_bot.BaseBot):
     return result
 
   def turn(self, equity, can_raise, can_bet, can_call):
+    #debug
+    print "------> enter turn(), equity:" + str(equity)
+      
     #result = 'CHECK'
     min_to_bet = 0.5
     min_to_bet_1 = 0.75
@@ -172,6 +250,10 @@ class MixedBot(base_bot.BaseBot):
     return result
 
   def river(self, equity, can_raise, can_bet, can_call):
+
+    #debug
+    print "------> enter river(), equity:" + str(equity)
+
     #result = 'CHECK'
     min_to_bet = 0.5
     min_to_bet_1 = 0.75
