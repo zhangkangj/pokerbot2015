@@ -34,73 +34,18 @@ class Base_nashBot(base_bot.BaseBot):
       can_call |= 'CALL' in action
     #Max added the following code to do *
     for action in self.player.last_actions[1:]:
-      #don't parse the first last_action, which is my last action or post:1:XXX
-      #if we have reached a showdown node, we all in our opponents
-      if self.current_node.get_node_type() == 'ShowdownNode':
+      output = self.move_current_node(action)
+      if output == 'Showdown':
         return self.all_in(can_raise, can_bet, can_call)
-      elif action[1] == 'POST':
-        print self.current_node.get_node_type(), 'should be maybe roundnode'
-        self.current_node = self.root.child_nodes[0]
-        self.last_raise_amount = 2
-      elif action[1] == 'CALL':
-        print self.current_node.get_node_type(), 'should be raise ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
-        assert self.current_node.get_node_type() == 'RaiseNode'
-        self.current_node = self.current_node.child_nodes[1]
-        #unfinished
-      elif action[1] == 'CHECK':
-        print self.current_node.get_node_type(), 'should be check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
-        assert self.current_node.get_node_type() == 'CheckNode'
-        self.current_node = self.current_node.child_nodes[0]
-      elif action[1] == 'DEAL':
-        print self.current_node.get_node_type(), 'should be round ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
-        #check if it is a round node, if not something is wrong, just for dubug perposes
-        assert self.current_node.get_node_type() == 'RoundNode'
-        self.current_node = self.current_node.child_nodes[0]
-        self.last_round_pot_size += 2 * self.last_raise_amount
-        self.last_raise_amount = 0
-      elif action[1] == 'RAISE' or action[1] == 'BET':
-        print self.current_node.get_node_type(), 'should be raise or check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'       
-        raise_amount = action[2] - self.last_raise_amount
-        #compute the ratio of this bet/raise, bug!
-        raise_ratio = raise_amount * 1. / (self.last_round_pot_size + 2 * self.last_raise_amount)
-        self.last_raise_amount = action[2]
-        if self.current_node.get_node_type() == 'CheckNode':
-          #if there are raise nodes, find the most similar one
-          tree_pot_size = self.current_node.get_pot_size()
-          tree_raise_ratios = []
-          print self.current_node.get_node_type(), 'current node type'
-          for i in range(1,self.current_node.get_num_child()):
-            tree_raise_ratios.append(self.current_node.child_nodes[i].get_raise_amount() / tree_pot_size)
-          index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
-          self.current_node = self.current_node.child_nodes[index + 1]
-        elif self.current_node.get_node_type() == 'RaiseNode':
-  #        print action[2], self.last_raise_amount, self.current_node.get_num_child()
-          
-          if self.current_node.get_num_child() == 2:
-            #if there are only 2 child nodes, it means in the tree there are no raise nodes, only fold and call node
-            if self.current_node.child_nodes[1].get_node_type() == 'ShowdownNode':
-              #if the call node is a showdown node, it means in the tree we have all_ined, then move to the showndown node, and all in.
-              self.current_node = self.current_node.child_nodes[1]
-            elif self.current_node.child_nodes[1].get_node_type() == 'RoundNode':
-              #if the call node is a round node, it means it has reached the three bets limit in the tree, but the opponent 4 bets, we call and go to the next round node
-              self.current_node = self.current_node.child_nodes[1]              
-              call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])              
-              return 'CALL:' + str(call_amount)
-            else:
-              print 'error'
-              assert 0
-              return 'CHECK'
-          else:
-            #if there are raise nodes, find the most similar one
-            tree_pot_size = self.current_node.get_pot_size()
-            tree_raise_ratios = []
-            for i in range(2,self.current_node.get_num_child()):
-              tree_raise_ratios.append(self.current_node.get_raise_amount() / tree_pot_size)
-            index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
-            self.current_node = self.current_node.child_nodes[index + 2]
-        else:
-          print 'wrong node type'
-          return 'CHECK'
+      elif output == 'Call4bet':
+        call_amount = int([action1 for action1 in self.player.legal_actions if 'CALL' in action1][0].split(':')[1])              
+        return 'CALL:' + str(call_amount)
+      elif output == 'Normal':
+        pass
+      else:
+        print 'impossible output'
+        assert 0
+        
     #finished evolving nodes, choose action next
     #situation 0:
     if self.current_node.get_node_type() == 'ShowdownNode':
@@ -213,7 +158,91 @@ class Base_nashBot(base_bot.BaseBot):
       print 'something is wrong!!!For a raise-able hand: cannot bet, raise, or call, legal_actions:[' + str(self.player.legal_actions) + '], will CHECK'
       result = 'CHECK'
     return result  
-    
+  ##################################################################################### 
+  def move_current_node(self, action):
+    #Max added the following code to do *
+    #if we have reached a showdown node, we all in our opponents
+    if self.current_node.get_node_type() == 'ShowdownNode':
+      return 'Showdown'
+    elif action[1] == 'POST':
+      print self.current_node.get_node_type(), 'should be maybe roundnode'
+      self.current_node = self.root.child_nodes[0]
+      self.last_raise_amount = 2
+    elif action[1] == 'CALL':
+      print self.current_node.get_node_type(), 'should be raise ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
+      assert self.current_node.get_node_type() == 'RaiseNode'
+      self.current_node = self.current_node.child_nodes[1]
+      #unfinished
+    elif action[1] == 'CHECK':
+      print self.current_node.get_node_type(), 'should be check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
+      assert self.current_node.get_node_type() == 'CheckNode'
+      self.current_node = self.current_node.child_nodes[0]
+    elif action[1] == 'DEAL':
+      print self.current_node.get_node_type(), 'should be round ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
+      #check if it is a round node, if not something is wrong, just for dubug perposes
+      assert self.current_node.get_node_type() == 'RoundNode'
+      self.current_node = self.current_node.child_nodes[0]
+      self.last_round_pot_size += 2 * self.last_raise_amount
+      self.last_raise_amount = 0
+    elif action[1] == 'RAISE' or action[1] == 'BET':
+      print self.current_node.get_node_type(), 'should be raise or check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'       
+      raise_amount = action[2] - self.last_raise_amount
+      #compute the ratio of this bet/raise, bug!
+      raise_ratio = raise_amount * 1. / (self.last_round_pot_size + 2 * self.last_raise_amount)
+      self.last_raise_amount = action[2]
+      if self.current_node.get_node_type() == 'CheckNode':
+        #if there are raise nodes, find the most similar one
+        tree_pot_size = self.current_node.get_pot_size()
+        tree_raise_ratios = []
+        print self.current_node.get_node_type(), 'current node type'
+        for i in range(1,self.current_node.get_num_child()):
+          tree_raise_ratios.append(self.current_node.child_nodes[i].get_raise_amount() / tree_pot_size)
+        index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
+        self.current_node = self.current_node.child_nodes[index + 1]
+      elif self.current_node.get_node_type() == 'RaiseNode':
+#        print action[2], self.last_raise_amount, self.current_node.get_num_child()      
+        if self.current_node.get_num_child() == 2:
+          #if there are only 2 child nodes, it means in the tree there are no raise nodes, only fold and call node
+          if self.current_node.child_nodes[1].get_node_type() == 'ShowdownNode':
+            #if the call node is a showdown node, it means in the tree we have all_ined, then move to the showndown node, and all in.
+            self.current_node = self.current_node.child_nodes[1]
+          elif self.current_node.child_nodes[1].get_node_type() == 'RoundNode':
+            #if the call node is a round node, it means it has reached the three bets limit in the tree, but the opponent 4 bets, we call and go to the next round node
+            self.current_node = self.current_node.child_nodes[1]              
+            return 'Call4bet'
+          else:
+            print 'error'
+            assert 0
+            return 'Error'
+        else:
+          #if there are raise nodes, find the most similar one
+          tree_pot_size = self.current_node.get_pot_size()
+          tree_raise_ratios = []
+          for i in range(2,self.current_node.get_num_child()):
+            tree_raise_ratios.append(self.current_node.get_raise_amount() / tree_pot_size)
+          index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
+          self.current_node = self.current_node.child_nodes[index + 2]
+      else:
+        print 'wrong node type, should be checknode or raisenode'
+        assert 0
+        return 'Error'
+    else:
+      print 'wrong action type'
+      assert 0
+      return 'Error'
+    return 'Normal'  
+#####################################################################
+
+  def initialize_from_beginning(self, action_seq):
+    for action in action_seq:
+      output = self.move_current_node(action)
+      if not (output == 'Normal'):
+        return False
+    if self.current_node.get_node_type() == 'ShowdownNode':
+      return False
+    else:
+      return True
+      
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
     if can_call:
