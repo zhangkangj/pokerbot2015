@@ -98,7 +98,7 @@ class Base_nashPlayer(base_player.BasePlayer):
         firstelm = self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init = [firstelm , (self.active_name,'POST',2) , (self.player_name,'CALL',2)] + self.last_actions_preflop_init
         # if I am BB and SB fold. I change to SB.I post1, oppo post 2, i called. then whatever.
-      elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[0][0] == self.player_name:
+      elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[0][0] == self.player_name and self.last_actions_preflop_init[0][1] == 'CALL':
         self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2),(self.player_name,'CALL',2)] + self.last_actions_preflop_init
         # if last one is check. was conclued by me. should concluded by him.
@@ -106,6 +106,11 @@ class Base_nashPlayer(base_player.BasePlayer):
           self.last_actions_preflop_init.pop()
           self.last_actions_preflop_init.pop()
           self.last_actions_preflop_init = self.last_actions_preflop_init + [(self.active_name,'CHECK',None)]
+       # if I am BB and SB fold, and I raised. I change to SB. i post 1, BB post 2, I raise
+      elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[0][0] == self.player_name and self.last_actions_preflop_init[0][1] == 'RAISE': 
+        self.last_actions_preflop_init.pop()
+        self.last_actions_preflop_init.pop()
+        self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2)] + last_actions_preflop_init
         # if I am BB and dealer fold. nothing changed.
       elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[1][0] == self.player_name:
         pass
