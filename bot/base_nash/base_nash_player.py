@@ -49,6 +49,10 @@ class Base_nashPlayer(base_player.BasePlayer):
   			modstate = 0;
   			newtup = (act[0],'RAISE',act[-1])
   			modified_acts.append(newtup)
+      elif (act[0] == self.player_name) and (modstate == 1):
+        modstate = 0;
+        newtup = (act[0],'RAISE',act[-1]);
+        modified_acts.append(newtup)
   		elif act[0] == inactive_name:
   			if ('RAISE' not in act[1]) and ('BET' not in act[1]):
   				pass
