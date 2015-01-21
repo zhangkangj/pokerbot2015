@@ -40,36 +40,36 @@ class Base_nashPlayer(base_player.BasePlayer):
 
 
   def prepare_last_actions(self,active_name,inactive_name,last_acts):
-  	modified_acts = [];
-  	modstate=0
-  	for act in last_acts:
-  		if (act[0] != inactive_name) and (modstate == 0):
-  			modified_acts.append(act);
-  		elif (act[0] == active_name) and (modstate == 1):
-  			modstate = 0;
-  			newtup = (act[0],'RAISE',act[-1])
-  			modified_acts.append(newtup)
+    modified_acts = [];
+    modstate=0
+    for act in last_acts:
+      if (act[0] != inactive_name) and (modstate == 0):
+        modified_acts.append(act);
+      elif (act[0] == active_name) and (modstate == 1):
+        modstate = 0;
+        newtup = (act[0],'RAISE',act[-1])
+        modified_acts.append(newtup)
       elif (act[0] == self.player_name) and (modstate == 1):
         modstate = 0;
         newtup = (act[0],'RAISE',act[-1]);
         modified_acts.append(newtup)
-  		elif act[0] == inactive_name:
-  			if ('RAISE' not in act[1]) and ('BET' not in act[1]):
-  				pass
-  			else:
-  				if len(modified_acts) == 0:
-  					modstate = 1;
-  				else:
-  					lastelm = modified_acts.pop()
-  					if lastelm[0] == active_name:
-  						newtup = (lastelm[0],'RAISE',act[-1])
-  						modified_acts.append(newtup)
-  					else:
-  						modstate = 1
-  						modified_acts.append(lastelm)
-  		else:
-  			print 'ERROR in mapping 3->2 in base_nash_player'
-  	return modified_acts
+      elif act[0] == inactive_name:
+        if ('RAISE' not in act[1]) and ('BET' not in act[1]):
+          pass
+        else:
+          if len(modified_acts) == 0:
+            modstate = 1;
+          else:
+            lastelm = modified_acts.pop()
+            if lastelm[0] == active_name:
+              newtup = (lastelm[0],'RAISE',act[-1])
+              modified_acts.append(newtup)
+            else:
+              modstate = 1
+              modified_acts.append(lastelm)
+      else:
+        print 'ERROR in mapping 3->2 in base_nash_player'
+    return modified_acts
 
   def further_process_init(self,last_actions_xxx_init):
     # cannot end with two calls
@@ -218,7 +218,7 @@ class Base_nashPlayer(base_player.BasePlayer):
       #   # max < 7 then can change bot
       
 
-      if self.nash_bot1.initialize_from_beginning(action_seq) and 0:
+      if self.nash_bot1.initialize_from_beginning(action_seq):
         self.current_bot = self.nash_bot1
         self.current_bot_type = 'NASH'
       
