@@ -12,8 +12,8 @@ class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
     self.current_bot = mixedoppnew_bot.MixedoppnewBot(self) ## by defalt it uses mixed_opp_new
-#    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, ' ')
-    self.nash_bot1 = base_nash_bot.Base_nashBot(self)
+    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, ' ')
+ #   self.nash_bot1 = base_nash_bot.Base_nashBot(self)
     self.current_bot_type = 'MIXED'
 
 
