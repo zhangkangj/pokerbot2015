@@ -11,16 +11,13 @@ from lib.evaluator import evaluator
 import bot_action_lib
 import top_play_lib
 
-class Mixedoppnew2Bot(base_bot.BaseBot):
+class Mixedoppnew4Bot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
     board_card_str = ''.join(self.player.board_cards)
     card_str = hole_card_str+':xx'*(self.player.num_active_player-1)
     equity = evaluator.evaluate(card_str, board_card_str, '', 300)
-
-    print "--##--Evaluate cards: hole_cards:" + card_str + ", board_cards:" + board_card_str + ", calcuated equity:" + str(equity)
-
     can_raise = False
     can_bet = False
     can_call = False
@@ -28,44 +25,56 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(Mixedoppnew2Bot, self).action(equity, can_raise, can_bet, can_call)
+    return super(Mixedoppnew4Bot, self).action(equity, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
     raise_hand_str = ['AA','KK','QQ','JJ','TT','AK','AQ','AJ','AT','KQ']
-    call_hand_str = ['QJ','JT','T9','98','87']
+    suited_call_hand_str = ['QJ','JT','T9','98','87']
+    low_call_hand_str = ['KJ','QJ','JT','99','88','77']
+    very_low_call_hand_str = ['QT', 'Q9', '66', '55']
+
     hole_card_str = ''.join(self.player.hole_cards)
     temp_str1 = hole_card_str[0]+hole_card_str[2]
     temp_str2 = hole_card_str[2]+hole_card_str[0]
     suit_equal = hole_card_str[1] == hole_card_str[3]
     
     is_raise_hand = (temp_str1 in raise_hand_str or temp_str2 in raise_hand_str)
-    is_call_hand = (suit_equal and (temp_str1 in call_hand_str or temp_str2 in call_hand_str))
+    is_suited_call_hand = (suit_equal and (temp_str1 in suited_call_hand_str or temp_str2 in suited_call_hand_str))
+    is_low_call_hand = (temp_str1 in low_call_hand_str or temp_str2 in low_call_hand_str)
+    is_very_low_call_hand = (temp_str1 in very_low_call_hand_str or temp_str2 in very_low_call_hand_str)
 
     #debug
     print "----------look at the hole_cards: " + str(hole_card_str) 
-    print "----------FLAGS: is_raise_hand: " + str(is_raise_hand) + ", is_call_hand: " + str(is_call_hand) 
+    print "----------FLAGS: is_raise_hand: " + str(is_raise_hand) + ", is_suited_call_hand: " + str(is_suited_call_hand) + ", is_low_call_hand" + str(is_low_call_hand)
     print "----------equity: " + str(equity)
     print "----------curr pot_size: " + str(self.player.pot_size) 
 
     preflop_raisehand_raise_limit = 20
-    preflop_callhand_call_limit = 4
-
+    preflop_suitedcallhand_call_limit = 4
+    preflop_lowcallhand_call_limit = 2
+    preflop_verylowcallhand_call_limit = 2
     preflop_nogoodhand_call_limit = 2
 
     if is_raise_hand:
         #debug
-        print "----------## enter is_raise_hand, max raise, no call limit"
-
+        print "----------## enter is_raise_hand, max raise, no call preflop_raisehand_raise_limit:" + str(preflop_raisehand_raise_limit)
         result = bot_action_lib.BotActionLib.action_equity_raise_call_max(self.player, equity, can_raise, can_bet, can_call, 1, preflop_raisehand_raise_limit, None)  
-    elif is_call_hand:
+    elif is_suited_call_hand:
         #debug
-        print "----------## enter is_can_hand, call with limit"
-      
-        result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, preflop_callhand_call_limit)       
+        print "----------## enter is_suited_call_hand, call with preflop_suitedcallhand_call_limit:" + str(preflop_suitedcallhand_call_limit)
+        result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, preflop_suitedcallhand_call_limit)       
+    elif is_low_call_hand:
+        #debug
+        print "----------## enter is_low_call_hand, call with preflop_lowcallhand_call_limit:" + str(preflop_lowcallhand_call_limit)
+        result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, preflop_lowcallhand_call_limit)
+    elif is_very_low_call_hand:
+        #debug
+        print "----------## enter is_very_low_call_hand, call with preflop_lowcallhand_call_limit:" + str(preflop_lowcallhand_call_limit)
+        result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, preflop_verylowcallhand_call_limit)
     elif can_call:
         #debug
-        print "----------## enter no good hand can_call, call with very small limit"          
+        print "----------## enter no good hand can_call, call with preflop_nogoodhand_call_limit:" + str(preflop_nogoodhand_call_limit)         
         result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, preflop_nogoodhand_call_limit)
     else:
         print 'For a no good card hand: cannot call, legal_actions:[' + str(self.player.legal_actions) + '], will CHECK'
@@ -79,8 +88,9 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
     print "--------> enter low_card()"
 
     result = 'CHECK'
-    # If opponent bets, don't want to follow, have to fold
+
     if can_call:
+      # If opponent bets, don't want to follow, have to fold
       result = 'FOLD' 
     # Otherwise, we just fall back to default 'Check' 
     return result
@@ -193,6 +203,7 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
     min_to_bet_mid = 0.4
     min_to_bet_high = 0.7
     min_to_bet_top = 0.8
+    max_discount_factor_for_opponent = 0.05
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4
@@ -206,7 +217,6 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
 
     if equity < min_to_bet_top:
         print "------> flop(), equity:" + str(equity) + " is less than top card equity, needs discount by observing opponents."
-        max_discount_factor_for_opponent = 0.05
         equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
     else:
         print "------> flop(), equity:" + str(equity) + " is greater than top card equity, ignore opponents action."
@@ -235,6 +245,7 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
     min_to_bet_mid = 0.5
     min_to_bet_high = 0.725
     min_to_bet_top = 0.825
+    max_discount_factor_for_opponent = 0.075
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4
@@ -248,7 +259,6 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
 
     if equity < min_to_bet_top:
         print "------> turn(), equity:" + str(equity) + " is less than top card equity, needs discount by observing opponents."
-        max_discount_factor_for_opponent = 0.75
         equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
     else:
         print "------> turn(), equity:" + str(equity) + " is greater than top card equity, ignore opponents action."
@@ -290,6 +300,7 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
     min_to_bet_mid = 0.5
     min_to_bet_high = 0.75
     min_to_bet_top = 0.85
+    max_discount_factor_for_opponent = 0.1
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4
@@ -303,7 +314,6 @@ class Mixedoppnew2Bot(base_bot.BaseBot):
 
     if equity < min_to_bet_top:
         print "------> river(), equity:" + str(equity) + " is less than top card equity, needs discount by observing opponents."
-        max_discount_factor_for_opponent = 0.1
         equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
     else:
         print "------> river(), equity:" + str(equity) + " is greater than top card equity, ignore opponents action."
