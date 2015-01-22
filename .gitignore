@@ -1,5 +1,6 @@
 test.*
 *.o
+*.so
 *reload*
 *.out
 *.pyc
