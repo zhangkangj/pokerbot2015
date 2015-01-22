@@ -56,7 +56,7 @@ class MixedoppnewOpponent(base_opponent.BaseOpponent):
     in_raise_occ = len(curr_actions.raise_seqs)
     in_call_occ = len(curr_actions.call_seqs)    
     in_bet_occ = len(curr_actions.bet_seqs)   
-    print "-------------======> in_check_occ:" + str(in_check_occ) + ", in_raise_occ:" + str(in_raise_occ) + ", in_call_occ:" + str(in_call_occ)
+#    print "-------------======> in_check_occ:" + str(in_check_occ) + ", in_raise_occ:" + str(in_raise_occ) + ", in_call_occ:" + str(in_call_occ)
 
     # In-state check:
     if in_check_occ > 0:
