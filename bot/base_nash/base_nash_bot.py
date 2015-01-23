@@ -48,7 +48,7 @@ class Base_nashBot(base_bot.BaseBot):
           pass
         else:
           print 'impossible output'
-          assert 0
+   #       assert 0
         
     #finished evolving nodes, choose action next
     #situation 0:
@@ -99,7 +99,7 @@ class Base_nashBot(base_bot.BaseBot):
         elif can_bet:
           return 'BET:' + str(raise_amount_final)
         else:
-          assert 0
+#          assert 0
           return 'CHECK'
     #situation 3
     else:
@@ -132,7 +132,7 @@ class Base_nashBot(base_bot.BaseBot):
       bucket, _, _  = evaluator.evaluate_turn(mc1, mc2, bc1, bc2, bc3, bc4)
       return bucket
     else:
-      assert self.player.num_board_card == 5
+ #     assert self.player.num_board_card == 5
       bc1, bc2, bc3, bc4, bc5 = util.c2n(self.player.board_cards)      
       bucket, _ = evaluator.evaluate_river(mc1, mc2, bc1, bc2, bc3, bc4, bc5)
       return bucket
@@ -174,17 +174,17 @@ class Base_nashBot(base_bot.BaseBot):
       self.last_raise_amount = 2
     elif action[1] == 'CALL':
       print self.current_node.get_node_type(), 'should be raise ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
-      assert self.current_node.get_node_type() == 'RaiseNode'
+ #     assert self.current_node.get_node_type() == 'RaiseNode'
       self.current_node = self.current_node.child_nodes[1]
       #unfinished
     elif action[1] == 'CHECK':
       print self.current_node.get_node_type(), 'should be check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
-      assert self.current_node.get_node_type() == 'CheckNode'
+ #     assert self.current_node.get_node_type() == 'CheckNode'
       self.current_node = self.current_node.child_nodes[0]
     elif action[1] == 'DEAL':
       print self.current_node.get_node_type(), 'should be round ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
       #check if it is a round node, if not something is wrong, just for dubug perposes
-      assert self.current_node.get_node_type() == 'RoundNode'
+ #     assert self.current_node.get_node_type() == 'RoundNode'
       self.current_node = self.current_node.child_nodes[0]
       self.last_round_pot_size += 2 * self.last_raise_amount
       self.last_raise_amount = 0
@@ -216,7 +216,7 @@ class Base_nashBot(base_bot.BaseBot):
             return 'Call4bet'
           else:
             print 'error'
-            assert 0
+ #           assert 0
             return 'Error'
         else:
           #if there are raise nodes, find the most similar one
@@ -228,11 +228,11 @@ class Base_nashBot(base_bot.BaseBot):
           self.current_node = self.current_node.child_nodes[index + 2]
       else:
         print 'wrong node type, should be checknode or raisenode'
-        assert 0
+  #      assert 0
         return 'Error'
     else:
       print 'wrong action type'
-      assert 0
+  #    assert 0
 
       return 'Error'
     return 'Normal'  

@@ -1,7 +1,7 @@
 from .. import base_player
 #import base_nash_bot
 
-import mixedoppnew_bot
+from bot.mixed import mixed_bot
 
 import mixedoppnew_opponent
 
@@ -11,9 +11,8 @@ import base_nash_bot
 class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
-    self.current_bot = mixedoppnew_bot.MixedoppnewBot(self) ## by defalt it uses mixed_opp_new
+    self.current_bot = mixed_bot.MixedBot(self) ## by defalt it uses mixed
     self.nash_bot1 = base_nash_bot.Base_nashBot(self, 300, '../../data/prob_300_total.npy')
- #   self.nash_bot1 = base_nash_bot.Base_nashBot(self)
     self.current_bot_type = 'MIXED'
 
 
@@ -29,7 +28,7 @@ class Base_nashPlayer(base_player.BasePlayer):
     	self.current_bot_type = 'NASH'
     	print 'Now change to nash bot for new hand'
     elif self.num_active_player == 3 and (self.current_bot_type != 'MIXED'):
-    	self.current_bot = mixedoppnew_bot.MixedoppnewBot(self)
+    	self.current_bot = mixed_bot.MixedBot(self)
     	self.current_bot_type = 'MIXED'
     	print 'Now change to mixed bot for new hand'
     else:
