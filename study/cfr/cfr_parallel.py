@@ -34,6 +34,7 @@ def run_cfr(index, initial_regret, initial_prob, num_iter, num_gen):
   util_sb = util_bb = 0
   print 'starting', index
   start_time = time.time()
+  np.random.seed((int(time.time()*1000000) * index)%429496729)
   for i in range(1, num_iter):
     mc1, mc2, oc1, oc2, bc1, bc2, bc3, bc4, bc5 = np.random.choice(52, 9, replace=False)
     seq1[0] = evaluator_cy.preflop_idx(mc1, mc2)
