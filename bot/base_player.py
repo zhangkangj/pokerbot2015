@@ -49,13 +49,19 @@ class BasePlayer(object):
     self.game_init_timebank = float(parts[7])
 
     self.create_opponents();
-    self.opponents = [self.opp1, self.opp2];
+
 
   def create_opponents(self):
     #debug
-#    print "-------------###--MixedoppnewPlayer.create_opponents()"    
+#    print "-------------###--MixedoppnewPlayer.create_opponents()" 
+  
+    # create a 'opponent model' 'opp0' for the player itself to store info for convenience
+    self.opp0 = base_opponent.BaseOpponent(self.player_name, self);
+    # create models for the actual opponents
     self.opp1 = base_opponent.BaseOpponent(self.opp1_name, self);
     self.opp2 = base_opponent.BaseOpponent(self.opp2_name, self);
+
+    self.opponents = [self.opp0, self.opp1, self.opp2];
 
   def key_value(self, parts):
     pass
@@ -97,9 +103,9 @@ class BasePlayer(object):
 
     # since the sequence changes every hand, we need to grap the data by finding the index
     # for each player
+    opp0_idx = -1
     opp1_idx = -1
     opp2_idx = -1
-    player_idx = -1
 
     for i in range(0,2):
       if self.player_names[i] == self.opp1.oppo_name:
@@ -107,10 +113,14 @@ class BasePlayer(object):
       elif self.player_names[i] == self.opp2.oppo_name:
         opp2_idx = i
       elif self.player_names[i] == self.player_name:
-        player_idx = i
+        opp0_idx = i
       else: 
 #        print "-------======>ERROR: self.player_names[" + str(i) + "]=" + str(self.player_names[i]) + " is not a valid name for player or opponents"
         pass    
+
+    self.opp0.is_active_in_game = bool(self.active_players[opp0_idx]) 
+    self.opp0.stack_size_new_hand = int(self.stack_sizes[opp0_idx])
+
     self.opp1.is_active_in_game = bool(self.active_players[opp1_idx]) 
     self.opp1.stack_size_new_hand = int(self.stack_sizes[opp1_idx])
 
@@ -133,11 +143,12 @@ class BasePlayer(object):
     elif self.opp2.is_active_in_game and self.opp2.is_active_in_hand and (self.opp2_name in one_action[-1]):
 #      print "-------========> action is for oppo2: " + self.opp2.oppo_name + ", one_action:" + str(one_action)
       self.opp2.Oppo_update(action_state,one_action[:-1]);
-    elif self.player_name in one_action[-1]:
+    elif self.opp0.is_active_in_game and self.opp0.is_active_in_hand and (self.player_name in one_action[-1]):
 #      print "-------========> action is for player, not opponent, one_action:" + str(one_action)
+      self.opp0.Oppo_update(action_state,one_action[:-1]);
       pass
     else:
-#      print "-------========> ERROR: it is not possible to have both opponent (in-hand or in-game) inactive or if they are active, there is no action message for their last actions"
+      print "ERROR: it is not possible to have both opponent (in-hand or in-game) inactive or if they are active, there is no action message for their last actions"
       pass
   def action(self, parts):
     #debug
@@ -155,8 +166,6 @@ class BasePlayer(object):
     self.num_last_action = int(parts[index])
     index = index + 1
     self.last_actions = parts[index:(index+self.num_last_action)]
-    
-    
     
     last_actions_tmp = []
     for last_action in self.last_actions:
