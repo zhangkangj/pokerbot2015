@@ -499,7 +499,7 @@ cdef class RaiseNode(PlayerNode):
         total_count += a
         round_count += b
         raise_count += c
-        check_count += d        
+        check_count += d
     return total_count, round_count, raise_count, check_count
 
   def get_node_type(self):
