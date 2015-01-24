@@ -6,24 +6,24 @@ Created on Mon Jan 12 12:58:46 2015
 """
 
 from .. import base_bot
-from lib.evaluator import evaluator
+from lib.evaluator import evaluator, evaluator_cy
 # from lib.evaluator import evaluator_cy
 from lib import util
 import numpy as np
 from study.cfr import cfr_cy2
 
 
-
 class Base_nashBot(base_bot.BaseBot):
   
-  def __init__(self, player, stack = 30, data_= None):
+  def __init__(self, player, stack = 300, data_= None):
     super(Base_nashBot, self).__init__(player)
     #initialize the bot with corresponding game tree
+    self.just_init = False
     self.root = cfr_cy2.RoundNode(0, 0, stack, stack)
     self.last_raise_amount = 0
     self.last_round_pot_size = 0
     #the stack and the data file should match! no check
-#    self.root.load_prob(data_)
+    self.root.load_prob(data_)
     self.current_node = self.root
   def action(self):
     can_raise = False
@@ -34,18 +34,21 @@ class Base_nashBot(base_bot.BaseBot):
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
     #Max added the following code to do *
-    for action in self.player.last_actions[1:]:
-      output = self.move_current_node(action)
-      if output == 'Showdown':
-        return self.all_in(can_raise, can_bet, can_call)
-      elif output == 'Call4bet':
-        call_amount = int([action1 for action1 in self.player.legal_actions if 'CALL' in action1][0].split(':')[1])              
-        return 'CALL:' + str(call_amount)
-      elif output == 'Normal':
-        pass
-      else:
-        print 'impossible output'
-        assert 0
+    if self.just_init:
+      self.just_init = False
+    else:
+      for action in self.player.last_actions[1:]:
+        output = self.move_current_node(action)
+        if output == 'Showdown':
+          return self.all_in(can_raise, can_bet, can_call)
+        elif output == 'Call4bet':
+          call_amount = int([action1 for action1 in self.player.legal_actions if 'CALL' in action1][0].split(':')[1])              
+          return 'CALL:' + str(call_amount)
+        elif output == 'Normal':
+          pass
+        else:
+          print 'impossible output'
+          assert 0
         
     #finished evolving nodes, choose action next
     #situation 0:
@@ -230,11 +233,13 @@ class Base_nashBot(base_bot.BaseBot):
     else:
       print 'wrong action type'
       assert 0
+
       return 'Error'
     return 'Normal'  
 #####################################################################
 
   def initialize_from_beginning(self, action_seq):
+    self.just_init = True
     for action in action_seq:
       output = self.move_current_node(action)
       if not (output == 'Normal'):

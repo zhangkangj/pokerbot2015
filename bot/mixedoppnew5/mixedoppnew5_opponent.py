@@ -1,11 +1,11 @@
 from .. import base_opponent
 
-class MixedoppnewOpponent(base_opponent.BaseOpponent):
+class Mixedoppnew5Opponent(base_opponent.BaseOpponent):
 
   def eval_opponent(self):
-    max_opp_eval_result = 1
-    min_opp_eval_result = 0
-    result = float(min_opp_eval_result)
+    max_opp_eval_limit = 1
+    min_opp_eval_limit = 0
+    result = float(min_opp_eval_limit)
 
     #debug
     print "-------------======> enter MixedoppnewOpponent.eval_opponent(), self.oppo_name: " + self.oppo_name + " is an active_player"
@@ -148,30 +148,31 @@ class MixedoppnewOpponent(base_opponent.BaseOpponent):
     print "is_cross_hascheck_noraisebet_raisebet:" + str(self.is_cross_hascheck_noraisebet_raisebet)
     print "-------------======> oppo eval result boolean ends: <======------------- " 
     
+    # TODOS: use multiply here instead
     if self.is_cross_nocheck_nocall_hasraisebet_raisebet:
-      result += 0.5 * max_opp_eval_result
+      result += 0.5 * max_opp_eval_limit
 
     if self.is_cross_nocheck_hascall_hasraisebet_raisebet:
-      result += 0.3 * max_opp_eval_result
+      result += 0.3 * max_opp_eval_limit
 
     if self.is_large_betraise:
-      result += 0.8 * max_opp_eval_result
+      result += 0.8 * max_opp_eval_limit
 
     if self.is_in_betraise:
-      result += 0.3 * max_opp_eval_result
+      result += 0.3 * max_opp_eval_limit
 
     if self.is_cross_check_raisebet:
-      result += 0.3 * max_opp_eval_result
+      result += 0.3 * max_opp_eval_limit
 
     if self.is_in_checkraise:
-      result += 0.3 * max_opp_eval_result
+      result += 0.3 * max_opp_eval_limit
 
     print "-------------======> oppo eval calculated result :" + str(result)    
 
-    if result > max_opp_eval_result:
-      result = max_opp_eval_result
-    elif result < min_opp_eval_result:
-      result = min_opp_eval_result
+    if result > max_opp_eval_limit:
+      result = max_opp_eval_limit
+    elif result < min_opp_eval_limit:
+      result = min_opp_eval_limit
 
     print "-------------======> oppo eval actual result :" + str(result)    
 
