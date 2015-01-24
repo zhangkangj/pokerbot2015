@@ -81,7 +81,7 @@ class Base_nashBot(base_bot.BaseBot):
     raise_amount_min = int([action for action in self.player.legal_actions if ('RAISE' in action or 'BET' in action)][0].split(':')[1])
     raise_amount_max = int([action for action in self.player.legal_actions if ('RAISE' in action or 'BET' in action)][0].split(':')[2])    
     tree_pot_size = self.current_node.get_pot_size()    
-    print self.current_node.get_node_type(), 'action node yoooooooooooooo',index
+    print self.current_node.get_node_type(), 'action node yoooooooooooooo',index, 'probability', prob
     is_check_node = (self.current_node.get_node_type() == 'CheckNode')
     self.current_node = self.current_node.child_nodes[index]
     #situation 2
@@ -179,12 +179,12 @@ class Base_nashBot(base_bot.BaseBot):
     print action, '\t current node:', self.current_node.get_node_type()
     #Max added the following code to do *
     #if we have reached a showdown node, we all in our opponents
-    if self.current_node.get_node_type() == 'ShowdownNode':
-      return 'Showdown'
-    elif action[1] == 'POST':
+    if action[1] == 'POST':
       print self.current_node.get_node_type(), 'should be maybe roundnode'
       self.current_node = self.root.child_nodes[0]
       self.last_raise_amount = 2
+    elif self.current_node.get_node_type() == 'ShowdownNode':
+      return 'Showdown'
     elif action[1] == 'CALL':
       print self.current_node.get_node_type(), 'should be raise ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
  #     assert self.current_node.get_node_type() == 'RaiseNode'

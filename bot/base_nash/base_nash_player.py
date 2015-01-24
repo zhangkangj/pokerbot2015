@@ -3,7 +3,7 @@ from .. import base_player
 
 from bot.mixed import mixed_bot
 
-import mixedoppnew_opponent
+#import mixedoppnew_opponent
 
 import base_nash_bot
 
@@ -12,11 +12,12 @@ class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
     self.current_bot = mixed_bot.MixedBot(self) ## by defalt it uses mixed
-    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 300, '../../data/prob_300_total.npy')
+    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 300, '../../data/cfr/aws/prob_300_total.npy')
     self.current_bot_type = 'MIXED'
 
 
   def new_game(self, parts):
+    print 'fdsafsdafsdafsda call new game bash nash'
     super(Base_nashPlayer, self).new_game(parts)
     
     
@@ -229,47 +230,3 @@ class Base_nashPlayer(base_player.BasePlayer):
     	##
     	##
 		
-
-
-
-
-## here are copied from mixedoppnew_player.py
-  def create_opponents(self):
-    self.opp1 = mixedoppnew_opponent.MixedoppnewOpponent(self.opp1_name, self);
-    self.opp2 = mixedoppnew_opponent.MixedoppnewOpponent(self.opp2_name, self);
-
-  def discount_equity_for_opponent(self, original_equity, max_discount_factor=0):
-    opponent_equity_discount = self.eval_opponents() * max_discount_factor
-    discounted_equity = (1-opponent_equity_discount) * original_equity
-    return discounted_equity  
-
-  def eval_opponents(self):
-    max_opp_eval_result = 1
-    min_opp_eval_result = 0
-    less_opp_eval_threshold = 0.7
-    less_opp_eval_factor = 0.5
-
-    # default value to no effect by the opponents
-    result = min_opp_eval_result
-
-    eval_opp_results=[]
-
-    for opponent in self.opponents:
-      if opponent.is_active_in_game and opponent.is_active_in_hand: 
-       # call opponent's evaulation  
-        eval_result = opponent.eval_opponent()    
-        eval_opp_results.append(eval_result)
-    
-    if len(eval_opp_results) > 1:
-      # if we evaluated two opponents
-      max_opp_eval = max(eval_opp_results)
-      min_opp_eval = min(eval_opp_results)
-
-      # if the other opponent is also a significant threat 
-      if min_opp_eval > less_opp_eval_threshold * max_opp_eval_result:
-        result = max_opp_eval + (max_opp_eval_result - max_opp_eval) * less_opp_eval_factor
-
-    elif len(eval_opp_results) == 1:
-      result = eval_opp_results[0]
-    
-    return result 
