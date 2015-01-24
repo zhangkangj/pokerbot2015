@@ -9,7 +9,7 @@ import time
 import numpy as np
 import pyximport
 pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator']}, reload_support=True, inplace=True)
-from lib.evaluator import evaluator, evaluator_cy
+from lib.evaluator import evaluator
 import multiprocessing
 
 '''
@@ -40,16 +40,11 @@ print time.time() - start_time
 np.save('data/flop_bucket'+str(thread_num), result)
 '''
 
-import multiprocessing
-import time
-import numpy as np
-import pyximport
-pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator']}, reload_support=True, inplace=True)
-from lib.evaluator import evaluator, evaluator_cy
-
-NUM_THREAD = 36
+'''
+NUM_THREAD = 4
 
 def gen_turn_bucket(thread_num):
+  print 'starting', thread_num
   result = np.zeros(278528*1326, dtype=np.int16)
   start_time = time.time()
   for i in xrange(51):
@@ -84,8 +79,18 @@ def gen_turn_bucket(thread_num):
 
 processes = []
 for i in range(NUM_THREAD):
+  print 'creating', i
   p = multiprocessing.Process(target=gen_turn_bucket, args=(i,))
   p.start()
   processes.append(p)
 for p in processes:
   p.join()
+'''
+
+turn_bucket = np.load('data/evaluator/turn_bucket.npy')
+i,j,k,m,n,o=np.random.choice(52, 6, replace=False)
+#i,j=sorted([i,j])
+#k,m,n,o = sorted([k,m,n,o])
+#index = (i+j*(j-1)/2)*278528 + o*(o-1)*(o-2)*(o-3)/24 + n*(n-1)*(n-2)/6 + m*(m-1)/2 + k
+turn_index = evaluator.turn_index(i,j,k,m,n,o)
+print turn_index, evaluator.evaluate_turn(i,j,k,m,n,o), turn_bucket[turn_index]
