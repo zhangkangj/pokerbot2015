@@ -8,7 +8,12 @@ Created on Sat Jan 10 02:24:21 2015
 import numpy as np
 
 from lib import util
-from lib.evaluator import pbots_calc
+try:
+  from lib.evaluator import pbots_calc
+except:
+  import traceback
+  traceback.print_exc()
+  print 'failed to import pbots_calc'
 try:
   from lib.evaluator import evaluator_cy
 except:
@@ -73,5 +78,28 @@ def evaluate_river(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_, bc5_):
   bc4 = util.card_to_num(bc4_)
   bc5 = util.card_to_num(bc5_)  
   mean = evaluator_cy.evaluate_river(mc1, mc2, bc1, bc2, bc3, bc4, bc5)
-  bucket = int(round(mean * 100) / 16)
+  bucket = int(mean / 0.0625)
   return bucket, mean
+  
+def flop_index(mc1_, mc2_, bc1_, bc2_, bc3_):
+  mc1 = util.card_to_num(mc1_)
+  mc2 = util.card_to_num(mc2_)
+  bc1 = util.card_to_num(bc1_)
+  bc2 = util.card_to_num(bc2_)
+  bc3 = util.card_to_num(bc3_)
+  if mc1 > mc2:
+    mc1, mc2 = mc2, mc1
+  bc1, bc2, bc3 = sorted([bc1, bc2, bc3])
+  return (mc1 + mc2*(mc2-1)/2) * 24576 + bc3*(bc3-1)*(bc3-2)/6 + bc2*(bc2-1)/2 + bc1
+
+def turn_index(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_):
+  mc1 = util.card_to_num(mc1_)
+  mc2 = util.card_to_num(mc2_)
+  bc1 = util.card_to_num(bc1_)
+  bc2 = util.card_to_num(bc2_)
+  bc3 = util.card_to_num(bc3_)
+  bc4 = util.card_to_num(bc4_)
+  if mc1 > mc2:
+    mc1, mc2 = mc2, mc1
+  bc1, bc2, bc3, bc4 = sorted([bc1, bc2, bc3, bc4])
+  return (mc1 + mc2*(mc2-1)/2) * 278528 + bc4*(bc4-1)*(bc4-2)*(bc4-3)/24 + bc3*(bc3-1)*(bc3-2)/6 + bc2*(bc2-1)/2 + bc1
