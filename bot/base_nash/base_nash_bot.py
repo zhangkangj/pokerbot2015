@@ -40,7 +40,7 @@ class Base_nashBot(base_bot.BaseBot):
       for action in self.player.last_actions[1:]:
         output = self.move_current_node(action)
         if output == 'Showdown':
-          return self.all_in(can_raise, can_bet, can_call)
+          return self.check_call(can_raise, can_bet, can_call)
         elif output == 'Call4bet':
           call_amount = int([action1 for action1 in self.player.legal_actions if 'CALL' in action1][0].split(':')[1])              
           return 'CALL:' + str(call_amount)
@@ -53,7 +53,7 @@ class Base_nashBot(base_bot.BaseBot):
     #finished evolving nodes, choose action next
     #situation 0:
     if self.current_node.get_node_type() == 'ShowdownNode':
-      return self.all_in(can_raise,can_bet,can_call)    
+      return self.check_call(can_raise,can_bet,can_call)    
     bucket = self.get_bucket()
     
     print self.current_node.get_node_type(), 'node type yooooooooo', bucket, 'bucket yooooo'
@@ -120,6 +120,7 @@ class Base_nashBot(base_bot.BaseBot):
             
 
   def get_bucket(self):
+    print self.player.hole_cards
     mc1, mc2 = util.c2n(self.player.hole_cards)
     if self.player.num_board_card == 0:
       return evaluator_cy.preflop_idx(mc1, mc2)
@@ -162,8 +163,20 @@ class Base_nashBot(base_bot.BaseBot):
       print 'something is wrong!!!For a raise-able hand: cannot bet, raise, or call, legal_actions:[' + str(self.player.legal_actions) + '], will CHECK'
       result = 'CHECK'
     return result  
+    
+
+  def check_call(self, can_raise, can_bet, can_call):
+    if can_call:
+      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+      result = 'CALL:' + str(call_amount)
+      print 'calling', result
+    else:
+      print 'check'
+      result = 'CHECK'
+    return result  
   ##################################################################################### 
   def move_current_node(self, action):
+    print action, '\t current node:', self.current_node.get_node_type()
     #Max added the following code to do *
     #if we have reached a showdown node, we all in our opponents
     if self.current_node.get_node_type() == 'ShowdownNode':
@@ -210,9 +223,11 @@ class Base_nashBot(base_bot.BaseBot):
           if self.current_node.child_nodes[1].get_node_type() == 'ShowdownNode':
             #if the call node is a showdown node, it means in the tree we have all_ined, then move to the showndown node, and all in.
             self.current_node = self.current_node.child_nodes[1]
+            print 'move to showdownnode'
           elif self.current_node.child_nodes[1].get_node_type() == 'RoundNode':
             #if the call node is a round node, it means it has reached the three bets limit in the tree, but the opponent 4 bets, we call and go to the next round node
-            self.current_node = self.current_node.child_nodes[1]              
+            self.current_node = self.current_node.child_nodes[1]
+            print 'has 4 bet, move to round node'              
             return 'Call4bet'
           else:
             print 'error'
@@ -233,8 +248,8 @@ class Base_nashBot(base_bot.BaseBot):
     else:
       print 'wrong action type'
   #    assert 0
-
       return 'Error'
+    print 'move to:', self.current_node.get_node_type()
     return 'Normal'  
 #####################################################################
 
