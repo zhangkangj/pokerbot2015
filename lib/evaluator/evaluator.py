@@ -73,5 +73,5 @@ def evaluate_river(mc1_, mc2_, bc1_, bc2_, bc3_, bc4_, bc5_):
   bc4 = util.card_to_num(bc4_)
   bc5 = util.card_to_num(bc5_)  
   mean = evaluator_cy.evaluate_river(mc1, mc2, bc1, bc2, bc3, bc4, bc5)
-  bucket = round(mean * 100) / 16
+  bucket = int(round(mean * 100) / 16)
   return bucket, mean
