@@ -320,11 +320,11 @@ cdef class PlayerNode(Node):
                      self.sb_utility_ptr + i, self.bb_utility_ptr + i, bucket_seq_sb, bucket_seq_bb)
       #compute utility from utilities of child nodes     
       for i in range(0, self.num_child):
-        util_sb[0] += act_prob[i] * util_sb_child[i]
-        util_bb[0] += act_prob[i] * util_bb_child[i]
+        util_sb[0] += act_prob[i] * self.sb_utility_ptr[i]
+        util_bb[0] += act_prob[i] * self.bb_utility_ptr[i]
       #compute new regrets
       for i in range(0, self.num_child):
-        self.regret_ptr[node_bucket * self.num_child + i] += p_bb * (util_sb_child[i] - util_sb[0])
+        self.regret_ptr[node_bucket * self.num_child + i] += p_bb * (self.sb_utility_ptr[i] - util_sb[0])
     else:
       node_bucket = bucket_seq_bb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child, p_bb)
@@ -334,11 +334,11 @@ cdef class PlayerNode(Node):
                      self.sb_utility_ptr + i, self.sb_utility_ptr + i, bucket_seq_sb, bucket_seq_bb)
       #compute utility from utilities of child nodes
       for i in range(0, self.num_child):
-        util_sb[0] += act_prob[i] * util_sb_child[i]
-        util_bb[0] += act_prob[i] * util_bb_child[i]
+        util_sb[0] += act_prob[i] * self.sb_utility_ptr[i]
+        util_bb[0] += act_prob[i] * self.bb_utility_ptr[i]
       #compute new regrets
       for i in range(0, self.num_child):
-        self.regret_ptr[node_bucket * self.num_child + i] += p_sb * (util_bb_child[i] - util_bb[0])
+        self.regret_ptr[node_bucket * self.num_child + i] += p_sb * (self.bb_utility_ptr[i] - util_bb[0])
     free(act_prob)
     #print 'player node', p_sb, p_bb, util_sb[0], util_bb[0]
     
