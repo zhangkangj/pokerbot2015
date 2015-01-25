@@ -263,16 +263,16 @@ class Base_nashBot(base_bot.BaseBot):
       return False
     else:
       #if the initializtion is successful, we need to adjust last_raise_amount and last_round_pot_size, untested.
-      can_bet = False
-      for action in self.player.legal_actions:
-        can_bet |= 'BET' in action
-      if can_bet:
-        self.last_raise_amount = 0
-        self.last_round_pot_size = self.player.pot_size
-      else:
-        self.last_raise_amount = int(next(x[2] for x in reversed(action_seq) if x[2] is not None))
-        call_amount_tmp = int(next(x[2] for x in reversed(action_seq) if (x[2] is not None and x[0] == self.player.player_name)))        
-        self.last_round_pot_size = self.player.pot_size + call_amount_tmp - 2 * self.last_raise_amount        
+#      can_bet = False
+#      for action in self.player.legal_actions:
+#        can_bet |= 'BET' in action
+#      if can_bet:
+#        self.last_raise_amount = 0
+#        self.last_round_pot_size = self.player.pot_size
+#      else:
+#        self.last_raise_amount = int(next(x[2] for x in reversed(action_seq) if x[2] is not None))
+#        call_amount_tmp = int(next(x[2] for x in reversed(action_seq) if (x[2] is not None and x[0] == self.player.player_name)))        
+#        self.last_round_pot_size = self.player.pot_size + call_amount_tmp - 2 * self.last_raise_amount        
       return True
       
   def preflop(self, equity, can_raise, can_bet, can_call):
