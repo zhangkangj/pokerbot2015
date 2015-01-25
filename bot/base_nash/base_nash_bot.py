@@ -14,7 +14,6 @@ from study.cfr import cfr_cy2
 
 
 class Base_nashBot(base_bot.BaseBot):
-  
   def __init__(self, player, stack = 300, data_= None):
     super(Base_nashBot, self).__init__(player)
     #initialize the bot with corresponding game tree
@@ -33,10 +32,11 @@ class Base_nashBot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    #Max added the following code to do *
     if self.just_init:
+      print 'Just initialized from init_from_beginning, stop parsing last-actions'
       self.just_init = False
     else:
+      print 'Start parsing last-actions and move node'
       for action in self.player.last_actions[1:]:
         output = self.move_current_node(action)
         if output == 'Showdown':
@@ -49,15 +49,12 @@ class Base_nashBot(base_bot.BaseBot):
         else:
           print 'impossible output'
    #       assert 0
-        
+    print 'Finished moving node.'    
     #finished evolving nodes, choose action next
     #situation 0:
     if self.current_node.get_node_type() == 'ShowdownNode':
       return self.check_call(can_raise,can_bet,can_call)    
     bucket = self.get_bucket()
-    
-    print self.current_node.get_node_type(), 'node type yooooooooo', bucket, 'bucket yooooo'
-    print self.player.last_actions
     prob = self.current_node.get_act_prob(bucket)
     #draw random number from uniform(0,1), then choose the corresponding node
     r = np.random.uniform(0,1)
@@ -68,7 +65,10 @@ class Base_nashBot(base_bot.BaseBot):
         index = i
         break
     #chose index as the next action, find call_amount in legal action for later use
-
+    print 'last_actions:', self.player.last_actions
+    print 'current node type:', self.current_node.get_node_type(), 'bucket:', bucket, 'action probability', prob
+    print 'choosing node', index, ' from', self.current_node.get_num_child(), 'child nodes:'
+    
     #situation 1:   
     if not can_raise and not can_bet:
       call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])              
@@ -81,7 +81,6 @@ class Base_nashBot(base_bot.BaseBot):
     raise_amount_min = int([action for action in self.player.legal_actions if ('RAISE' in action or 'BET' in action)][0].split(':')[1])
     raise_amount_max = int([action for action in self.player.legal_actions if ('RAISE' in action or 'BET' in action)][0].split(':')[2])    
     tree_pot_size = self.current_node.get_pot_size()    
-    print self.current_node.get_node_type(), 'action node yoooooooooooooo',index, 'probability', prob
     is_check_node = (self.current_node.get_node_type() == 'CheckNode')
     self.current_node = self.current_node.child_nodes[index]
     #situation 2
@@ -180,29 +179,30 @@ class Base_nashBot(base_bot.BaseBot):
     #Max added the following code to do *
     #if we have reached a showdown node, we all in our opponents
     if action[1] == 'POST':
-      print self.current_node.get_node_type(), 'should be maybe roundnode'
+ #     print self.current_node.get_node_type(), 'should be maybe roundnode'
       self.current_node = self.root.child_nodes[0]
       self.last_raise_amount = 2
     elif self.current_node.get_node_type() == 'ShowdownNode':
+      print 'current is showdown node, does not move node'
       return 'Showdown'
     elif action[1] == 'CALL':
-      print self.current_node.get_node_type(), 'should be raise ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
+ #     print self.current_node.get_node_type(), 'should be raise ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
  #     assert self.current_node.get_node_type() == 'RaiseNode'
       self.current_node = self.current_node.child_nodes[1]
       #unfinished
     elif action[1] == 'CHECK':
-      print self.current_node.get_node_type(), 'should be check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
+ #     print self.current_node.get_node_type(), 'should be check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
  #     assert self.current_node.get_node_type() == 'CheckNode'
       self.current_node = self.current_node.child_nodes[0]
     elif action[1] == 'DEAL':
-      print self.current_node.get_node_type(), 'should be round ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
+ #     print self.current_node.get_node_type(), 'should be round ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'
       #check if it is a round node, if not something is wrong, just for dubug perposes
  #     assert self.current_node.get_node_type() == 'RoundNode'
       self.current_node = self.current_node.child_nodes[0]
       self.last_round_pot_size += 2 * self.last_raise_amount
       self.last_raise_amount = 0
     elif action[1] == 'RAISE' or action[1] == 'BET':
-      print self.current_node.get_node_type(), 'should be raise or check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'       
+ #     print self.current_node.get_node_type(), 'should be raise or check ddddddddddddddddddddddddddd>>>>>>>>>>>>>>>>>>'       
       raise_amount = action[2] - self.last_raise_amount
       #compute the ratio of this bet/raise, bug!
       raise_ratio = raise_amount * 1. / (self.last_round_pot_size + 2 * self.last_raise_amount)
@@ -211,7 +211,7 @@ class Base_nashBot(base_bot.BaseBot):
         #if there are raise nodes, find the most similar one
         tree_pot_size = self.current_node.get_pot_size()
         tree_raise_ratios = []
-        print self.current_node.get_node_type(), 'current node type'
+ #       print self.current_node.get_node_type(), 'current node type'
         for i in range(1,self.current_node.get_num_child()):
           tree_raise_ratios.append(self.current_node.child_nodes[i].get_raise_amount() / tree_pot_size)
         index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
@@ -223,14 +223,14 @@ class Base_nashBot(base_bot.BaseBot):
           if self.current_node.child_nodes[1].get_node_type() == 'ShowdownNode':
             #if the call node is a showdown node, it means in the tree we have all_ined, then move to the showndown node, and all in.
             self.current_node = self.current_node.child_nodes[1]
-            print 'move to showdownnode'
+  #          print 'move to showdownnode'
           elif self.current_node.child_nodes[1].get_node_type() == 'RoundNode':
             #if the call node is a round node, it means it has reached the three bets limit in the tree, but the opponent 4 bets, we call and go to the next round node
             self.current_node = self.current_node.child_nodes[1]
-            print 'has 4 bet, move to round node'              
-            return 'Call4bet'
+            print 'opp 4 bets, move to round node/showdown node'
+            return '4bet'
           else:
-            print 'error'
+ #           print 'error'
  #           assert 0
             return 'Error'
         else:
