@@ -11,7 +11,7 @@ import pyximport
 pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator']}, reload_support=True, inplace=True)
 from study.cfr import cfr_cy2
 import itertools
-
+import time
 
 def normalize(array):
   array = np.clip(array, 0, np.inf) + 1e-10
@@ -28,19 +28,25 @@ root = cfr_cy2.RoundNode(3, 2, 1, 1)
 root.initialize_regret()
 seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
-for i in range(100000):
-  util_sb = util_bb = 0.0
+cum_time = 0
+start_time = time.time()
+for i in range(500):
   for sb, bb, _ in itertools.permutations([0,1,2]):
     seq1[3] = seq1[4] = sb
     seq2[3] = seq2[4] = bb
-    if i%1000 == 999:      
+    root.run_cfr(seq1, seq2)
+  if time.time() - start_time > 0.0005:
+    cum_time += time.time() - start_time
+    util_sb = util_bb = 0.0
+    for sb, bb, _ in itertools.permutations([0,1,2]):
+      seq1[3] = seq1[4] = sb
+      seq2[3] = seq2[4] = bb      
       util_sb_, util_bb_ = root.compute_util(seq1, seq2)
       util_sb += util_sb_
       util_bb += util_bb_
-    else:
-      root.run_cfr(seq1, seq2)
-  if i%1000 == 999:
-    print i, util_sb/6, util_bb/6
+    print i, cum_time, util_sb/6, util_bb/6
+    start_time = time.time()
+
 print 'sb: root              ', normalize(root.child_nodes[0].average_prob[0:6])
 print 'bb: sb check          ', normalize(root.child_nodes[0].child_nodes[0].average_prob[0:6])
 print 'bb: sb raise          ', normalize(root.child_nodes[0].child_nodes[1].average_prob[0:6])
