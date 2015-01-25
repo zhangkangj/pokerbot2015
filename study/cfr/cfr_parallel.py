@@ -90,7 +90,7 @@ else:
 
 print 'initialized'
 
-for j in range(1, 100):
+for j in range(1, 200):
   processes = []
   for i in range(NUM_THREAD):
     p = multiprocessing.Process(target=run_cfr, args=(i, total_regret, total_prob, NUM_ITER, j))

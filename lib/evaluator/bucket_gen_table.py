@@ -9,47 +9,55 @@ import time
 import numpy as np
 import pyximport
 pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator']}, reload_support=True, inplace=True)
-from lib.evaluator import evaluator, evaluator_cy
+from lib.evaluator import evaluator
 import multiprocessing
 
-'''
-thread_num = 0
-result = np.zeros(32587776, dtype=np.int16)
-start_time = time.time()
-for i in xrange(51):
-  for j in xrange(i+1, 52):
-    index_first = i + j*(j-1)/2
-    for k in xrange(51, 1, -1):
-      print i, j, k
-      if k==i or k==j:
-        continue
-      index_second__ = k*(k-1)*(k-2)/6
-      for m in range(k-1, 0, -1):
-        if m==i or m==j:
+NUM_THREAD = 8
+
+def gen_flop_bucket(thread_num):
+  result = np.zeros(32587776, dtype=np.int16)
+  start_time = time.time()
+  for i in xrange(51):
+    for j in xrange(i+1, 52):
+      index_first = i + j*(j-1)/2
+      for k in xrange(51, 1, -1):
+        print i, j, k
+        if k==i or k==j:
           continue
-        index_second_ = index_second__ + m*(m-1)/2
-        for n in range(m-1, -1, -1):
-          if n==i or n==j:
+        index_second__ = k*(k-1)*(k-2)/6
+        for m in range(k-1, 0, -1):
+          if m==i or m==j:
             continue
-          index_second = n + index_second_
-          index = index_first * 24576 + index_second
-          if index % 4 == thread_num:
-            bucket, _, _ = evaluator.evaluate_flop(i, j, k, m, n)
-            result[index] = bucket
-print time.time() - start_time
-np.save('data/flop_bucket'+str(thread_num), result)
+          index_second_ = index_second__ + m*(m-1)/2
+          for n in range(m-1, -1, -1):
+            if n==i or n==j:
+              continue
+            index_second = n + index_second_
+            index = index_first * 24576 + index_second
+            if index % NUM_THREAD == thread_num:
+              bucket, _, _ = evaluator.evaluate_flop(i, j, k, m, n, num_iter=400)
+              result[index] = bucket
+  print time.time() - start_time
+  np.save('data/evaluator/flop_bucket'+str(thread_num), result)
+
+processes = []
+for i in range(NUM_THREAD):
+  print 'creating', i
+  p = multiprocessing.Process(target=gen_flop_bucket, args=(i,))
+  p.start()
+  processes.append(p)
+for p in processes:
+  p.join()
+
+result = np.zeros(24576*1326, dtype=np.int16)
+for i in range(NUM_THREAD):
+    result[i::NUM_THREAD] = np.load('data/evaluator/flop_bucket'+str(i)+'.npy')[i::NUM_THREAD]
+np.save('data/evaluator/flop_bucket', result)
+
+
 '''
-
-import multiprocessing
-import time
-import numpy as np
-import pyximport
-pyximport.install(setup_args={'include_dirs': [np.get_include(), 'lib/evaluator']}, reload_support=True, inplace=True)
-from lib.evaluator import evaluator, evaluator_cy
-
-NUM_THREAD = 36
-
 def gen_turn_bucket(thread_num):
+  print 'starting', thread_num
   result = np.zeros(278528*1326, dtype=np.int16)
   start_time = time.time()
   for i in xrange(51):
@@ -84,8 +92,20 @@ def gen_turn_bucket(thread_num):
 
 processes = []
 for i in range(NUM_THREAD):
+  print 'creating', i
   p = multiprocessing.Process(target=gen_turn_bucket, args=(i,))
   p.start()
   processes.append(p)
 for p in processes:
   p.join()
+'''
+
+'''
+flop_bucket = np.load('data/evaluator/flop_bucket.npy')
+i,j,k,m,n=np.random.choice(52, 5, replace=False)
+#i,j=sorted([i,j])
+#k,m,n,o = sorted([k,m,n,o])
+#index = (i+j*(j-1)/2)*278528 + o*(o-1)*(o-2)*(o-3)/24 + n*(n-1)*(n-2)/6 + m*(m-1)/2 + k
+flop_index = evaluator.flop_index(i,j,k,m,n)
+print flop_index, evaluator.evaluate_flop(i,j,k,m,n), flop_bucket[flop_index]
+'''

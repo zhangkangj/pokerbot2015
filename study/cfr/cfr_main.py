@@ -112,13 +112,15 @@ for i in range(51):
 
 
 
-# parallel
-root = cfr_cy2.RoundNode(0, 0, 4, 4)
-root.load_regret('data/regret_300_total.npy')
-root.load_prob('data/prob_300_total.npy')
-n = 3
-result = np.reshape(normalize(root.child_nodes[0].average_prob[:(n*169)], n=n), (169,n))
+root = cfr_cy2.RoundNode(0, 0, 300, 300)
+root.initialize_regret()
+root.load_regret('data/cfr/aws/regret_300_total.npy')
+root.load_prob('data/cfr/aws/prob_300_total.npy')
+node = root.child_nodes[0]
+num_child = 4
+prob = np.reshape(node.average_prob[:(169*num_child)], (169, num_child))
+regret = np.reshape(node.regret[:(169*num_child)], (169,num_child))
 for i in range(51):
   for j in range(i+1, 52):
     idx = evaluator_cy.preflop_idx(i, j)
-    print util.n2c([i,j]), idx, result[idx]
+    print util.n2c([i,j]), idx, prob[idx]/np.sum(prob[idx])#, bb_regret[idx]

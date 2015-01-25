@@ -262,10 +262,14 @@ cdef class RoundNode(Node):
 cdef class PlayerNode(Node):
   cpdef public regret
   cpdef public average_prob
+  cpdef public sb_utility
+  cpdef public bb_utility
   cdef:
     bint is_sb
     double* regret_ptr
     float* average_prob_ptr
+    float* sb_utility_ptr
+    float* bb_utility_ptr
     int raise_amount
     int t
 
@@ -278,8 +282,14 @@ cdef class PlayerNode(Node):
   cdef void initialize_prob(self):
     cdef:
       np.ndarray[float, ndim=1] average_prob_ = np.zeros(self.num_card_bucket*self.num_child, dtype=np.float32)
+      np.ndarray[float, ndim=1] sb_utility_ = np.zeros(self.num_card_bucket*self.num_child, dtype=np.float32)
+      np.ndarray[float, ndim=1] bb_utility_ = np.zeros(self.num_card_bucket*self.num_child, dtype=np.float32)
     self.average_prob = average_prob_
-    self.average_prob_ptr = <float*> average_prob_.data  
+    self.average_prob_ptr = <float*> average_prob_.data
+    self.sb_utility = sb_utility_
+    self.bb_utility = bb_utility_
+    self.sb_utility_ptr = <float*> sb_utility_.data
+    self.bb_utility_ptr = <float*> bb_utility_.data
 
   def initialize_regret(self):
     cdef:
@@ -295,8 +305,6 @@ cdef class PlayerNode(Node):
   cdef void transit(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
     cdef double* act_prob = <double*> malloc(self.num_child * sizeof(double))
-    cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))
-    cdef float* util_bb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef int node_bucket, i
     cdef Node node
     util_sb[0] = 0
@@ -309,32 +317,29 @@ cdef class PlayerNode(Node):
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
         node.transit(p_sb * act_prob[i], p_bb, 
-                     util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
+                     self.sb_utility_ptr + i, self.bb_utility_ptr + i, bucket_seq_sb, bucket_seq_bb)
       #compute utility from utilities of child nodes     
       for i in range(0, self.num_child):
-        util_sb[0] += act_prob[i] * util_sb_child[i]
-        util_bb[0] += act_prob[i] * util_bb_child[i]
+        util_sb[0] += act_prob[i] * self.sb_utility_ptr[i]
+        util_bb[0] += act_prob[i] * self.bb_utility_ptr[i]
       #compute new regrets
       for i in range(0, self.num_child):
-        self.regret_ptr[node_bucket * self.num_child + i] += p_bb * (util_sb_child[i] - util_sb[0])
+        self.regret_ptr[node_bucket * self.num_child + i] += p_bb * (self.sb_utility_ptr[i] - util_sb[0])
     else:
       node_bucket = bucket_seq_bb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child, p_bb)
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
         node.transit(p_sb, p_bb * act_prob[i], 
-                     util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
+                     self.sb_utility_ptr + i, self.sb_utility_ptr + i, bucket_seq_sb, bucket_seq_bb)
       #compute utility from utilities of child nodes
       for i in range(0, self.num_child):
-        util_sb[0] += act_prob[i] * util_sb_child[i]
-        util_bb[0] += act_prob[i] * util_bb_child[i]
+        util_sb[0] += act_prob[i] * self.sb_utility_ptr[i]
+        util_bb[0] += act_prob[i] * self.bb_utility_ptr[i]
       #compute new regrets
       for i in range(0, self.num_child):
-        self.regret_ptr[node_bucket * self.num_child + i] += p_sb * (util_bb_child[i] - util_bb[0])
+        self.regret_ptr[node_bucket * self.num_child + i] += p_sb * (self.bb_utility_ptr[i] - util_bb[0])
     free(act_prob)
-    free(util_sb_child)
-    free(util_bb_child)
-    self.t += 1
     #print 'player node', p_sb, p_bb, util_sb[0], util_bb[0]
     
   cdef void compute_prob(self, double* result, int node_bucket_times_num_child, float weight):
@@ -494,7 +499,7 @@ cdef class RaiseNode(PlayerNode):
         total_count += a
         round_count += b
         raise_count += c
-        check_count += d        
+        check_count += d
     return total_count, round_count, raise_count, check_count
 
   def get_node_type(self):
