@@ -9,9 +9,11 @@ import argparse
 import socket
 import sys
 
-from bot.fold import fold_player
+from bot.mixedoppnew7 import mixedoppnew7_player
 
 if __name__ == '__main__':
+  from lib import util
+  util.test()
   parser = argparse.ArgumentParser(description='A Pokerbot.', add_help=False, prog='pokerbot')
   parser.add_argument('-h', dest='host', type=str, default='localhost', help='Host to connect to, defaults to localhost')
   parser.add_argument('port', metavar='PORT', type=int, help='Port on host to connect to')
@@ -25,25 +27,12 @@ if __name__ == '__main__':
     print 'Error connecting! Aborting'
     exit()
 
-  import os
-  print "------------dir-----------"
-  print os.path.dirname(os.path.realpath("."))
-  f = open('../../massive_params.txt', 'r')
-  # f = open('../../massive_params.txt', 'r')
-  lineStr = f.readline()
-  print "lineStr: " + str(lineStr)
-  line = lineStr.split(', ')
-  print "line: " + str(line)
-  param1 = line[0]
-  param2 = line[1]
-  f.close()
+  bot = mixedoppnew7_player.Mixedoppnew7Player()
 
-  print "-----------------------"
-  print "line: " + str(line)
-  print "param1: " + str(param1)
-  print "param2: " + str(param2)
-  print "param1+2: " + str(param1+param2)
-  print "-----------------------"
+  # Init the Param and assign it to the player
+  from bot.mixedoppnew7 import mixedoppnew7_param
+  param = mixedoppnew7_param.Mixedoppnew7Param()
+  param.readin_params()
+  bot.set_param(param)
 
-  bot = fold_player.FoldPlayer()
   bot.run(s)
