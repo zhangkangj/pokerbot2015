@@ -1,26 +1,32 @@
 from .. import base_player
-#import base_nash_bot
-
-from bot.mixed import mixed_bot
-
-#import mixedoppnew_opponent
+from bot.mixedoppnew6 import mixedoppnew6_bot
+from bot.mixedoppnew6 import mixedoppnew6_opponent
 
 import base_nash_bot
-
 
 class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
-    self.current_bot = mixed_bot.MixedBot(self) ## by defalt it uses mixed
-    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 300, '../../data/cfr/aws/prob_300_total.npy')
+    self.current_bot = mixedoppnew6_bot.Mixedoppnew6Bot(self) ## by defalt it uses mixedoppnew6
+    self.nash_bot1 = base_nash_bot.Base_nashBot(self, 30, '../../data/cfr/aws/prob_300_total.npy')
     self.current_bot_type = 'MIXED'
+    self.Bankrolls={};
+
 
 
   def new_game(self, parts):
-    print 'fdsafsdafsdafsda call new game bash nash'
+    print 
+    print '****New Game Start*******'
     super(Base_nashPlayer, self).new_game(parts)
+    if len(self.Bankrolls) == 0:
+      print 'This is the first game:INIT bankrolls'
+      self.Bankrolls[self.player_name]=0
+      self.Bankrolls[self.opp1_name] = 0
+      self.Bankrolls[self.opp2_name] = 0    
     
-    
+    #print 'call create_op,......................'
+    #self.create_opponents();
+
   def new_hand(self, parts):
     super(Base_nashPlayer, self).new_hand(parts);
     if self.num_active_player == 2 and (self.current_bot_type != 'NASH'):
@@ -28,15 +34,33 @@ class Base_nashPlayer(base_player.BasePlayer):
     	#self.current_bot = base_nash_bot.Base_nashBot(self, 100, ' ')
     	self.current_bot_type = 'NASH'
     	print 'Now change to nash bot for new hand'
-    elif self.num_active_player == 3 and (self.current_bot_type != 'MIXED'):
-    	self.current_bot = mixed_bot.MixedBot(self)
-    	self.current_bot_type = 'MIXED'
-    	print 'Now change to mixed bot for new hand'
+    elif self.num_active_player == 3 and (self.current_bot_type == 'NASH'):
+      if self.stack_rank == 3 and min(self.stack_sizes) < 50 and max(self.stack_sizes) > 450:
+        print "Should use tight here - depend on whether second person is tight";
+      elif self.stack_rank == 3 and min(self.stack_sizes) < 50 and max(self.stack_sizes) < 350:
+        print "Should use tight aggressive here"
+      elif self.stack_rank == 2 and self.stack_sizes[self.seat-1] < 100:
+        print "Should use tight conservative here"
+      else:
+        print "Should use normal here"
+      self.current_bot = mixedoppnew6_bot.Mixedoppnew6Bot(self)
+      self.current_bot_type = 'MIXED6'
+      print 'Now change to mixedoppnew6 bot for new hand'
     else:
     	print 'Current player:' + self.current_bot_type
     
   def handover(self, parts):
     super(Base_nashPlayer, self).handover(parts)
+    if max(self.stack_sizes) == 600: # the last hand in a game
+       # the last one already omitted. SO it is the last one in player_names
+      self.Bankrolls[self.player_names[-1]] += -80;
+      if self.stack_sizes[0] == 0:
+        self.Bankrolls[self.player_names[0]] += -20
+        self.Bankrolls[self.player_names[1]] += 100;
+      else:
+        self.Bankrolls[self.player_names[0]] += 100
+        self.Bankrolls[self.player_names[1]] += -20;
+      print '****************Current BANKROLLS:'+ str(self.Bankrolls)
 
 
   def prepare_last_actions(self,active_name,inactive_name,last_acts):
@@ -229,4 +253,80 @@ class Base_nashPlayer(base_player.BasePlayer):
     	##
     	##
     	##
+
+  def create_opponents(self):
+    #debug
+    print "-------------###--Mixedoppnew6Player.create_opponents()"
+  
+    # create a 'opponent model' 'opp0' for the player itself to store info for convenience
+    self.opp0 = mixedoppnew6_opponent.Mixedoppnew6Opponent(self.player_name, self);
+    # create models for the actual opponents
+    self.opp1 = mixedoppnew6_opponent.Mixedoppnew6Opponent(self.opp1_name, self);
+    self.opp2 = mixedoppnew6_opponent.Mixedoppnew6Opponent(self.opp2_name, self);
+
+    self.opponents = [self.opp0, self.opp1, self.opp2];    
+    print self.opp1
+
+  def discount_equity_for_opponent(self, original_equity, max_discount_factor=0):
+    #debug
+    print "-------------discount_equity_for_opponent(), original_equity: " + str(original_equity) + ", active_players: " + str(self.active_players)
+    opponent_equity_discount = self.eval_opponents() * max_discount_factor
+    #debug
+    print "-------------discount_equity_for_opponent(), opponent_equity_discount: " + str(opponent_equity_discount) + ", original equity:" + str(original_equity)
+    discounted_equity = (1-opponent_equity_discount) * original_equity
+    #debug
+    print "-------------discount_equity_for_opponent(), oppo discounted equity:" + str(discounted_equity)
+    return discounted_equity  
+
+  def eval_opponents(self):
+    max_opp_eval_limit = 1
+    min_opp_eval_limit = 0
+    less_opp_eval_threshold = 0.7
+
+    # default value to no effect by the opponents
+    result = min_opp_eval_limit
+
+    #debug
+    print "----------====> enter eval_opponents() "
+    #debug
+    print "----------====> active_players: " + str(self.active_players)
+    eval_opp_results=[]
+
+    # get actual opponents - 1st element is the player itself
+    opponents = self.opponents[1:]
+    
+
+    for opponent in opponents:
+      if opponent.is_active_in_game and opponent.is_active_in_hand: 
+        #debug
+        print "--------------====> about to evaluate opponent: " + str(opponent.oppo_name)
+        # call opponent's evaulation  
+        eval_result = opponent.eval_opponent()    
+        eval_opp_results.append(eval_result)
+        print "--------------====> completed evaluating opponent, eval_result:" + str(eval_result) + ", for: " + str(opponent.oppo_name) 
+    
+    print "------------====> completed evaluating all opponents, eval_opp_results:" + str(eval_opp_results)
+    
+    if len(eval_opp_results) > 1:
+      # if we evaluated two opponents
+      max_opp_eval = max(eval_opp_results)
+      min_opp_eval = min(eval_opp_results)
+      #debug
+      print "------------====> max_opp_eval: " + str(max_opp_eval) + ", min_opp_eval: " + str(min_opp_eval) 
+
+      # if the other opponent is also a significant threat 
+      if min_opp_eval > less_opp_eval_threshold * max_opp_eval_limit:
+        result = max_opp_eval + (max_opp_eval_limit - max_opp_eval) * min_opp_eval
+
+      #debug  
+      print "------------====> opp eval result with max, min: " + str(result)
+    elif len(eval_opp_results) == 1:
+      result = eval_opp_results[0]
+    else:
+      print "------------====> ERORR: no eval result generated"
+    
+    #debug
+    print "----------====> exit eval_opponents(), eval result: " + str(result)
+    
+    return result 
 		
