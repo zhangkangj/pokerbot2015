@@ -48,12 +48,13 @@ class BasePlayer(object):
     self.max_num_hand = int(parts[6])
     self.game_init_timebank = float(parts[7])
 
+    #print 'call create_op,......................'
     self.create_opponents();
 
 
   def create_opponents(self):
     #debug
-#    print "-------------###--MixedoppnewPlayer.create_opponents()" 
+    print "-------------###--.create_opponents()" 
   
     # create a 'opponent model' 'opp0' for the player itself to store info for convenience
     self.opp0 = base_opponent.BaseOpponent(self.player_name, self);
@@ -69,11 +70,14 @@ class BasePlayer(object):
   def new_hand(self, parts):
 
 #    print "-------====>enter: new_hand()"
+# # Max add this line
+#     self.opp0 = base_opponent.BaseOpponent(self.player_name, self);
 
-    # self.opp1 = base_opponent.BaseOpponent(self.opp1_name);
-    # self.opp2 = base_opponent.BaseOpponent(self.opp2_name);
-    # self.opponents = [self.opp1,self.opp2];
-
+# ####################
+#     self.opp1 = base_opponent.BaseOpponent(self.opp1_name, self);
+#     self.opp2 = base_opponent.BaseOpponent(self.opp2_name, self);
+#     self.opponents = [self.opp1,self.opp2];
+#
     for opponent in self.opponents:
       # clear the stats in opponents
       opponent.reset()
@@ -82,6 +86,7 @@ class BasePlayer(object):
     self.seat = int(parts[2])
     self.hole_cards = parts[3:5]
     self.init_stack_sizes = [int(x) for x in parts[5:8]]
+    self.stack_rank = len([x for x in self.init_stack_sizes if x >= self.init_stack_sizes[self.seat-1]])
     self.stack_sizes = self.init_stack_sizes
     self.player_names = parts[8:11]
     self.init_num_active_player = int(parts[11])
@@ -217,8 +222,6 @@ class BasePlayer(object):
 
   def handover(self, parts):
 
-
-
     self.stack_sizes = [int(x) for x in parts[1:4]]
     self.num_board_card = int(parts[4])
     self.board_cards = parts[5:(5+self.num_board_card)]
@@ -238,6 +241,7 @@ class BasePlayer(object):
     parts = message.split()
     word = parts[0]
     if word == 'NEWGAME':
+      print 'new game handle message-------------------'
       self.new_game(parts)
       self.current_bot.new_game()
     elif word == 'KEYVALUE':

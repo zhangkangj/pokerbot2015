@@ -356,7 +356,7 @@ cdef class PlayerNode(Node):
   cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                           int* bucket_seq_sb, int* bucket_seq_bb):
     cdef int node_bucket, i
-    cdef double* act_prob
+    cdef float* act_prob
     cdef float* util_sb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef float* util_bb_child = <float*> malloc(self.num_child * sizeof(float))
     cdef Node node
@@ -365,22 +365,20 @@ cdef class PlayerNode(Node):
     util_bb[0] = 0
     if self.is_sb:
       node_bucket = bucket_seq_sb[self.num_round]
-      act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
+      act_prob = <float*> (self.average_prob_ptr + node_bucket*self.num_child)
       for i in range(self.num_child):
         total_prob += act_prob[i]
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
-        print 'entering child node', i
         node.compute_util_(p_sb * act_prob[i] / total_prob, p_bb,
                           util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
     else:
       node_bucket = bucket_seq_bb[self.num_round]
-      act_prob = <double*> (self.average_prob_ptr + node_bucket*self.num_child)
+      act_prob = <float*> (self.average_prob_ptr + node_bucket*self.num_child)
       for i in range(self.num_child):
         total_prob += act_prob[i]
       for i in range(0, self.num_child):
         node = <Node> self.child_nodes[i]
-        print 'entering child node', i
         node.compute_util_(p_sb, p_bb * act_prob[i] / total_prob,
                            util_sb_child + i, util_bb_child + i, bucket_seq_sb, bucket_seq_bb)
     for i in range(0, self.num_child):
@@ -448,7 +446,8 @@ cdef class PlayerNode(Node):
     for i in range(0,self.num_child):
       prob_tmp[i] /= prob_sum_tmp
     return prob_tmp
-    
+
+
 cdef class RaiseNode(PlayerNode):
   def __init__(self, bint is_sb, int num_round, int pot_size, int stack_sb, int stack_bb,
                int amount_sb, int amount_bb, int min_bet, int num_bet, int raise_amount):
@@ -569,6 +568,7 @@ cdef class CheckNode(PlayerNode):
   def get_node_type(self):
     return 'CheckNode'
 
+
 cdef class FoldNode(Node):
   cdef:
     bint sb_win
@@ -600,6 +600,7 @@ cdef class FoldNode(Node):
     #print 'fold node', p_sb, p_bb, util_sb[0], util_bb[0]
   def get_node_type(self):
     return 'FoldNode'
+
 
 cdef class ShowdownNode(Node):
   cdef int pot_size

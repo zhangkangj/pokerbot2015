@@ -13,7 +13,7 @@ sqlite.db
 *.zip
 
 .gitignore
-
+fold.py
 
 /config.txt
 /pokerbot.sh
@@ -25,3 +25,6 @@ sqlite.db
 /backup
 
 /big_hand_data
+
+massive_params.txt
+

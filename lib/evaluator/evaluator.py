@@ -32,7 +32,7 @@ def evaluate_preflop(mc1_, mc2_, num_iter=1000):
   mc2 = util.num_to_card(mc2_)
   bucket = evaluator_cy.preflop_idx(mc1, mc2)
   mean = evaluate(mc1+mc2+':xx', '', '', num_iter)
-  return result, mean
+  return bucket, mean
 
 def evaluate_cards(a, b, c, d, e, f, g):
   aa = util.card_to_num(a)
