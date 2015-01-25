@@ -45,6 +45,7 @@ def VIH(LOGPATH, Folder, Team_1, Team_2, other_team, sequence):
           if pot_size > pot_size_limit and count not in index_list:
             count_can_store = True            
       else:
+
         str_list_1.append(temp_str)
         temp_str = row
         temp_p = row.split(' ').index(Team_researched) + 1
@@ -55,7 +56,7 @@ def VIH(LOGPATH, Folder, Team_1, Team_2, other_team, sequence):
           index_list.append(count)
           count_can_store = False
         count += 1
-    
+             
   with open(LOGPATH + FILENAME_2,'r') as f:
     count = 0
     for row in f.readlines():
@@ -86,8 +87,7 @@ def VIH(LOGPATH, Folder, Team_1, Team_2, other_team, sequence):
       try:
         f.write('**************************************************************\r\n')
         f.write(str_list_1[index])    
-        f.write(str_list_2[index])    
-        f.write('**************************************************************\r\n')
+        f.write(str_list_2[index])     
       except:
         continue
   f.close()
