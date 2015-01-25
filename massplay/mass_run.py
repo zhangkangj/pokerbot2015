@@ -107,29 +107,32 @@ if __name__ == '__main__':
   # Variables
   opp_discount_lim_min = 0.01
   opp_discount_lim_max = 0.49
-  opp_discount_lim_sample_size = 1
+  opp_discount_lim_sample_size = 5
   total_num_games *= opp_discount_lim_sample_size
   opp_discount_lim_paras = [round(y, precision) for y in list(numpy.linspace(opp_discount_lim_min, opp_discount_lim_max, num=opp_discount_lim_sample_size))]
+  opp_discount_lim_paras = opp_discount_lim_paras[1:]
+  opp_discount_lim_paras = opp_discount_lim_paras[:-2]
 
   low_card_up_lim_min = 0.01
   low_card_up_lim_max = 0.98
-  low_card_up_lim_sample_size = 1
+  low_card_up_lim_sample_size = 5
   total_num_games *= low_card_up_lim_sample_size
   low_card_up_lim_paras = [round(x, precision) for x in list(numpy.linspace(low_card_up_lim_min, low_card_up_lim_max, num=low_card_up_lim_sample_size))]
+  low_card_up_lim_paras = low_card_up_lim_paras[1:]
+  low_card_up_lim_paras = low_card_up_lim_paras[:-2]
 
   mid_card_up_lim_max = 0.99
-  mid_card_up_lim_sample_size = 1
+  mid_card_up_lim_sample_size = 5
   total_num_games *= mid_card_up_lim_sample_size
   # mid_card_up_lim_paras_2d = []
 
   high_card_up_lim_max = 1.0
-  high_card_up_lim_sample_size = 1
+  high_card_up_lim_sample_size = 5
   total_num_games *= high_card_up_lim_sample_size
   # high_card_up_lim_paras_3d = []
 
-  num_run_per_param_set = 1
+  num_run_per_param_set = 3
   total_num_games *= num_run_per_param_set
-
 
   # global result list
   all_stats_tuple_list = []
@@ -143,8 +146,12 @@ if __name__ == '__main__':
 
   for low_card_up_lim in low_card_up_lim_paras:
     mid_card_up_lim_paras = [round(k, precision) for k in list(numpy.linspace(low_card_up_lim, mid_card_up_lim_max, num=mid_card_up_lim_sample_size))]
+    mid_card_up_lim_paras = mid_card_up_lim_paras[1:]
+    mid_card_up_lim_paras = mid_card_up_lim_paras[:-2]    
     for mid_card_up_lim in mid_card_up_lim_paras:
       high_card_up_lim_paras = [round(m, precision) for m in list(numpy.linspace(mid_card_up_lim, high_card_up_lim_max, num=high_card_up_lim_sample_size))]
+      high_card_up_lim_paras = high_card_up_lim_paras[1:]
+      high_card_up_lim_paras = high_card_up_lim_paras[:-2]          
       for high_card_up_lim in high_card_up_lim_paras:
         for opp_discount_lim in opp_discount_lim_paras:
           # -- Clean up before running 
