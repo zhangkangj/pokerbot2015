@@ -41,7 +41,7 @@ class Base_nashBot(base_bot.BaseBot):
         output = self.move_current_node(action)
         if output == 'Showdown':
           return self.check_call(can_raise, can_bet, can_call)
-        elif output == 'Call4bet':
+        elif output == '4bet':
           call_amount = int([action1 for action1 in self.player.legal_actions if 'CALL' in action1][0].split(':')[1])              
           return 'CALL:' + str(call_amount)
         elif output == 'Normal':
@@ -55,6 +55,7 @@ class Base_nashBot(base_bot.BaseBot):
     if self.current_node.get_node_type() == 'ShowdownNode':
       return self.check_call(can_raise,can_bet,can_call)    
     bucket = self.get_bucket()
+    print self.current_node.get_node_type(), 'print node type before act prob'
     prob = self.current_node.get_act_prob(bucket)
     #draw random number from uniform(0,1), then choose the corresponding node
     r = np.random.uniform(0,1)
@@ -67,7 +68,7 @@ class Base_nashBot(base_bot.BaseBot):
     #chose index as the next action, find call_amount in legal action for later use
     print 'last_actions:', self.player.last_actions
     print 'current node type:', self.current_node.get_node_type(), 'bucket:', bucket, 'action probability', prob
-    print 'choosing node', index, ' from', self.current_node.get_num_child(), 'child nodes:'
+    print 'choosing node', index + 1, 'th node from', self.current_node.get_num_child(), 'child nodes:'
     
     #situation 1:   
     if not can_raise and not can_bet:
