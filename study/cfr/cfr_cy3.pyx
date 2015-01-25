@@ -295,14 +295,12 @@ cdef class PlayerNode(Node):
     for i in range(self.num_child):
       node = <Node> self.child_nodes[i]
       node.initialize_regret()
-    
+
   cdef void transit(self, float p_sb, float p_bb, float p_sample, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
     cdef double* act_prob = <double*> malloc(self.num_child * sizeof(double))
     cdef int node_bucket, i, node_index
     cdef Node node
-    util_sb[0] = 0
-    util_bb[0] = 0
     #update action probablity from regret    
     #traverse tree to compute utilities of child nodes
     self.random_int = (self.random_int * 1140671485 + 12820163) % 16777216
@@ -315,7 +313,7 @@ cdef class PlayerNode(Node):
       node.transit(p_sb * act_prob[node_index], p_bb, p_sample, util_sb, util_bb,
                    bucket_seq_sb, bucket_seq_bb)
       #compute new regrets
-      print 'sampling sb', util_sb[0], p_sb, p_sample
+      #print 'sampling sb', util_sb[0], p_sb, p_sample
       for i in range(self.num_child):
         self.regret_ptr[node_bucket * self.num_child + i] += -util_sb[0] * p_sb
       self.regret_ptr[node_bucket * self.num_child + node_index] += util_sb[0]
@@ -328,7 +326,7 @@ cdef class PlayerNode(Node):
       node.transit(p_sb, p_bb * act_prob[node_index], p_sample, util_sb, util_bb,
                    bucket_seq_sb, bucket_seq_bb)
       #compute new regrets
-      print 'sampling bb', util_bb[0], p_sb, p_sample
+      #print 'sampling bb', util_bb[0], p_sb, p_sample
       for i in range(self.num_child):
         self.regret_ptr[node_bucket * self.num_child + i] += - util_bb[0] * p_bb
       self.regret_ptr[node_bucket * self.num_child + node_index] += util_bb[0]
