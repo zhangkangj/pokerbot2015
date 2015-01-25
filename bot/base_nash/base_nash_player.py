@@ -155,52 +155,6 @@ class Base_nashPlayer(base_player.BasePlayer):
       self.last_actions_turn_init = self.further_process_init(self.last_actions_turn_init)
       self.last_actions_river_init = self.further_process_init(self.last_actions_river_init)
 
-
-      # if len(self.last_actions_preflop_init) > 2 and self.last_actions_preflop_init[-1][1] == 'CALL' and self.last_actions_preflop_init[-2][1] == 'CALL':
-      #   self.last_actions_preflop_init.pop()
-      # if len(self.last_actions_preflop_init) > 2:
-      #   raiseflag = 0;
-      #   for i in range(-1,-len(self.last_actions_preflop_init)-1,-1):
-      #     if self.last_actions_preflop_init[i][1] in ['RAISE','BET']:
-      #       raiseflag = 1;
-      #     elif raiseflag == 1 and self.last_actions_preflop_init[i][1] in ['CALL','CHECK']:
-      #       newtup = (self.last_actions_preflop_init[i][0],'RAISE',max(0,self.last_actions_preflop_init[i][2])+1);
-      #       self.last_actions_preflop_init[i] = newtup;
-      #       raiseflag = 0;
-      # if len(self.last_actions_flop_init) > 2 and self.last_actions_flop_init[-1][1] == 'CALL' and self.last_actions_flop_init[-2][1] == 'CALL':
-      #   self.last_actions_flop_init.pop()
-      # if len(self.last_actions_flop_init) > 2:
-      #   raiseflag = 0;
-      #   for i in range(-1,-len(self.last_actions_flop_init)-1,-1):
-      #     if self.last_actions_flop_init[i][1] in ['RAISE','BET'] : 
-      #       raiseflag = 1;
-      #     elif raiseflag == 1 and self.last_actions_flop_init[i][1] in ['CALL','CHECK']:      
-      #       newtup = (self.last_actions_flop_init[i][0],'RAISE',max(0,self.last_actions_flop_init[i][2])+1);
-      #       self.last_actions_flop_init[i] = newtup;
-      #       raiseflag = 0;
-      # if len(self.last_actions_turn_init) > 2 and self.last_actions_turn_init[-1][1] == 'CALL' and self.last_actions_turn_init[-2][1] == 'CALL':
-      #   self.last_actions_turn_init.pop()
-      # if len(self.last_actions_turn_init) > 2:
-      #   raiseflag = 0;
-      #   for i in range(-1,-len(self.last_actions_turn_init)-1,-1):
-      #     if self.last_actions_turn_init[i][1] in ['RAISE','BET'] :
-      #       raiseflag = 1;
-      #     elif raiseflag == 1 and self.last_actions_turn_init[i][1] in ['CALL','CHECK']:
-      #       newtup = (self.last_actions_turn_init[i][0],'RAISE',max(0,self.last_actions_flop_init[i][2])+1);
-      #       self.last_actions_turn_init[i] = newtup;
-      #       raiseflag = 0;
-      # if len(self.last_actions_river_init) > 2 and self.last_actions_river_init[-1][1] == 'CALL' and self.last_actions_river_init[-2][1] == 'CALL':
-      #   self.last_actions_river_init.pop()
-      # if len(self.last_actions_river_init) > 2 :
-      #   raiseflag = 0;
-      #   for i in range(-1,-len(self.last_actions_river_init)-1,-1):
-      #     if self.last_actions_river_init[i][1] in ['RAISE','BET'] :
-      #       raiseflag = 1;
-      #     elif raiseflag == 1 and self.last_actions_river_init[i][1] in ['CALL','CHECK']:
-      #       newtup = (self.last_actions_river_init[i][0],'RAISE',max(0,self.last_actions_flop_init[i][2])+1);
-      #       self.last_actions_river_init[i] = newtup;
-      #       raiseflag = 0;
-
       action_seq = self.last_actions_preflop_init      
       if self.num_board_card >= 3:
         action_seq = action_seq + [('FLOP', 'DEAL', None)] + self.last_actions_flop_init
