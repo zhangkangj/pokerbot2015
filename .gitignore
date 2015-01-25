@@ -17,6 +17,7 @@ fold.py
 
 /config.txt
 /pokerbot.sh
+/run_match.sh
 
 /log
 /logs
