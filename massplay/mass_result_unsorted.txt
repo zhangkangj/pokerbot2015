@@ -1,0 +1,1 @@
+{MixedOppNewSeven, w:2, 2:0, 3:4, T:594}{MixedOppNewSix, w:4, 2:0, 3:2, T:1861}{Fold, w:0, 2:6, 3:0, T:1145}, [0.01, 0.01, 0.01, 0.01]

@@ -1,9 +1,8 @@
 import player_stats
 
 class AllStats(object):
-  def __init__(self, player_list, param_list):
+  def __init__(self, player_list):
     self.player_list = player_list
-    self.param_list = param_list
 
     self.stats_dict = {}
 
@@ -12,14 +11,20 @@ class AllStats(object):
       self.stats_dict[player] = player_stats.PlayerStats(player)
 
   def output(self):
-    outpoutline = ""
-    outputline += str(self.param_list)
+    outputline = ""
 
-    #TODO:
-    for player_stat in self.stat_dict:
-      outputline = player_stat.
+    sorted(self.stats_dict, key=self.stats_dict.get)
+    for player_name, stat in self.stats_dict.iteritems():
+      outputline += str("{" + player_name + ", w:" + str(stat.win) + ", 2:" 
+        + str(stat.second) + ", 3:" + str(stat.third) 
+        + ", T:" + str(stat.total_game_end_stack)) + "}"
 
-    outputline += str(player1.)
+    return outputline  
+
+  def get_player_win_total(self, player):
+    player_stat = self.stats_dict[player]
+    return player_stat.win
+
 
   def update_stats(self, last_hand_stack_str):
     game_end_playerstacks = last_hand_stack_str.split(", ")
@@ -28,14 +33,21 @@ class AllStats(object):
     # player 1
     game_end_playerstacks1 = game_end_playerstacks[1].rstrip(")").split(" (")
     game_end_player1 = game_end_playerstacks1[0]
+    # we have extra digit in triplicate 
+    if game_end_player1[-1].isdigit():
+      game_end_player1 = game_end_player1[:-1]
     game_end_stack1 = int(game_end_playerstacks1[1])
     # player 2
     game_end_playerstacks2 = game_end_playerstacks[2].rstrip(")").split(" (")
     game_end_player2 = game_end_playerstacks2[0]
+    if game_end_player2[-1].isdigit():
+      game_end_player2 = game_end_player2[:-1]
     game_end_stack2 = int(game_end_playerstacks2[1])
     # player 3
     game_end_playerstacks3 = game_end_playerstacks[3].rstrip(")").split(" (")
     game_end_player3 = game_end_playerstacks3[0]
+    if game_end_player3[-1].isdigit():
+      game_end_player3 = game_end_player3[:-1]    
     game_end_stack3 = int(game_end_playerstacks3[1])
 
     max_stack = max([game_end_stack1, game_end_stack2, game_end_stack3])
