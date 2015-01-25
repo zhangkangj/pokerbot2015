@@ -30,7 +30,7 @@ seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
 cum_time = 0
 start_time = time.time()
-for i in range(10000):
+for i in range(100000):
   for sb, bb, _ in itertools.permutations([0,1,2]):
     seq1[3] = seq1[4] = sb
     seq2[3] = seq2[4] = bb
@@ -48,14 +48,14 @@ for i in range(10000):
     start_time = time.time()
 
 
-root = cfr_cy3.RoundNode(3, 2, 1, 1)
-root.initialize_regret()
-seq1 = np.array([0, 0, 0, 0, 0])
-seq2 = np.array([0, 0, 0, 0, 0])
-seq1[3] = seq1[4] = 0
-seq2[3] = seq2[4] = 2
-root.run_cfr(seq1, seq2)
-print 'sb: root              ', normalize(root.child_nodes[0].average_prob[0:6])
-print 'bb: sb check          ', normalize(root.child_nodes[0].child_nodes[0].average_prob[0:6])
-print 'bb: sb raise          ', normalize(root.child_nodes[0].child_nodes[1].average_prob[0:6])
-print 'sb: sb check, bb raise', normalize(root.child_nodes[0].child_nodes[0].child_nodes[1].average_prob[0:6])
+#root = cfr_cy3.RoundNode(3, 2, 1, 1)
+#root.initialize_regret()
+#seq1 = np.array([0, 0, 0, 0, 0])
+#seq2 = np.array([0, 0, 0, 0, 0])
+#seq1[3] = seq1[4] = 0
+#seq2[3] = seq2[4] = 2
+#root.run_cfr(seq1, seq2)
+print 'sb: root              ', root.child_nodes[0].average_prob[0:6]
+print 'bb: sb check          ', root.child_nodes[0].child_nodes[0].average_prob[0:6]
+print 'bb: sb raise          ', root.child_nodes[0].child_nodes[1].average_prob[0:6]
+print 'sb: sb check, bb raise', root.child_nodes[0].child_nodes[0].child_nodes[1].average_prob[0:6]

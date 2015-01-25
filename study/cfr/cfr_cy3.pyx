@@ -271,7 +271,7 @@ cdef class PlayerNode(Node):
     float* average_prob_ptr
     int pot_size
     int raise_amount
-    int random_int
+    unsigned int random_int
 
   def __init__(self, bint is_sb, int num_round):
     self.is_sb = is_sb
@@ -308,19 +308,23 @@ cdef class PlayerNode(Node):
       node_bucket = bucket_seq_sb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child, p_sb/p_sample)
       node_index = self.sample_action(act_prob, self.random_int/16777216.0)
+ #     print 'sb', act_prob[0], act_prob[1], node_index, self.random_int/16777216.0
       p_sample = p_sample * (act_prob[node_index] + 0.3/self.num_child) * 1.3
       node = <Node> self.child_nodes[node_index]
+#      print 'node_index', node_index
       node.transit(p_sb * act_prob[node_index], p_bb, p_sample, util_sb, util_bb,
                    bucket_seq_sb, bucket_seq_bb)
       #compute new regrets
       #print 'sampling sb', util_sb[0], p_sb, p_sample
       for i in range(self.num_child):
-        self.regret_ptr[node_bucket * self.num_child + i] += -util_sb[0] * p_sb
+        self.regret_ptr[node_bucket * self.num_child + i] += -util_sb[0] * act_prob[node_index]
       self.regret_ptr[node_bucket * self.num_child + node_index] += util_sb[0]
+  #    util_sb[0] *= act_prob[node_index]      
     else:
       node_bucket = bucket_seq_bb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child, p_bb/p_sample)
       node_index = self.sample_action(act_prob, self.random_int/16777216.0)
+#      print 'bb', act_prob[0], act_prob[1], node_index, self.random_int/16777216.0
       p_sample = p_sample * (act_prob[node_index] + 0.3/self.num_child) * 1.3
       node = <Node> self.child_nodes[node_index]
       node.transit(p_sb, p_bb * act_prob[node_index], p_sample, util_sb, util_bb,
@@ -328,8 +332,9 @@ cdef class PlayerNode(Node):
       #compute new regrets
       #print 'sampling bb', util_bb[0], p_sb, p_sample
       for i in range(self.num_child):
-        self.regret_ptr[node_bucket * self.num_child + i] += - util_bb[0] * p_bb
+        self.regret_ptr[node_bucket * self.num_child + i] += - util_bb[0] * act_prob[node_index]
       self.regret_ptr[node_bucket * self.num_child + node_index] += util_bb[0]
+  #    util_bb[0] *= act_prob[node_index]
     free(act_prob)
     #print 'player node', p_sb, p_bb, util_sb[0], util_bb[0]
     
@@ -345,7 +350,7 @@ cdef class PlayerNode(Node):
         self.average_prob_ptr[offset + i] += weight * result[i]
     else:
       for i in range(self.num_child):
-        result[i] = 1.0 / self.num_child
+        result[i] = 1.0 / self.num_child      
         self.average_prob_ptr[offset + i] += weight * result[i]
 
   cdef int sample_action(self, double* prob, float random_float):
@@ -356,7 +361,6 @@ cdef class PlayerNode(Node):
       cum_prob += prob[i] + 0.3/self.num_child
       if cum_prob > random_float:
         return i
-    assert False, ('sampling error', cum_prob, random_float, i)
     return self.num_child - 1
 
   cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
@@ -592,13 +596,13 @@ cdef class FoldNode(Node):
   cdef void transit(self, float p_sb, float p_bb, float p_sample, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
     cdef float utility
-    utility = self.win_amount * p_sample * (p_bb if self.is_sb else p_sb)
+    utility = self.win_amount / p_sample
     if self.sb_win:
-      util_sb[0] = utility
-      util_bb[0] = -utility
+      util_sb[0] = utility * p_bb
+      util_bb[0] = -utility * p_sb
     else:
-      util_sb[0] = -utility
-      util_bb[0] = utility
+      util_sb[0] = -utility * p_bb
+      util_bb[0] = utility * p_sb
 
   cdef void compute_util_(self, float p_sb, float p_bb, float* util_sb, float* util_bb,
                           int* bucket_seq_sb, int* bucket_seq_bb):
@@ -625,13 +629,13 @@ cdef class ShowdownNode(Node):
   cdef void transit(self, float p_sb, float p_bb, float p_sample, float* util_sb, float* util_bb,
                     int* bucket_seq_sb, int* bucket_seq_bb):
     cdef float utility
-    utility = self.pot_size * p_sample * (p_bb if self.is_sb else p_sb) / 2.0
+    utility = self.pot_size / p_sample / 2.0
     if bucket_seq_sb[4] > bucket_seq_bb[4]:
-      util_sb[0] = utility
-      util_bb[0] = -utility
+      util_sb[0] = utility * p_bb
+      util_bb[0] = -utility * p_sb
     elif bucket_seq_sb[4] < bucket_seq_bb[4]:
-      util_sb[0] = -utility
-      util_bb[0] = utility
+      util_sb[0] = -utility * p_bb
+      util_bb[0] = utility * p_sb
     else:
       util_sb[0] = 0
       util_bb[0] = 0
