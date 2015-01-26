@@ -14,9 +14,9 @@ import scipy.stats as sp
 class TightAggressiveBot(base_bot.BaseBot):
 
   def __init__(self,player):
-    self.flop_buckets = np.load('data/evaluator/flop_bucket.npy')
-    self.turn_buckets = np.load('data/evaluator/turn_bucket.npy') 
-    self.prob_arr = np.load('data/evaluator/preflop_prob.npy')
+    self.flop_buckets = np.load('../../data/evaluator/flop_bucket.npy')
+    self.turn_buckets = np.load('../../data/evaluator/turn_bucket.npy') 
+    self.prob_arr = np.load('../../data/evaluator/preflop_prob.npy')
     self.player = player
     
   def action(self):

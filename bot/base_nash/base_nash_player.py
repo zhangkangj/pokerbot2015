@@ -11,7 +11,7 @@ class Base_nashPlayer(base_player.BasePlayer):
     super(Base_nashPlayer, self).__init__()
     self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
      ## by defalt it uses mixedoppnew6
-    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, 'data/cfr/aws/prob_300_total.npy')
+    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, '../../data/cfr/aws/prob_300_total.npy')
     self.nash_bot_200 = []
     self.nash_bot_140 = []
     self.nash_bot_90 = []
