@@ -30,12 +30,12 @@ seq1 = np.array([0, 0, 0, 0, 0])
 seq2 = np.array([0, 0, 0, 0, 0])
 cum_time = 0
 start_time = time.time()
-for i in range(100000):
+for i in range(1000000):
   for sb, bb, _ in itertools.permutations([0,1,2]):
     seq1[3] = seq1[4] = sb
     seq2[3] = seq2[4] = bb
     root.run_cfr(seq1, seq2)
-  if time.time() - start_time > 0.1:
+  if time.time() - start_time > 0.01:
     cum_time += time.time() - start_time
     util_sb = util_bb = 0.0
     for sb, bb, _ in itertools.permutations([0,1,2]):

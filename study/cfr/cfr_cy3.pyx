@@ -309,7 +309,7 @@ cdef class PlayerNode(Node):
       self.compute_prob(act_prob, node_bucket*self.num_child, p_sb/p_sample)
       node_index = self.sample_action(act_prob, self.random_int/16777216.0)
  #     print 'sb', act_prob[0], act_prob[1], node_index, self.random_int/16777216.0
-      p_sample = p_sample * (act_prob[node_index] + 0.3/self.num_child) * 1.3
+      p_sample = p_sample * (act_prob[node_index] + 0.3/self.num_child) / 1.3
       node = <Node> self.child_nodes[node_index]
 #      print 'node_index', node_index
       node.transit(p_sb * act_prob[node_index], p_bb, p_sample, util_sb, util_bb,
@@ -319,13 +319,13 @@ cdef class PlayerNode(Node):
       for i in range(self.num_child):
         self.regret_ptr[node_bucket * self.num_child + i] += -util_sb[0] * act_prob[node_index]
       self.regret_ptr[node_bucket * self.num_child + node_index] += util_sb[0]
-  #    util_sb[0] *= act_prob[node_index]      
+      util_sb[0] *= act_prob[node_index]      
     else:
       node_bucket = bucket_seq_bb[self.num_round]
       self.compute_prob(act_prob, node_bucket*self.num_child, p_bb/p_sample)
       node_index = self.sample_action(act_prob, self.random_int/16777216.0)
 #      print 'bb', act_prob[0], act_prob[1], node_index, self.random_int/16777216.0
-      p_sample = p_sample * (act_prob[node_index] + 0.3/self.num_child) * 1.3
+      p_sample = p_sample * (act_prob[node_index] + 0.3/self.num_child) / 1.3
       node = <Node> self.child_nodes[node_index]
       node.transit(p_sb, p_bb * act_prob[node_index], p_sample, util_sb, util_bb,
                    bucket_seq_sb, bucket_seq_bb)
@@ -334,7 +334,7 @@ cdef class PlayerNode(Node):
       for i in range(self.num_child):
         self.regret_ptr[node_bucket * self.num_child + i] += - util_bb[0] * act_prob[node_index]
       self.regret_ptr[node_bucket * self.num_child + node_index] += util_bb[0]
-  #    util_bb[0] *= act_prob[node_index]
+      util_bb[0] *= act_prob[node_index]
     free(act_prob)
     #print 'player node', p_sb, p_bb, util_sb[0], util_bb[0]
     
