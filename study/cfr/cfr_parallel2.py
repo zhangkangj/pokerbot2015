@@ -22,8 +22,6 @@ NUM_ITER = 5000
 NUM_GEN = 1000
 NUM_NODE = 14688512
 STACK_SIZE = 300
-REGRET_FILE = 'data/regret_%d_total4' % STACK_SIZE
-PROB_FILE = 'data/prob_%d_total4' % STACK_SIZE
 
 def parallel_cfr(index, num_iter, num_gen, initial_regret, initial_prob, final_regret, final_prob):
   print 'creating root', index, num_iter, num_gen
@@ -79,6 +77,8 @@ if __name__ == '__main__':
   if args.ni is not None:
     NUM_ITER = int(args.ni)
   print 'STACK_SIZE=', STACK_SIZE, 'NUM_THREAD=', NUM_THREAD, 'NUM_ITER=', NUM_ITER
+  REGRET_FILE = 'data/regret4_%d_total' % STACK_SIZE
+  PROB_FILE = 'data/prob4_%d_total' % STACK_SIZE
   regret = np.zeros(NUM_NODE, dtype=np.float64)
   try:
     regret = np.load(REGRET_FILE+'.npy')
