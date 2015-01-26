@@ -11,7 +11,7 @@ from lib import util
 import numpy as np
 import scipy.stats as sp
 
-class TightAggressiveBot(base_bot.BaseBot):
+class TightConservativeBot(base_bot.BaseBot):
 
   def __init__(self,player):
     self.flop_buckets = np.load('../../data/evaluator/flop_bucket.npy')
@@ -27,7 +27,7 @@ class TightAggressiveBot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(TightAggressiveBot, self).action(can_raise, can_bet, can_call)
+    return super(TightConservativeBot, self).action(can_raise, can_bet, can_call)
 
   def preflop_idx(self,cards):
     c = util.c2n(cards)
@@ -135,12 +135,12 @@ class TightAggressiveBot(base_bot.BaseBot):
     elif rd < prob_cum[2]:
       if can_bet:
         # medium bet
-        bet_amount = (int([action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]) + int([action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]))/2
+        bet_amount =  int([action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2])
         result = 'BET:' + str(bet_amount)        
         print 'betting', result
       else:
         # medium raise
-        raise_amount = (int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]) + int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2]))/2
+        raise_amount = int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2])
         result = 'RAISE:' + str(raise_amount)
         print 'raising', result
     else:
