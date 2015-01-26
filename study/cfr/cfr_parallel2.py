@@ -21,8 +21,6 @@ NUM_ITER = 5000
 NUM_GEN = 1000
 NUM_NODE = 14688512
 STACK_SIZE = 300
-REGRET_FILE = 'data/regret_%d_total4' % STACK_SIZE
-PROB_FILE = 'data/prob_%d_total4' % STACK_SIZE
 
 def parallel_cfr(index, num_iter, num_gen, initial_regret, initial_prob, final_regret, final_prob):
   print 'creating root', index, num_iter, num_gen
@@ -57,41 +55,62 @@ def run_cfr(root, index, num_iter, num_gen):
     util_sb += util_sb_
     util_bb += util_bb_
     if i%100 == 0:
-      print num_gen, index, i, time.time()-start_time, util_sb/i, util_bb/i
+      print num_gen, index, i, time.time()-start_time, util_sb/i, util_bb/i, STACK_SIZE
       start_time = time.time()
   regret = root.dump_regret()
   prob = root.dump_prob()
   return regret, prob
   
 
-regret = np.zeros(NUM_NODE, dtype=np.float64)
-try:
-  regret = np.load(REGRET_FILE+'.npy')
-except:
-  pass
-prob = np.zeros(NUM_NODE, dtype=np.float32)
-try:
-  prob = np.load(PROB_FILE+'.npy')
-except:
-  pass
-print 'initialized'
-
-for i in range(0, NUM_GEN):
-  processes = []
-  results = [(multiprocessing.Array(ctypes.c_double, NUM_NODE), multiprocessing.Array(ctypes.c_float, NUM_NODE)) for i in range(NUM_THREAD)]
-  for j in range(NUM_THREAD):
-    thread_args = (j, NUM_ITER, i, regret, prob, results[j][0], results[j][1])
-    p = multiprocessing.Process(target=parallel_cfr, args=thread_args)
-    p.start()
-    processes.append(p)
-  for p in processes:
-    p.join()
-  current_regret = np.zeros(NUM_NODE, dtype=np.float64)
-  current_prob   = np.zeros(NUM_NODE, dtype=np.float32)
-  for j in range(NUM_THREAD):
-    current_regret += np.frombuffer(results[j][0].get_obj(), dtype=np.float64)
-    current_prob   += np.frombuffer(results[j][1].get_obj(), dtype=np.float32)
-  regret += current_regret * (i**0.5) / float(NUM_THREAD)
-  prob   += current_prob   * (i**0.5) / float(NUM_THREAD)
-  np.save(REGRET_FILE, regret)
-  np.save(PROB_FILE, prob)
+if __name__ == '__main__':
+  import argparse
+  parser = argparse.ArgumentParser(description='parallel')
+  parser.add_argument('-ss', action='store')
+  parser.add_argument('-nt', action='store')
+  parser.add_argument('-ni', action='store')
+  parser.add_argument('-ng', action='store')
+  args = parser.parse_args()
+  if args.ss is not None:
+    STACK_SIZE = int(args.ss)
+    root = cfr_cy4.RoundNode(0, 0, STACK_SIZE, STACK_SIZE)
+    NUM_NODE = root.dump_prob().size
+  if args.nt is not None:
+    NUM_THREAD = int(args.nt)
+  if args.ni is not None:
+    NUM_ITER = int(args.ni)
+  if args.ng is not None:
+    NUM_GEN = int(args.ng)
+  print 'STACK_SIZE=', STACK_SIZE, 'NUM_THREAD=', NUM_THREAD, 'NUM_ITER=', NUM_ITER
+  REGRET_FILE = 'data/regret4_%d_total' % STACK_SIZE
+  PROB_FILE = 'data/prob4_%d_total' % STACK_SIZE
+  regret = np.zeros(NUM_NODE, dtype=np.float64)
+  try:
+    regret = np.load(REGRET_FILE+'.npy')
+  except:
+    pass
+  prob = np.zeros(NUM_NODE, dtype=np.float32)
+  try:
+    prob = np.load(PROB_FILE+'.npy')
+  except:
+    pass
+  print 'initialized'
+  
+  for i in range(0, NUM_GEN):
+    processes = []
+    results = [(multiprocessing.Array(ctypes.c_double, NUM_NODE), multiprocessing.Array(ctypes.c_float, NUM_NODE)) for j in range(NUM_THREAD)]
+    for j in range(NUM_THREAD):
+      thread_args = (j, NUM_ITER, i, regret, prob, results[j][0], results[j][1])
+      p = multiprocessing.Process(target=parallel_cfr, args=thread_args)
+      p.start()
+      processes.append(p)
+    for p in processes:
+      p.join()
+    current_regret = np.zeros(NUM_NODE, dtype=np.float64)
+    current_prob   = np.zeros(NUM_NODE, dtype=np.float32)
+    for j in range(NUM_THREAD):
+      current_regret += np.frombuffer(results[j][0].get_obj(), dtype=np.float64)
+      current_prob   += np.frombuffer(results[j][1].get_obj(), dtype=np.float32)
+    regret += current_regret * (i**0.5) / float(NUM_THREAD)
+    prob   += current_prob   * (i**0.5) / float(NUM_THREAD)
+    np.save(REGRET_FILE, regret)
+    np.save(PROB_FILE, prob)
