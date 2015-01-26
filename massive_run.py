@@ -6,36 +6,24 @@ from massplayutil import all_stats, player_stats
 
 def writeAllStats(all_stats_tuples, result_output_file):
   # Sort all the result by the number of wins of the player of interest
-  # sorted_all_stats_tuple_list = sorted(all_stats_tuples, key=lambda x: (x[1], x[2]), reverse=True)
-  # sort will sort by each of the element of its tuple member by default 
-  sorted_all_stats_tuple_list = sorted(all_stats_tuples, reverse=True)
+  sorted_all_stats_tuple_list = sorted(all_stats_tuples, key=getFirstEleAsKey, reverse=True)
 
   # Write result to a file
   with open(result_output_file, 'w') as f:
     for all_stats_tuple in sorted_all_stats_tuple_list:
-      all_stats_str = all_stats_tuple[1]
-      param_list = all_stats_tuple[2]
-      f.write('%s, %s\n' % (all_stats_str, str(param_list)))
-
-def writeOneStats(stats_tuple, one_stats_output_file):
-  # Write result to a file
-  with open(one_stats_output_file, 'a') as f:
-    stats_str = stats_tuple[1]
-    param_list = stats_tuple[2]
-    f.write('%s, %s\n' % (stats_str, str(param_list)))
+      param_all_stats_str = all_stats_tuple[1]
+      param_val_list = all_stats_tuple[2]
+      f.write('%s, %s\n' % (param_all_stats_str, str(param_val_list)))
 
 def generateAllStatsTuple(result_dir, player_list, params_list, name_of_interest):
     # generate stats from the *.txt files in the result dir
   all_stats_for_curr_params = generateAllStats(result_dir, player_names)
   
-  # - Use the total win for the current param combo for the player of interest, as 1st sort key 
-  player_win = all_stats_for_curr_params.get_player_win_total(name_of_interest)
-    # - Use the total win for the current param combo for the player of interest, as 1st sort key 
-  player_total_end_stack = all_stats_for_curr_params.get_player_end_stack_total(name_of_interest)
-  
+  # - Use the total win for the current param combo for the player of interest as key, 
+  key_player_win = all_stats_for_curr_params.get_player_win_total(name_of_interest)
   # - Use the total stats info for all player after all games for the current param combo as value
   curr_param_stats_str = all_stats_for_curr_params.output()
-  all_stats_tuple = (player_win, player_total_end_stack, curr_param_stats_str, param_list)
+  all_stats_tuple = (key_player_win, curr_param_stats_str, param_list)
   return all_stats_tuple
 
 def generateAllStats(result_dir, player_list):
@@ -67,12 +55,6 @@ def generateAllStats(result_dir, player_list):
 
   return stats
           
-def generateLinearListExclEnds(min_lim, max_lim, size, deci_precision):
-  result_list = [round(y, deci_precision) for y in list(numpy.linspace(min_lim, max_lim, num=(size+2)))]
-  result_list = result_list[1:]
-  result_list = result_list[:-1]
-  return result_list
-
 def getFirstEleAsKey(tuple):
   return tuple[0]
 
@@ -88,24 +70,19 @@ if __name__ == '__main__':
 
   import time
   start = time.time()
-  game_start = start
 
   # Player name last char cannot be digit
-  player_names = ["MixedOppNewSeven", "MixedOppNewSix", "Fold"]
+  player_names = ["MixedOppNewSeven", "MixedOppNewSix", "FoldNew"]
 
   player_of_interest = "MixedOppNewSeven"
 
   precision = 4
 
-  massplay_result_output_file = "./massplay/mass_result.txt"
+  massplay_result_output_file = "mass_result.txt"
 
-  massplay_result_output_file_unsorted = "./massplay/mass_result_unsorted.txt"
-
-  input_params_file = './massplay/mass_params.txt'
+  input_params_file = 'massive_params.txt'
 
   clean_param_file_cmd = "rm -f " + input_params_file
-
-  clean_mass_result_file_cmd = "rm -f " + massplay_result_output_file + " " + massplay_result_output_file_unsorted
 
   run_result_dir = "./log/test"
 
@@ -121,24 +98,28 @@ if __name__ == '__main__':
   opp_discount_lim_max = 0.49
   opp_discount_lim_sample_size = 2
   total_num_games *= opp_discount_lim_sample_size
-  opp_discount_lim_paras = generateLinearListExclEnds(opp_discount_lim_min, opp_discount_lim_max, opp_discount_lim_sample_size, precision)
+  opp_discount_lim_paras = [round(y, precision) for y in list(numpy.linspace(opp_discount_lim_min, opp_discount_lim_max, num=opp_discount_lim_sample_size))]
 
   low_card_up_lim_min = 0.01
   low_card_up_lim_max = 0.98
   low_card_up_lim_sample_size = 2
   total_num_games *= low_card_up_lim_sample_size
-  low_card_up_lim_paras = generateLinearListExclEnds(low_card_up_lim_min, low_card_up_lim_max, low_card_up_lim_sample_size, precision)
+  low_card_up_lim_paras = [round(x, precision) for x in list(numpy.linspace(low_card_up_lim_min, low_card_up_lim_max, num=low_card_up_lim_sample_size))]
 
   mid_card_up_lim_max = 0.99
-  mid_card_up_lim_sample_size = 1
+  mid_card_up_lim_sample_size = 2
   total_num_games *= mid_card_up_lim_sample_size
+  # mid_card_up_lim_paras_2d = []
 
   high_card_up_lim_max = 1.0
   high_card_up_lim_sample_size = 2
   total_num_games *= high_card_up_lim_sample_size
+  # high_card_up_lim_paras_3d = []
 
-  num_run_per_param_set = 3
+  num_run_per_param_set = 2
   total_num_games *= num_run_per_param_set
+
+  print "========" + "Totally " + str(total_num_games) + " Games (each of which could be a triplicate game) to Run" + "========"
 
   # global result list
   all_stats_tuple_list = []
@@ -146,22 +127,17 @@ if __name__ == '__main__':
   # game counter
   total_game_count = 0
 
-  print "========" + "Totally " + str(total_num_games) + " Games (each of which could be a triplicate game) to Run" + "========"
-  rm_mass_result = subprocess.call([clean_mass_result_file_cmd], shell=True)
-  print "... clean_mass_result_file_cmd:" + str(rm_mass_result) + " ..."
-
   for low_card_up_lim in low_card_up_lim_paras:
-    mid_card_up_lim_paras = generateLinearListExclEnds(low_card_up_lim, mid_card_up_lim_max, mid_card_up_lim_sample_size, precision)
+    mid_card_up_lim_paras = [round(x, precision) for x in list(numpy.linspace(low_card_up_lim, mid_card_up_lim_max, num=mid_card_up_lim_sample_size))]
     for mid_card_up_lim in mid_card_up_lim_paras:
-      high_card_up_lim_paras = generateLinearListExclEnds(mid_card_up_lim, high_card_up_lim_max, high_card_up_lim_sample_size, precision)         
+      high_card_up_lim_paras = [round(x, precision) for x in list(numpy.linspace(mid_card_up_lim, high_card_up_lim_max, num=high_card_up_lim_sample_size))]
       for high_card_up_lim in high_card_up_lim_paras:
         for opp_discount_lim in opp_discount_lim_paras:
           # -- Clean up before running 
           rm_param_result = subprocess.call([clean_param_file_cmd], shell=True)
-          print "... clean_param_file_cmd:" + str(rm_param_result) + " ..."
-          rm_run_result = subprocess.call([clean_run_result_files_cmd], shell=True)
-          print "... clean_run_result_files_cmd:" + str(rm_run_result) + " ..."
-
+          print "... rm_param_result:" + str(rm_param_result) + " ..."
+          rm_result_result = subprocess.call([clean_run_result_files_cmd], shell=True)
+          # print "... rm_result_result:" + str(rm_result_result) + " ..."
 
           # -- Parameters
           param_list = [low_card_up_lim, mid_card_up_lim, high_card_up_lim, opp_discount_lim]
@@ -177,12 +153,6 @@ if __name__ == '__main__':
           for i in range(num_run_per_param_set):
             engine_run_result = subprocess.call([engine_cmd], shell=True)
             print "......... " + str(i) + " - engine_run_result:" + str(engine_run_result) + ", " + str(param_list) + "..."
-            
-            # Print out game count
-            total_game_count += 1
-            game_end = time.time()
-            print "============ " + str(total_game_count) + " Out of " + str(total_num_games) + " Games Has Completed, Duration:" + str(game_end - game_start) + "============" 
-            game_start = game_end
 
           # -- Generate the result
           # generate the tuple for all stats of current param based on the *.txt files
@@ -190,10 +160,9 @@ if __name__ == '__main__':
           # Add this result to the global result list
           all_stats_tuple_list.append(all_stats_tuple_for_curr_params)
 
-          # Write this to an unsorted file as we go, in case it stops in the middle of the run
-          writeOneStats(all_stats_tuple_for_curr_params, massplay_result_output_file_unsorted)
-
-
+          # Print out game count
+          total_game_count += 1
+          print "============ " + str(total_game_count) + " Out of " + str(total_num_games) + " Games Has Completed." + "============" 
 
   # Write the result to output file
   writeAllStats(all_stats_tuple_list, massplay_result_output_file)
