@@ -1,23 +1,29 @@
 from .. import base_player
 from bot.mixedoppnew6 import mixedoppnew6_bot
 from bot.mixedoppnew6 import mixedoppnew6_opponent
-import tight_aggressive_bot
-import tight_conservative_bot
+from bot.tight_aggressive import tight_aggressive_bot
+from bot.tight_conservative import tight_conservative_bot
 
 import base_nash_bot
 
 class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
-    self.opponew6 = oppnew6_bot.Mixedoppnew6Bot(self)
+    self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
      ## by defalt it uses mixedoppnew6
-    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, '../../data/cfr/aws/prob_300_total.npy')
-    self.nash_bot_200 = base_nash_bot.Base_nashBot(self, 200, '../../data/cfr/aws/prob_300_total.npy')
-    self.nash_bot_140 = base_nash_bot.Base_nashBot(self, 140, '../../data/cfr/aws/prob_300_total.npy')
-    self.nash_bot_90 = base_nash_bot.Base_nashBot(self, 90, '../../data/cfr/aws/prob_300_total.npy')
-    self.nash_bot_50 = base_nash_bot.Base_nashBot(self, 50, '../../data/cfr/aws/prob_300_total.npy')
-    self.nash_bot_25 = base_nash_bot.Base_nashBot(self, 25, '../../data/cfr/aws/prob_300_total.npy')
-    self.nash_bot_10 = base_nash_bot.Base_nashBot(self, 10, '../../data/cfr/aws/prob_300_total.npy')
+    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, 'data/cfr/aws/prob_300_total.npy')
+    self.nash_bot_200 = []
+    self.nash_bot_140 = []
+    self.nash_bot_90 = []
+    self.nash_bot_50 = []
+    self.nash_bot_25 = []
+    self.nash_bot_10 = []
+#    self.nash_bot_200 = base_nash_bot.Base_nashBot(self, 200, '../../data/cfr/aws/prob_300_total.npy')
+#    self.nash_bot_140 = base_nash_bot.Base_nashBot(self, 140, '../../data/cfr/aws/prob_300_total.npy')
+#    self.nash_bot_90 = base_nash_bot.Base_nashBot(self, 90, '../../data/cfr/aws/prob_300_total.npy')
+#    self.nash_bot_50 = base_nash_bot.Base_nashBot(self, 50, '../../data/cfr/aws/prob_300_total.npy')
+#    self.nash_bot_25 = base_nash_bot.Base_nashBot(self, 25, '../../data/cfr/aws/prob_300_total.npy')
+#    self.nash_bot_10 = base_nash_bot.Base_nashBot(self, 10, '../../data/cfr/aws/prob_300_total.npy')
     self.tight_aggressive_bot1 = tight_aggressive_bot.TightAggressiveBot(self)
     self.tight_conservative_bot1 = tight_conservative_bot.TightConservativeBot(self)
     self.current_bot = self.opponew6
@@ -42,7 +48,7 @@ class Base_nashPlayer(base_player.BasePlayer):
   def new_hand(self, parts):
     super(Base_nashPlayer, self).new_hand(parts);
     if self.num_active_player == 2 and (self.current_bot_type != 'NASH'):
-    	if self.init_stack_sizes[self.seat-1] > 200:
+      if self.init_stack_sizes[self.seat-1] > 200:
         self.current_bot = self.nash_bot_300;
       elif self.init_stack_sizes[self.seat-1] > 140:
         self.current_bot = self.nash_bot_200;
@@ -57,24 +63,29 @@ class Base_nashPlayer(base_player.BasePlayer):
       else:
         self.current_bot = self.nash_bot_10;
     	#self.current_bot = base_nash_bot.Base_nashBot(self, 100, ' ')
-    	self.current_bot_type = 'NASH'
-    	print 'Now change to nash bot for new hand'
-    elif self.num_active_player == 3 #and (self.current_bot_type == 'NASH'):
+      #Max add the following line, for now, only use nash_300
+      self.current_bot = self.nash_bot_300
+      self.current_bot_type = 'NASH'
+      print 'Now change to nash bot for new hand'
+    elif self.num_active_player == 3: #and (self.current_bot_type == 'NASH'):
       if self.stack_rank == 3 and min(self.stack_sizes) < 50 and max(self.stack_sizes) > 450:
-        self.current_bot = tight_conservative_bot1
+        self.current_bot = self.tight_conservative_bot1
+ #       self.current_bot = self.opponew6
         self.current_bot_type = 'TIGHT_CONSERVATIVE'
         print "Should use tight here - depend on whether second person is tight";
       elif self.stack_rank == 3 and min(self.stack_sizes) < 50 and max(self.stack_sizes) < 350:
-        self.current_bot = tight_aggressive_bot1
+        self.current_bot = self.tight_aggressive_bot1
+  #      self.current_bot = self.opponew6
         self.current_bot_type = 'TIGHT_AGGRESSIVE'
         print "Should use tight aggressive here"
       elif self.stack_rank == 2 and self.stack_sizes[self.seat-1] < 100:
-        self.current_bot = tight_conservative_bot1
+        self.current_bot = self.tight_conservative_bot1
+    #    self.current_bot = self.opponew6
         print "Should use tight conservative here"
         self.current_bot_type = 'TIGHT_CONSERVATIVE'
       else:
         print "Should use normal here"
-        self.current_bot = mixedoppnew6_bot.Mixedoppnew6Bot(self)
+        self.current_bot = self.opponew6
         self.current_bot_type = 'MIXED'
         print 'Now change to mixedoppnew6 bot for new hand'
     else:
@@ -226,10 +237,10 @@ class Base_nashPlayer(base_player.BasePlayer):
       # if max(len(self.last_actions_preflop_init),len(self.last_actions_flop_init),len(self.last_actions_turn_init),len(self.last_actions_river_init)) < 7:
       #   # max < 7 then can change bot
       
-
-      if self.nash_bot1.initialize_from_beginning(action_seq):
-        self.current_bot = self.nash_bot1
-        self.current_bot_type = 'NASH'
+#grafting
+#      if self.nash_bot1.initialize_from_beginning(action_seq):
+#        self.current_bot = self.nash_bot1
+#        self.current_bot_type = 'NASH'
       
 
     	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################

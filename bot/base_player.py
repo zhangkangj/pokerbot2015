@@ -1,4 +1,5 @@
 import base_opponent
+import time
 
 class BasePlayer(object):
   
@@ -269,6 +270,7 @@ class BasePlayer(object):
       if not data:
         print 'Gameover, engine disconnected.'
         break
+      start_time = time.time()
       print data
       try:
         result = self.handle_message(data)
@@ -277,6 +279,7 @@ class BasePlayer(object):
         traceback.print_exc()
         print data
         result = None
+      print 'spent', time.time() - start_time
       if result is not None:
         print result
         input_socket.send(result + '\n')
