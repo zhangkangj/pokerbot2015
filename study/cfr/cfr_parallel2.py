@@ -5,7 +5,6 @@ Created on Fri Jan 16 15:37:03 2015
 @author: zhk
 """
 
-import sys
 import ctypes
 import multiprocessing
 import numpy as np
@@ -56,7 +55,7 @@ def run_cfr(root, index, num_iter, num_gen):
     util_sb += util_sb_
     util_bb += util_bb_
     if i%100 == 0:
-      print num_gen, index, i, time.time()-start_time, util_sb/i, util_bb/i
+      print num_gen, index, i, time.time()-start_time, util_sb/i, util_bb/i, STACK_SIZE
       start_time = time.time()
   regret = root.dump_regret()
   prob = root.dump_prob()
@@ -69,13 +68,18 @@ if __name__ == '__main__':
   parser.add_argument('-ss', action='store')
   parser.add_argument('-nt', action='store')
   parser.add_argument('-ni', action='store')
+  parser.add_argument('-ng', action='store')
   args = parser.parse_args()
   if args.ss is not None:
     STACK_SIZE = int(args.ss)
+    root = cfr_cy4.RoundNode(0, 0, STACK_SIZE, STACK_SIZE)
+    NUM_NODE = root.dump_prob().size
   if args.nt is not None:
     NUM_THREAD = int(args.nt)
   if args.ni is not None:
     NUM_ITER = int(args.ni)
+  if args.ng is not None:
+    NUM_GEN = int(args.ng)
   print 'STACK_SIZE=', STACK_SIZE, 'NUM_THREAD=', NUM_THREAD, 'NUM_ITER=', NUM_ITER
   REGRET_FILE = 'data/regret4_%d_total' % STACK_SIZE
   PROB_FILE = 'data/prob4_%d_total' % STACK_SIZE
