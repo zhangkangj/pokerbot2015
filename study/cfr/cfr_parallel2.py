@@ -97,7 +97,7 @@ if __name__ == '__main__':
   
   for i in range(0, NUM_GEN):
     processes = []
-    results = [(multiprocessing.Array(ctypes.c_double, NUM_NODE), multiprocessing.Array(ctypes.c_float, NUM_NODE)) for i in range(NUM_THREAD)]
+    results = [(multiprocessing.Array(ctypes.c_double, NUM_NODE), multiprocessing.Array(ctypes.c_float, NUM_NODE)) for j in range(NUM_THREAD)]
     for j in range(NUM_THREAD):
       thread_args = (j, NUM_ITER, i, regret, prob, results[j][0], results[j][1])
       p = multiprocessing.Process(target=parallel_cfr, args=thread_args)
