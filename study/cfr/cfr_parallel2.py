@@ -21,8 +21,8 @@ NUM_ITER = 5000
 NUM_GEN = 1000
 NUM_NODE = 14688512
 STACK_SIZE = 300
-REGRET_FILE = 'data/regret_%d_total' % STACK_SIZE
-PROB_FILE = 'data/prob_%d_total' % STACK_SIZE
+REGRET_FILE = 'data/regret_%d_total4' % STACK_SIZE
+PROB_FILE = 'data/prob_%d_total4' % STACK_SIZE
 
 def parallel_cfr(index, num_iter, num_gen, initial_regret, initial_prob, final_regret, final_prob):
   print 'creating root', index, num_iter, num_gen
@@ -91,7 +91,7 @@ for i in range(0, NUM_GEN):
   for j in range(NUM_THREAD):
     current_regret += np.frombuffer(results[j][0].get_obj(), dtype=np.float64)
     current_prob   += np.frombuffer(results[j][1].get_obj(), dtype=np.float32)
-  regret += current_regret * (i**0.5)
-  prob   += current_prob   * (i**0.5)
+  regret += current_regret * (i**0.5) / float(NUM_THREAD)
+  prob   += current_prob   * (i**0.5) / float(NUM_THREAD)
   np.save(REGRET_FILE, regret)
   np.save(PROB_FILE, prob)
