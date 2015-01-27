@@ -11,7 +11,8 @@ class Base_nashPlayer(base_player.BasePlayer):
     super(Base_nashPlayer, self).__init__()
     self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
      ## by defalt it uses mixedoppnew6
-    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, '../../data/cfr/aws/prob_300_total.npy')
+#    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, '../../data/cfr/aws/prob_300_total.npy')
+    self.nash_bot_300 = []
     self.nash_bot_200 = []
     self.nash_bot_140 = []
     self.nash_bot_90 = []
@@ -21,8 +22,8 @@ class Base_nashPlayer(base_player.BasePlayer):
 #    self.nash_bot_200 = base_nash_bot.Base_nashBot(self, 200, '../../data/cfr/aws/prob_300_total.npy')
 #    self.nash_bot_140 = base_nash_bot.Base_nashBot(self, 140, '../../data/cfr/aws/prob_300_total.npy')
 #    self.nash_bot_90 = base_nash_bot.Base_nashBot(self, 90, '../../data/cfr/aws/prob_300_total.npy')
-#    self.nash_bot_50 = base_nash_bot.Base_nashBot(self, 50, '../../data/cfr/aws/prob_300_total.npy')
-#    self.nash_bot_25 = base_nash_bot.Base_nashBot(self, 25, '../../data/cfr/aws/prob_300_total.npy')
+    self.nash_bot_50 = base_nash_bot.Base_nashBot(self, 50, '../../data/cfr/aws_new/prob4_50_total.npy')
+    self.nash_bot_25 = base_nash_bot.Base_nashBot(self, 25, '../../data/cfr/aws_new/prob4_25_total.npy')
 #    self.nash_bot_10 = base_nash_bot.Base_nashBot(self, 10, '../../data/cfr/aws/prob_300_total.npy')
     self.tight_aggressive_bot1 = tight_aggressive_bot.TightAggressiveBot(self)
     self.tight_conservative_bot1 = tight_conservative_bot.TightConservativeBot(self)
@@ -64,7 +65,7 @@ class Base_nashPlayer(base_player.BasePlayer):
         self.current_bot = self.nash_bot_10;
     	#self.current_bot = base_nash_bot.Base_nashBot(self, 100, ' ')
       #Max add the following line, for now, only use nash_300
-      self.current_bot = self.nash_bot_300
+      self.current_bot = self.nash_bot_50
       self.current_bot_type = 'NASH'
       print 'Now change to nash bot for new hand'
     elif self.num_active_player == 3: #and (self.current_bot_type == 'NASH'):
