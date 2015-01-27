@@ -86,8 +86,8 @@ if __name__ == '__main__':
   PROB_FILE = 'data/prob4_%d_total' % STACK_SIZE
   print 'scp ubuntu@54.205.253.94:%s data'%REGRET_FILE
   try:
-    os.system('scp ubuntu@54.205.253.94:%s data'% (REGRET_FILE + '.npy'))
-    os.system('scp ubuntu@54.205.253.94:%s data'% (PROB_FILE + '.npy'))
+    os.system('scp -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:%s data'% (REGRET_FILE + '.npy'))
+    os.system('scp -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:%s data'% (PROB_FILE + '.npy'))
   except:
     print 'no initial files'
   regret = np.zeros(NUM_NODE, dtype=np.float64)
@@ -121,5 +121,5 @@ if __name__ == '__main__':
     prob   += current_prob   * (i**0.5) / float(NUM_THREAD)
     np.save(REGRET_FILE, regret)
     np.save(PROB_FILE, prob)
-    os.system('scp %s ubuntu@54.205.253.94:data' % (REGRET_FILE + '.npy'))
-    os.system('scp %s ubuntu@54.205.253.94:data' % (PROB_FILE + '.npy'))
+    os.system('scp  -i ~/.ssh/pokerbot.pem %s ubuntu@54.205.253.94:data' % (REGRET_FILE + '.npy'))
+    os.system('scp  -i ~/.ssh/pokerbot.pem %s ubuntu@54.205.253.94:data' % (PROB_FILE + '.npy'))
