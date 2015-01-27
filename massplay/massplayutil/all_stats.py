@@ -25,6 +25,9 @@ class AllStats(object):
     player_stat = self.stats_dict[player]
     return player_stat.win
 
+  def get_player_end_stack_total(self, player):
+    player_stat = self.stats_dict[player]
+    return player_stat.total_game_end_stack
 
   def update_stats(self, last_hand_stack_str):
     game_end_playerstacks = last_hand_stack_str.split(", ")

@@ -13,15 +13,15 @@ def writeAllStats(all_stats_tuples, result_output_file):
   # Write result to a file
   with open(result_output_file, 'w') as f:
     for all_stats_tuple in sorted_all_stats_tuple_list:
-      all_stats_str = all_stats_tuple[1]
-      param_list = all_stats_tuple[2]
+      all_stats_str = all_stats_tuple[2]
+      param_list = all_stats_tuple[3]
       f.write('%s, %s\n' % (all_stats_str, str(param_list)))
 
 def writeOneStats(stats_tuple, one_stats_output_file):
   # Write result to a file
   with open(one_stats_output_file, 'a') as f:
-    stats_str = stats_tuple[1]
-    param_list = stats_tuple[2]
+    stats_str = stats_tuple[2]
+    param_list = stats_tuple[3]
     f.write('%s, %s\n' % (stats_str, str(param_list)))
 
 def generateAllStatsTuple(result_dir, player_list, params_list, name_of_interest):
@@ -91,9 +91,9 @@ if __name__ == '__main__':
   game_start = start
 
   # Player name last char cannot be digit
-  player_names = ["MixedOppNewSeven", "MixedOppNewSix", "Fold"]
+  player_names = ["MixedParam", "Mixed", "Fold"]
 
-  player_of_interest = "MixedOppNewSeven"
+  player_of_interest = "MixedParam"
 
   precision = 4
 
@@ -117,27 +117,32 @@ if __name__ == '__main__':
   total_num_games = 1
 
   # Variables
-  opp_discount_lim_min = 0.01
-  opp_discount_lim_max = 0.49
-  opp_discount_lim_sample_size = 2
-  total_num_games *= opp_discount_lim_sample_size
-  opp_discount_lim_paras = generateLinearListExclEnds(opp_discount_lim_min, opp_discount_lim_max, opp_discount_lim_sample_size, precision)
+  mid_band_factor_min = 0.5
+  mid_band_factor_max = 1
+  mid_band_factor_sample_size = 3
+  total_num_games *= mid_band_factor_sample_size
+  mid_band_factor_lim_paras = generateLinearListExclEnds(mid_band_factor_min, mid_band_factor_max, mid_band_factor_sample_size, precision)
 
-  low_card_up_lim_min = 0.01
-  low_card_up_lim_max = 0.98
-  low_card_up_lim_sample_size = 2
-  total_num_games *= low_card_up_lim_sample_size
-  low_card_up_lim_paras = generateLinearListExclEnds(low_card_up_lim_min, low_card_up_lim_max, low_card_up_lim_sample_size, precision)
+  preflop_raise_lim_min = 2
+  preflop_raise_lim_max = 20
+  preflop_raise_lim_sample_size = 3
+  total_num_games *= preflop_raise_lim_sample_size
+  preflop_raise_lim_paras = generateLinearListExclEnds(preflop_raise_lim_min, preflop_raise_lim_max, preflop_raise_lim_sample_size, precision)
 
-  mid_card_up_lim_max = 0.99
-  mid_card_up_lim_sample_size = 1
-  total_num_games *= mid_card_up_lim_sample_size
 
-  high_card_up_lim_max = 1.0
-  high_card_up_lim_sample_size = 2
-  total_num_games *= high_card_up_lim_sample_size
+  flop_mid_card_lim_min = 0.25
+  flop_mid_card_lim_max = 0.75
+  flop_mid_card_lim_sample_size = 3
+  total_num_games *= flop_mid_card_lim_sample_size
+  flop_mid_card_lim_paras = generateLinearListExclEnds(flop_mid_card_lim_min, flop_mid_card_lim_max, flop_mid_card_lim_sample_size, precision)
 
-  num_run_per_param_set = 3
+  river_mid_card_lim_min = 0.25
+  river_mid_card_lim_max = 0.75
+  river_mid_card_lim_sample_size = 3
+  total_num_games *= river_mid_card_lim_sample_size
+  river_mid_card_lim_paras = generateLinearListExclEnds(river_mid_card_lim_min, river_mid_card_lim_max, river_mid_card_lim_sample_size, precision)
+
+  num_run_per_param_set = 2
   total_num_games *= num_run_per_param_set
 
   # global result list
@@ -150,12 +155,10 @@ if __name__ == '__main__':
   rm_mass_result = subprocess.call([clean_mass_result_file_cmd], shell=True)
   print "... clean_mass_result_file_cmd:" + str(rm_mass_result) + " ..."
 
-  for low_card_up_lim in low_card_up_lim_paras:
-    mid_card_up_lim_paras = generateLinearListExclEnds(low_card_up_lim, mid_card_up_lim_max, mid_card_up_lim_sample_size, precision)
-    for mid_card_up_lim in mid_card_up_lim_paras:
-      high_card_up_lim_paras = generateLinearListExclEnds(mid_card_up_lim, high_card_up_lim_max, high_card_up_lim_sample_size, precision)         
-      for high_card_up_lim in high_card_up_lim_paras:
-        for opp_discount_lim in opp_discount_lim_paras:
+  for mid_band_factor in mid_band_factor_lim_paras:
+    for preflop_raise_lim in preflop_raise_lim_paras:
+      for flop_mid_card_lim in flop_mid_card_lim_paras:
+        for river_mid_card_lim in river_mid_card_lim_paras:
           # -- Clean up before running 
           rm_param_result = subprocess.call([clean_param_file_cmd], shell=True)
           print "... clean_param_file_cmd:" + str(rm_param_result) + " ..."
@@ -164,12 +167,12 @@ if __name__ == '__main__':
 
 
           # -- Parameters
-          param_list = [low_card_up_lim, mid_card_up_lim, high_card_up_lim, opp_discount_lim]
+          param_list = [mid_band_factor, preflop_raise_lim, flop_mid_card_lim, river_mid_card_lim]
           print "... parameter combo: " + str(param_list) + "..."
 
           # -- Write the parameter combo to the parameter file
           f = open(input_params_file, 'w')
-          f.write('%f, %f, %f, %f\n' %(low_card_up_lim, mid_card_up_lim, high_card_up_lim, opp_discount_lim))
+          f.write('%f, %f, %f, %f\n' %(mid_band_factor, preflop_raise_lim, flop_mid_card_lim, river_mid_card_lim))
           f.close()
 
           # -- Run engine, the player will read the file above 
