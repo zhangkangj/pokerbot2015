@@ -5,13 +5,13 @@ Created on Sat Dec 27 01:36:27 2014
 @author: zhk
 """
 
-# high card: 7 choose 5 --> (1, 1287)
-# pair: 1 choose 1 + 5 choose 3 --> (1, 13*165)
-# two pair: 2 choose 2 + 3 choose 1, 3 choose 2 + ?2 choose 1? -->(2145+1, 2145+1+78*13)
-# three of a kind: 1 choose 1 + 4 choose 2 --> (1, 13*165)
+# high card: 7 choose 5 --> (1, 462)
+# pair: 1 choose 1 + 5 choose 3 --> (1, 13*84)
+# two pair: 2 choose 2 + 3 choose 1, 3 choose 2 + ?2 choose 1? -->(1092+1, 1092+1+78*13)
+# three of a kind: 1 choose 1 + 4 choose 2 --> (1, 13*84)
 # straight/straight flush: 7 choose 5, 6 choose 5, 5 choose 5 --> (1, 10)
-# full house: 1,2 choose 1 + 1,2 choose 1 --> (1, 165*13)
-# four of a kind: 1 choose 1 + (1-3) choose 1 --> (1, 165*13)
+# full house: 1,2 choose 1 + 1,2 choose 1 --> (1, 84*13)
+# four of a kind: 1 choose 1 + (1-3) choose 1 --> (1, 84*13)
 
 
 # flush table
@@ -36,15 +36,15 @@ def map_52_to_15(x):
 
 # class table
 result = [0] * 32768
-# 7, 6, 5 choose 5 --> (1, 1287), for high card or flush
-count = 1287
-for a in range(12, 3, -1):
-  for b in range(a-1, 2, -1):
-    for c in range(b-1, 1, -1):
-      for d in range(c-1, 0, -1):
-        for e in range(d-1, -1, -1):
+# 7, 6, 5 choose 5 --> (1, 462), for high card or flush
+count = 462
+for a in range(12, 5, -1):
+  for b in range(a-1, 4, -1):
+    for c in range(b-1, 3, -1):
+      for d in range(c-1, 2, -1):
+        for e in range(d-1, 1, -1):
           count -= 1
-          for f in range(e-1, -1, -1):
+          for f in range(e-1, 0, -1):
             for g in range(f-1, -1, -1):
               x = (1<<a)|(1<<b)|(1<<c)|(1<<d)|(1<<e)|(1<<f)|(1<<g)
               bin_str = bin(x)[2:]
@@ -52,26 +52,26 @@ for a in range(12, 3, -1):
               index = map_52_to_15(bin_x)
               assert result[index] == 0              
               result[index] = count + 1
-count = 1287
-for a in range(12, 3, -1):
-  for b in range(a-1, 2, -1):
-    for c in range(b-1, 1, -1):
-      for d in range(c-1, 0, -1):
-        for e in range(d-1, -1, -1):
+count = 462
+for a in range(12, 5, -1):
+  for b in range(a-1, 4, -1):
+    for c in range(b-1, 3, -1):
+      for d in range(c-1, 2, -1):
+        for e in range(d-1, 1, -1):
           count -= 1
-          for f in range(e-1, -1, -1):
+          for f in range(e-1, 0, -1):
             x = (1<<a)|(1<<b)|(1<<c)|(1<<d)|(1<<e)|(1<<f)
             bin_str = bin(x)[2:]
             bin_x = int(''.join(['000' + char for char in bin_str]), 2)
             index = map_52_to_15(bin_x)
             assert result[index] == 0              
             result[index] = count + 1
-count = 1287
-for a in range(12, 3, -1):
-  for b in range(a-1, 2, -1):
-    for c in range(b-1, 1, -1):
-      for d in range(c-1, 0, -1):
-        for e in range(d-1, -1, -1):
+count = 462
+for a in range(12, 5, -1):
+  for b in range(a-1, 4, -1):
+    for c in range(b-1, 3, -1):
+      for d in range(c-1, 2, -1):
+        for e in range(d-1, 1, -1):
           count -= 1
           x = (1<<a)|(1<<b)|(1<<c)|(1<<d)|(1<<e)
           bin_str = bin(x)[2:]
@@ -80,19 +80,19 @@ for a in range(12, 3, -1):
           assert result[index] == 0
           result[index] = count + 1
 
-# 7 choose 5, 6 choose 5, 5 choose 5 --> (1, 10) + 9000, for straight
+# 7 choose 5, 6 choose 5, 5 choose 5 --> (1, 10) + 462, for straight
 for x in range(1+0b1111111111111):
   bin_str = bin(x)[2:]
   bin_x = int(''.join(['000' + char for char in bin_str]), 2)
   index = map_52_to_15(bin_x)
   if '11111' in bin_str:
     value = len(bin_str) - bin_str.find('11111') - 3
-    result[index] = value + 12000
+    result[index] = value + 5000
   elif (bin_str.startswith('1') and bin_str.endswith('1111') and len(bin_str) == 13):
-    value =  1 + 12000
+    value =  1 + 5000
     result[index] = value
 
-# 1 choose 1 --> (1, 13*165+1), for four of a kind and one pair
+# 1 choose 1 --> (1, 13*84+1), for four of a kind and one pair
 for a in range(12, -1, -1):
   x = (1<<a)
   bin_str = bin(x)[2:]
@@ -100,9 +100,9 @@ for a in range(12, -1, -1):
   index = (bin_x >> 31) + bin_x
   index = ((index >> 14) + index) & 0x0000000000007fff
   assert result[index] == 0
-  result[index] = a * 165 + 1
+  result[index] = a * 84 + 1
 
-# 2 choose 2 --> (2145+1, 2145+1+78*13), for two pair
+# 2 choose 2 --> (1092+1, 1092+1+78*13), for two pair
 count = 78
 for a in range(12, 0, -1):
   for b in range(a-1, -1, -1):
@@ -113,13 +113,11 @@ for a in range(12, 0, -1):
     index = (bin_x >> 31) + bin_x
     index = ((index >> 14) + index) & 0x0000000000007fff
     assert result[index] == 0
-    result[index] = count * 13 + 1 + 2145
+    result[index] = count * 13 + 1 + 1092
 
-# 3 choose 2 --> (2145+1, 2145+1+78*13) for two pair
-count = 78
-for a in range(12, 0, -1):
-  for b in range(a-1, -1, -1):
-    count -= 1
+# 3 choose 2 --> (1092+1, 1092+1+78*13) for two pair
+for a in range(12, 1, -1):
+  for b in range(a-1, 0, -1):
     for c in range(b-1, -1, -1):
       x = (1<<a)|(1<<b)|(1<<c)
       bin_str = bin(x)[2:]
@@ -127,7 +125,7 @@ for a in range(12, 0, -1):
       index = (bin_x >> 31) + bin_x
       index = ((index >> 14) + index) & 0x0000000000007fff
       assert result[index] == 0
-      result[index] = count * 13 + 1 + 2145
+      result[index] = count * 13 + 1 + 1092
 
 # 2 choose smaller 1
 for a in range(0, 12):
@@ -144,15 +142,14 @@ print ','.join([str(x) for x in result])
 
 
 # kicker table
-result = [0] * 32768
-# 5 choose 3 --> (0, 164), for one pair
-count = 165
-for a in range(12, 3, -1):
-  for b in range(a-1, 2, -1):
-    for c in range(b-1, 1, -1):
+# 5 choose 3 --> (0, 83), for one pair
+count = 84
+for a in range(12, 5, -1):
+  for b in range(a-1, 4, -1):
+    for c in range(b-1, 3, -1):
       count -= 1
-      for d in range(c-1, 0, -1):
-        for e in range(d-1, -1, -1):
+      for d in range(c-1, 2, -1):
+        for e in range(d-1, 1, -1):
           x = (1<<a)|(1<<b)|(1<<c)|(1<<d)|(1<<e)
           bin_str = bin(x)[2:]
           bin_x = int(''.join(['000' + char for char in bin_str]), 2)
@@ -178,8 +175,6 @@ count = 55
 for a in range(12, 2, -1):
   for b in range(a-1, 1, -1):
     count -= 1
-    if b == 8:
-      print a, count
     for c in range(b-1, 0, -1):
       for d in range(c-1, -1, -1):
         x = (1<<a)|(1<<b)|(1<<c)|(1<<d)
@@ -221,6 +216,6 @@ for a in range(0, 12):
       index = (bin_x >> 31) + bin_x
       index = ((index >> 14) + index) & 0x0000000000007fff
       index = 0x7fff^index
-      assert result[index] == 0
+      assert result[index] == 0    
       result[index] = map_52_to_15(1<<(a*4))
 print ','.join([str(x) for x in result])

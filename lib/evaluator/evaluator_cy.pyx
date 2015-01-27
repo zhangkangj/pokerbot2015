@@ -18,8 +18,8 @@ from evaluator_c cimport evaluate_river as evaluate_river_c
 from evaluator_c cimport evaluate_turn as evaluate_turn_c
 from evaluator_c cimport evaluate_flop as evaluate_flop_c
 
-def preflop_idx(int c1, int c2):
-  cdef int r1, r2, result
+def preflop_idx(unsigned int c1, unsigned int c2):
+  cdef unsigned int r1, r2, result
   r1 = c1 / 4
   r2 = c2 / 4
   if r1 > r2:
@@ -45,13 +45,7 @@ def flop_idx(int c1, int c2, int c3, int c4, int c5):
   if c3 < c4:
     c3, c4 = c4, c3
   board_index = c3 * (c3-1) * (c3-2) / 6 + c4 * (c4-1) / 2 + c5
-  return hole_index * 24576 + board_index
-
-def turn_idx(int mc1, int mc2, int bc1, int bc2, int bc3, int bc4):
-  if mc1 > mc2:
-    mc1, mc2 = mc2, mc1
-  bc1, bc2, bc3, bc4 = sorted([bc1, bc2, bc3, bc4])
-  return (mc1 + mc2*(mc2-1)/2) * 278528 + bc4*(bc4-1)*(bc4-2)*(bc4-3)/24 + bc3*(bc3-1)*(bc3-2)/6 + bc2*(bc2-1)/2 + bc1
+  return hole_index * 22100 + board_index
 
 def flop_bucket(float mean, float var):
   if var < 0.07:
