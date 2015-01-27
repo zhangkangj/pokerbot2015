@@ -5,6 +5,7 @@ Created on Fri Jan 16 15:37:03 2015
 @author: zhk
 """
 
+import os
 import ctypes
 import multiprocessing
 import numpy as np
@@ -83,6 +84,12 @@ if __name__ == '__main__':
   print 'STACK_SIZE=', STACK_SIZE, 'NUM_THREAD=', NUM_THREAD, 'NUM_ITER=', NUM_ITER
   REGRET_FILE = 'data/regret4_%d_total' % STACK_SIZE
   PROB_FILE = 'data/prob4_%d_total' % STACK_SIZE
+  print 'scp ubuntu@54.205.253.94:%s data'%REGRET_FILE
+  try:
+    os.system('scp ubuntu@54.205.253.94:%s data'% (REGRET_FILE + '.npy'))
+    os.system('scp ubuntu@54.205.253.94:%s data'% (PROB_FILE + '.npy'))
+  except:
+    print 'no initial files'
   regret = np.zeros(NUM_NODE, dtype=np.float64)
   try:
     regret = np.load(REGRET_FILE+'.npy')
@@ -114,3 +121,5 @@ if __name__ == '__main__':
     prob   += current_prob   * (i**0.5) / float(NUM_THREAD)
     np.save(REGRET_FILE, regret)
     np.save(PROB_FILE, prob)
+    os.system('scp %s ubuntu@54.205.253.94:data' % (REGRET_FILE + '.npy'))
+    os.system('scp %s ubuntu@54.205.253.94:data' % (PROB_FILE + '.npy'))
