@@ -13,15 +13,15 @@ def writeAllStats(all_stats_tuples, result_output_file):
   # Write result to a file
   with open(result_output_file, 'w') as f:
     for all_stats_tuple in sorted_all_stats_tuple_list:
-      all_stats_str = all_stats_tuple[1]
-      param_list = all_stats_tuple[2]
+      all_stats_str = all_stats_tuple[2]
+      param_list = all_stats_tuple[3]
       f.write('%s, %s\n' % (all_stats_str, str(param_list)))
 
 def writeOneStats(stats_tuple, one_stats_output_file):
   # Write result to a file
   with open(one_stats_output_file, 'a') as f:
-    stats_str = stats_tuple[1]
-    param_list = stats_tuple[2]
+    stats_str = stats_tuple[2]
+    param_list = stats_tuple[3]
     f.write('%s, %s\n' % (stats_str, str(param_list)))
 
 def generateAllStatsTuple(result_dir, player_list, params_list, name_of_interest):
@@ -117,124 +117,221 @@ if __name__ == '__main__':
   total_num_games = 1
 
 
+  # ---- Variables ----
+  # fixed_param_vals = [0.495, 0.7425, 0.8283, 0.105, 
+  #   0.495, 0.7425, 0.9142, 0.155, 
+  #   0.495, 0.7425, 0.9142, 0.205, 
+  #   0.4167, 0.8333, 0.8333, 0.5, 
+  #   20.6667, 11.0, 4.0, 4, 2]
 
-  # Variables
+  # fixed_param_vals =  [0.0067, 0.4983, 0.8328, 0.105, 
+  #   0.6567, 0.8234, 0.9411, 0.155, 
+  #   0.3333, 0.6617, 0.7745, 0.205, 
+  #   0.4167, 0.8333, 0.8333, 0.5, 
+  #   20.667, 11.0, 4.0, 4, 2]   
+
+  #fixed_param_vals = [0.3333, 0.6617, 0.7745, 0.105, 0.3333, 0.6617, 0.8872, 0.155, 0.3333, 0.6617, 0.7745, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.3333, 0.6617, 0.7745, 0.105, 0.6567, 0.8234, 0.8823, 0.155, 0.3333, 0.6617, 0.7745, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.6567, 0.8234, 0.8823, 0.105, 0.3333, 0.6617, 0.8872, 0.155, 0.6567, 0.8234, 0.9411, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.6567, 0.8234, 0.8823, 0.105, 0.6567, 0.8234, 0.8823, 0.155, 0.6567, 0.8234, 0.9411, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.3333, 0.6617, 0.8308, 0.105, 0.6567, 0.8234, 0.9117, 0.155, 0.1717, 0.5808, 0.7904, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.3333, 0.6617, 0.8308, 0.105, 0.3333, 0.6617, 0.8308, 0.155, 0.495, 0.7425, 0.8713, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.1717, 0.5808, 0.7904, 0.105, 0.8183, 0.9042, 0.9521, 0.155, 0.8183, 0.9042, 0.9521, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.3333, 0.6617, 0.8308, 0.105, 0.6567, 0.8234, 0.9117, 0.155, 0.1717, 0.5808, 0.7904, 0.205, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #manual
+  #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.5, 0.6617, 0.8308, 0.1, 0.495, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.4, 0.6617, 0.8308, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.3, 0.6617, 0.8308, 0.1, 0.2, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
 
   # River
   #0
   sample_size = 1
-  total_num_games *= sample_size
-  river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  if fixed_param_vals != None:
+    river_low_card_up_lim_paras = [float(fixed_param_vals[0])]
+  else:
+    total_num_games *= sample_size
+    river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
 
   #1
   river_mid_card_up_lim_max = 0.99
   river_mid_card_up_lim_sample_size = 1
-  total_num_games *= river_mid_card_up_lim_sample_size
+  if fixed_param_vals != None:
+    river_mid_card_up_lim_paras = [float(fixed_param_vals[1])] 
+  else:
+    total_num_games *= river_mid_card_up_lim_sample_size
 
   #2
   river_high_card_up_lim_max = 1.0
   river_high_card_up_lim_sample_size = 2
-  total_num_games *= river_high_card_up_lim_sample_size
+  if fixed_param_vals != None:
+    river_high_card_up_lim_paras = [float(fixed_param_vals[2])]  
+  else:
+    total_num_games *= river_high_card_up_lim_sample_size
 
   #3
   sample_size = 1
-  total_num_games *= sample_size
-  river_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.2, sample_size, precision)    
+  if fixed_param_vals != None:
+    river_opp_discount_lim_paras = [float(fixed_param_vals[3])]
+  else:  
+    total_num_games *= sample_size
+    river_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.2, sample_size, precision)  
 
   # Turn
-
   #4
   sample_size = 1
-  total_num_games *= sample_size
-  turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  if fixed_param_vals != None:
+    turn_low_card_up_lim_paras = [float(fixed_param_vals[4])]
+  else:
+    total_num_games *= sample_size
+    turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
 
   #5
   turn_mid_card_up_lim_max = 0.99
   turn_mid_card_up_lim_sample_size = 1
-  total_num_games *= turn_mid_card_up_lim_sample_size
+  if fixed_param_vals != None:
+    turn_mid_card_up_lim_paras = [float(fixed_param_vals[5])] 
+  else:
+    total_num_games *= turn_mid_card_up_lim_sample_size
 
   #6
   turn_high_card_up_lim_max = 1.0
   turn_high_card_up_lim_sample_size = 2
-  total_num_games *= turn_high_card_up_lim_sample_size
+  if fixed_param_vals != None:
+    turn_high_card_up_lim_paras = [float(fixed_param_vals[6])]  
+  else:
+    total_num_games *= turn_high_card_up_lim_sample_size
 
   #7
   sample_size = 1
-  total_num_games *= sample_size
-  turn_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.3, sample_size, precision)      
+  if fixed_param_vals != None:
+    turn_opp_discount_lim_paras = [float(fixed_param_vals[7])]
+  else:  
+    total_num_games *= sample_size
+    turn_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.3, sample_size, precision)      
 
   # Flop
   #8
   sample_size = 1
-  total_num_games *= sample_size
-  flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  if fixed_param_vals != None:
+    flop_low_card_up_lim_paras = [float(fixed_param_vals[8])]
+  else:
+    total_num_games *= sample_size
+    flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
 
   #9
   flop_mid_card_up_lim_max = 0.99
   flop_mid_card_up_lim_sample_size = 1
-  total_num_games *= flop_mid_card_up_lim_sample_size
+  if fixed_param_vals != None:
+    flop_mid_card_up_lim_paras = [float(fixed_param_vals[9])] 
+  else:
+    total_num_games *= flop_mid_card_up_lim_sample_size
 
   #10
   flop_high_card_up_lim_max = 1.0
   flop_high_card_up_lim_sample_size = 2
-  total_num_games *= flop_high_card_up_lim_sample_size  
+  if fixed_param_vals != None:
+    flop_high_card_up_lim_paras = [float(fixed_param_vals[10])]  
+  else:
+    total_num_games *= flop_high_card_up_lim_sample_size
 
   #11
   sample_size = 1
-  total_num_games *= sample_size
-  flop_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.4, sample_size, precision)  
+  if fixed_param_vals != None:
+    flop_opp_discount_lim_paras = [float(fixed_param_vals[11])]
+  else:  
+    total_num_games *= sample_size
+    flop_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.4, sample_size, precision)  
 
   # Other variables
   #12 
   sample_size = 2
-  total_num_games *= sample_size
-  mid_card_river_call_limit_paras = generateLinearListExclEnds(0.25, 0.75, sample_size, precision)
+  if fixed_param_vals != None:
+    mid_card_river_call_limit_paras = [float(fixed_param_vals[12])]
+  else:
+    total_num_games *= sample_size
+    mid_card_river_call_limit_paras = generateLinearListExclEnds(0.25, 0.75, sample_size, precision)
 
   #13
   sample_size = 2
-  total_num_games *= sample_size
-  mid_card_call_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
+  if fixed_param_vals != None:
+    mid_card_call_limit_paras = [float(fixed_param_vals[13])]
+  else:  
+    total_num_games *= sample_size
+    mid_card_call_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
 
   #14
   sample_size = 2
-  total_num_games *= sample_size
-  high_card_river_raise_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
+  if fixed_param_vals != None:
+    high_card_river_raise_limit_paras = [float(fixed_param_vals[14])]
+  else:  
+    total_num_games *= sample_size
+    high_card_river_raise_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
 
   #15
   sample_size = 2
-  total_num_games *= sample_size
-  high_card_raise_limit_paras = generateLinearListExclEnds(0.25, 1, sample_size, precision)
+  if fixed_param_vals != None:
+    high_card_raise_limit_paras = [float(fixed_param_vals[15])]
+  else:  
+    total_num_games *= sample_size
+    high_card_raise_limit_paras = generateLinearListExclEnds(0.25, 1, sample_size, precision)
 
   #16      
   sample_size = 2
-  total_num_games *= sample_size
-  preflop_raise_limit_paras = generateLinearListExclEnds(2, 30, sample_size, precision)
+  if fixed_param_vals != None:
+    preflop_raise_limit_paras = [float(fixed_param_vals[16])]
+  else:  
+    total_num_games *= sample_size
+    preflop_raise_limit_paras = generateLinearListExclEnds(2, 30, sample_size, precision)
 
   #17
   sample_size = 1
-  total_num_games *= sample_size
-  preflop_suitedhand_call_limit_paras = generateLinearListExclEnds(2, 20, sample_size, precision)
+  if fixed_param_vals != None:
+    preflop_suitedhand_call_limit_paras = [float(fixed_param_vals[17])]
+  else:  
+    total_num_games *= sample_size
+    preflop_suitedhand_call_limit_paras = generateLinearListExclEnds(2, 20, sample_size, precision)
 
   #18
   sample_size = 1
-  total_num_games *= sample_size
-  preflop_lowhand_call_limit_paras = generateLinearListExclEnds(2, 6, sample_size, precision)  
+  if fixed_param_vals != None:
+    preflop_lowhand_call_limit_paras = [float(fixed_param_vals[18])]
+  else:  
+    total_num_games *= sample_size
+    preflop_lowhand_call_limit_paras = generateLinearListExclEnds(2, 6, sample_size, precision)  
 
-  # #19
-  # sample_size = 1
-  # total_num_games *= sample_size
-  # preflop_verylowhand_call_limit_paras = generateLinearListExclEnds(2, 2, sample_size, precision)    
+  #19
+  # to temporarily relieve from 'too many staic loop' error
+  sample_size = 1
+  if fixed_param_vals != None:
+    preflop_verylowhand_call_limit = float(fixed_param_vals[19])
+  else:  
+    total_num_games *= sample_size
+    # preflop_lowhand_call_limit_paras = generateLinearListExclEnds(2, 6, sample_size, precision)  
+    preflop_verylowhand_call_limit_paras = 4
 
-  # #20
-  # sample_size = 1
-  # total_num_games *= sample_size
-  # preflop_nogoodhand_call_limit_paras = generateLinearListExclEnds(2, 2, sample_size, precision)    
-
-
+  #20
+  # to temporarily relieve from 'too many staic loop' error
+  sample_size = 1
+  if fixed_param_vals != None:
+    preflop_nogoodhand_call_limit = float(fixed_param_vals[20])
+  else:  
+    total_num_games *= sample_size
+    #preflop_lowhand_call_limit_paras = generateLinearListExclEnds(2, 6, sample_size, precision)  
+    preflop_nogoodhand_call_limit = 2
 
 
   # num of runs
-  num_run_per_param_set = 3
+  num_run_per_param_set = 25
   total_num_games *= num_run_per_param_set
 
   # global result list
@@ -248,23 +345,29 @@ if __name__ == '__main__':
   print "... clean_mass_result_file_cmd:" + str(rm_mass_result) + " ..."
 
   for river_low_card_up_lim in river_low_card_up_lim_paras:
-    river_mid_card_up_lim_paras = generateLinearListExclEnds(river_low_card_up_lim, river_mid_card_up_lim_max, river_mid_card_up_lim_sample_size, precision)
+    if river_mid_card_up_lim_paras == None:
+      river_mid_card_up_lim_paras = generateLinearListExclEnds(river_low_card_up_lim, river_mid_card_up_lim_max, river_mid_card_up_lim_sample_size, precision)
     for river_mid_card_up_lim in river_mid_card_up_lim_paras:
-      river_high_card_up_lim_paras = generateLinearListExclEnds(river_mid_card_up_lim, river_high_card_up_lim_max, river_high_card_up_lim_sample_size, precision)         
+      if river_high_card_up_lim_paras == None:
+        river_high_card_up_lim_paras = generateLinearListExclEnds(river_mid_card_up_lim, river_high_card_up_lim_max, river_high_card_up_lim_sample_size, precision)         
       for river_high_card_up_lim in river_high_card_up_lim_paras:
         for river_opp_discount_lim in river_opp_discount_lim_paras:
 
           for turn_low_card_up_lim in turn_low_card_up_lim_paras:
-            turn_mid_card_up_lim_paras = generateLinearListExclEnds(turn_low_card_up_lim, turn_mid_card_up_lim_max, turn_mid_card_up_lim_sample_size, precision)
+            if turn_mid_card_up_lim_paras == None:
+              turn_mid_card_up_lim_paras = generateLinearListExclEnds(turn_low_card_up_lim, turn_mid_card_up_lim_max, turn_mid_card_up_lim_sample_size, precision)
             for turn_mid_card_up_lim in turn_mid_card_up_lim_paras:
-              turn_high_card_up_lim_paras = generateLinearListExclEnds(turn_mid_card_up_lim, turn_high_card_up_lim_max, turn_high_card_up_lim_sample_size, precision)         
+              if turn_high_card_up_lim_paras == None:
+                turn_high_card_up_lim_paras = generateLinearListExclEnds(turn_mid_card_up_lim, turn_high_card_up_lim_max, turn_high_card_up_lim_sample_size, precision)         
               for turn_high_card_up_lim in turn_high_card_up_lim_paras:
                 for turn_opp_discount_lim in turn_opp_discount_lim_paras:    
 
                   for flop_low_card_up_lim in flop_low_card_up_lim_paras:
-                    flop_mid_card_up_lim_paras = generateLinearListExclEnds(flop_low_card_up_lim, flop_mid_card_up_lim_max, flop_mid_card_up_lim_sample_size, precision)
+                    if flop_mid_card_up_lim_paras == None:
+                      flop_mid_card_up_lim_paras = generateLinearListExclEnds(flop_low_card_up_lim, flop_mid_card_up_lim_max, flop_mid_card_up_lim_sample_size, precision)
                     for flop_mid_card_up_lim in flop_mid_card_up_lim_paras:
-                      flop_high_card_up_lim_paras = generateLinearListExclEnds(flop_mid_card_up_lim, flop_high_card_up_lim_max, flop_high_card_up_lim_sample_size, precision)         
+                      if flop_high_card_up_lim_paras == None:
+                        flop_high_card_up_lim_paras = generateLinearListExclEnds(flop_mid_card_up_lim, flop_high_card_up_lim_max, flop_high_card_up_lim_sample_size, precision)         
                       for flop_high_card_up_lim in flop_high_card_up_lim_paras:
                         for flop_opp_discount_lim in flop_opp_discount_lim_paras:
 
@@ -278,9 +381,7 @@ if __name__ == '__main__':
                                         # for preflop_verylowhand_call_limit in preflop_verylowhand_call_limit_paras:
                                           #   for preflop_nogoodhand_call_limit in preflop_nogoodhand_call_limit_paras:
 
-                                              # to temporarily relieve from 'too many staic loop' error
-                                              preflop_verylowhand_call_limit = 4
-                                              preflop_nogoodhand_call_limit = 2
+
 
                                               # -- Clean up before running 
                                               rm_param_result = subprocess.call([clean_param_file_cmd], shell=True)
