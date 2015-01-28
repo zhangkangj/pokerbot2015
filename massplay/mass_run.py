@@ -91,9 +91,9 @@ if __name__ == '__main__':
   game_start = start
 
   # Player name last char cannot be digit
-  player_names = ["MixedOppNewSeven", "Mixed", "Fold"]
+  player_names = ["MixedOppNewEight", "Mixed", "MixedStronger"]
 
-  player_of_interest = "MixedOppNewSeven"
+  player_of_interest = "MixedOppNewEight"
 
   precision = 4
 
@@ -188,12 +188,17 @@ if __name__ == '__main__':
 
   # Turn
   #4
-  sample_size = 1
-  if fixed_param_vals != None:
-    turn_low_card_up_lim_paras = [float(fixed_param_vals[4])]
-  else:
-    total_num_games *= sample_size
-    turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  # sample_size = 1
+  # if fixed_param_vals != None:
+  #   turn_low_card_up_lim_paras = [float(fixed_param_vals[4])]
+  # else:
+  #   total_num_games *= sample_size
+  #   turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
+  
+  # TODO: temp tune key 
+  sample_size = 2
+  total_num_games *= sample_size
+  turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
 
   #5
   turn_mid_card_up_lim_max = 0.99
@@ -207,7 +212,7 @@ if __name__ == '__main__':
   turn_high_card_up_lim_max = 1.0
   turn_high_card_up_lim_sample_size = 2
   if fixed_param_vals != None:
-    turn_high_card_up_lim_paras = [float(fixed_param_vals[6])]  
+    turn_high_card_up_lim_paras = [float(fixed_param_vals[6])]
   else:
     total_num_games *= turn_high_card_up_lim_sample_size
 
@@ -221,12 +226,17 @@ if __name__ == '__main__':
 
   # Flop
   #8
-  sample_size = 1
-  if fixed_param_vals != None:
-    flop_low_card_up_lim_paras = [float(fixed_param_vals[8])]
-  else:
-    total_num_games *= sample_size
-    flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  # sample_size = 1
+  # if fixed_param_vals != None:
+  #   flop_low_card_up_lim_paras = [float(fixed_param_vals[8])]
+  # else:
+  #   total_num_games *= sample_size
+  #   flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+
+  # TODO: temp tune key
+  sample_size = 2
+  total_num_games *= sample_size
+  flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
 
   #9
   flop_mid_card_up_lim_max = 0.99
@@ -331,7 +341,7 @@ if __name__ == '__main__':
 
 
   # num of runs
-  num_run_per_param_set = 25
+  num_run_per_param_set = 1
   total_num_games *= num_run_per_param_set
 
   # global result list
