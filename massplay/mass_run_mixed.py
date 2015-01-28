@@ -91,9 +91,9 @@ if __name__ == '__main__':
   game_start = start
 
   # Player name last char cannot be digit
-  player_names = ["MixedParam", "Mixed", "Fold"]
+  player_names = ["MixedTuned", "Mixed", "Fold"]
 
-  player_of_interest = "MixedParam"
+  player_of_interest = "MixedTuned"
 
   precision = 4
 
@@ -115,34 +115,35 @@ if __name__ == '__main__':
 
   # total number of games (which could be a triplicate game on its own) to run 
   total_num_games = 1
-
+	
+#[0.625, 15.5, 0.5, 0.625]
   # Variables
-  mid_band_factor_min = 0.5
-  mid_band_factor_max = 1
-  mid_band_factor_sample_size = 3
+  mid_band_factor_min = 0.625
+  mid_band_factor_max = 0.625
+  mid_band_factor_sample_size = 1
   total_num_games *= mid_band_factor_sample_size
   mid_band_factor_lim_paras = generateLinearListExclEnds(mid_band_factor_min, mid_band_factor_max, mid_band_factor_sample_size, precision)
 
-  preflop_raise_lim_min = 2
-  preflop_raise_lim_max = 20
-  preflop_raise_lim_sample_size = 3
+  preflop_raise_lim_min = 15.5
+  preflop_raise_lim_max = 15.5
+  preflop_raise_lim_sample_size = 1
   total_num_games *= preflop_raise_lim_sample_size
   preflop_raise_lim_paras = generateLinearListExclEnds(preflop_raise_lim_min, preflop_raise_lim_max, preflop_raise_lim_sample_size, precision)
 
 
-  flop_mid_card_lim_min = 0.25
-  flop_mid_card_lim_max = 0.75
-  flop_mid_card_lim_sample_size = 3
+  flop_mid_card_lim_min = 0.5
+  flop_mid_card_lim_max = 0.5
+  flop_mid_card_lim_sample_size = 1
   total_num_games *= flop_mid_card_lim_sample_size
   flop_mid_card_lim_paras = generateLinearListExclEnds(flop_mid_card_lim_min, flop_mid_card_lim_max, flop_mid_card_lim_sample_size, precision)
 
-  river_mid_card_lim_min = 0.25
-  river_mid_card_lim_max = 0.75
-  river_mid_card_lim_sample_size = 3
+  river_mid_card_lim_min = 0.625
+  river_mid_card_lim_max = 0.625
+  river_mid_card_lim_sample_size = 1
   total_num_games *= river_mid_card_lim_sample_size
   river_mid_card_lim_paras = generateLinearListExclEnds(river_mid_card_lim_min, river_mid_card_lim_max, river_mid_card_lim_sample_size, precision)
 
-  num_run_per_param_set = 2
+  num_run_per_param_set = 20
   total_num_games *= num_run_per_param_set
 
   # global result list

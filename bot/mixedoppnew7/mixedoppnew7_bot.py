@@ -50,11 +50,11 @@ class Mixedoppnew7Bot(base_bot.BaseBot):
     print "----------equity: " + str(equity)
     print "----------curr pot_size: " + str(self.player.pot_size) 
 
-    preflop_raisehand_raise_limit = 20
-    preflop_suitedcallhand_call_limit = 4
-    preflop_lowcallhand_call_limit = 2
-    preflop_verylowcallhand_call_limit = 2
-    preflop_nogoodhand_call_limit = 2
+    preflop_raisehand_raise_limit = self.player.param.preflop_raise_limit
+    preflop_suitedcallhand_call_limit = self.player.param.preflop_suitedhand_call_limit
+    preflop_lowcallhand_call_limit = self.player.param.preflop_lowhand_call_limit
+    preflop_verylowcallhand_call_limit = self.player.param.preflop_verylowhand_call_limit
+    preflop_nogoodhand_call_limit = self.player.param.preflop_nogoodhand_call_limit
 
     if is_raise_hand:
         #debug
@@ -105,7 +105,7 @@ class Mixedoppnew7Bot(base_bot.BaseBot):
     call_limit_factor = 0.5
 
     equity_band_factor = 1
-    call_limit = self.player.current_stacksize * equity * call_limit_factor
+    call_limit = self.player.current_stacksize * equity * self.player.param.mid_card_river_call_limit_factor
 
     # at river you know that for sure you only have a mid hand, play conservatively with lower call limit
     result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, call_limit)
@@ -131,7 +131,7 @@ class Mixedoppnew7Bot(base_bot.BaseBot):
     call_limit_factor = 1.0
 
     equity_band_factor = 1
-    call_limit = self.player.current_stacksize * equity * call_limit_factor
+    call_limit = self.player.current_stacksize * equity * self.player.param.mid_card_call_limit_factor
 
     # call with a limit to leave room to improve
     result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, call_limit)
@@ -163,7 +163,7 @@ class Mixedoppnew7Bot(base_bot.BaseBot):
 
     call_limit = None
     # use a raise limit to reduce loss if we end up losing, given this is not the 'top' card spectrum 
-    raise_limit = self.player.current_stacksize * equity * raise_limit_factor
+    raise_limit = self.player.current_stacksize * equity * self.player.param.high_card_raise_limit_factor
 
     result = bot_action_lib.BotActionLib.action_equity_raise_call(self.player, equity, can_raise, can_bet, can_call, equity_band_factor, raise_limit, call_limit)   
     

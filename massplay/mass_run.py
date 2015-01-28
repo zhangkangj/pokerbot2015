@@ -91,7 +91,7 @@ if __name__ == '__main__':
   game_start = start
 
   # Player name last char cannot be digit
-  player_names = ["MixedOppNewSeven", "MixedOppNewSix", "Fold"]
+  player_names = ["MixedOppNewSeven", "Mixed", "Fold"]
 
   player_of_interest = "MixedOppNewSeven"
 
@@ -116,27 +116,124 @@ if __name__ == '__main__':
   # total number of games (which could be a triplicate game on its own) to run 
   total_num_games = 1
 
+
+
   # Variables
-  opp_discount_lim_min = 0.01
-  opp_discount_lim_max = 0.49
-  opp_discount_lim_sample_size = 2
-  total_num_games *= opp_discount_lim_sample_size
-  opp_discount_lim_paras = generateLinearListExclEnds(opp_discount_lim_min, opp_discount_lim_max, opp_discount_lim_sample_size, precision)
 
-  low_card_up_lim_min = 0.01
-  low_card_up_lim_max = 0.98
-  low_card_up_lim_sample_size = 2
-  total_num_games *= low_card_up_lim_sample_size
-  low_card_up_lim_paras = generateLinearListExclEnds(low_card_up_lim_min, low_card_up_lim_max, low_card_up_lim_sample_size, precision)
+  # River
+  #0
+  sample_size = 1
+  total_num_games *= sample_size
+  river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
 
-  mid_card_up_lim_max = 0.99
-  mid_card_up_lim_sample_size = 1
-  total_num_games *= mid_card_up_lim_sample_size
+  #1
+  river_mid_card_up_lim_max = 0.99
+  river_mid_card_up_lim_sample_size = 1
+  total_num_games *= river_mid_card_up_lim_sample_size
 
-  high_card_up_lim_max = 1.0
-  high_card_up_lim_sample_size = 2
-  total_num_games *= high_card_up_lim_sample_size
+  #2
+  river_high_card_up_lim_max = 1.0
+  river_high_card_up_lim_sample_size = 2
+  total_num_games *= river_high_card_up_lim_sample_size
 
+  #3
+  sample_size = 1
+  total_num_games *= sample_size
+  river_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.2, sample_size, precision)    
+
+  # Turn
+
+  #4
+  sample_size = 1
+  total_num_games *= sample_size
+  turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+
+  #5
+  turn_mid_card_up_lim_max = 0.99
+  turn_mid_card_up_lim_sample_size = 1
+  total_num_games *= turn_mid_card_up_lim_sample_size
+
+  #6
+  turn_high_card_up_lim_max = 1.0
+  turn_high_card_up_lim_sample_size = 2
+  total_num_games *= turn_high_card_up_lim_sample_size
+
+  #7
+  sample_size = 1
+  total_num_games *= sample_size
+  turn_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.3, sample_size, precision)      
+
+  # Flop
+  #8
+  sample_size = 1
+  total_num_games *= sample_size
+  flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+
+  #9
+  flop_mid_card_up_lim_max = 0.99
+  flop_mid_card_up_lim_sample_size = 1
+  total_num_games *= flop_mid_card_up_lim_sample_size
+
+  #10
+  flop_high_card_up_lim_max = 1.0
+  flop_high_card_up_lim_sample_size = 2
+  total_num_games *= flop_high_card_up_lim_sample_size  
+
+  #11
+  sample_size = 1
+  total_num_games *= sample_size
+  flop_opp_discount_lim_paras = generateLinearListExclEnds(0.01, 0.4, sample_size, precision)  
+
+  # Other variables
+  #12 
+  sample_size = 2
+  total_num_games *= sample_size
+  mid_card_river_call_limit_paras = generateLinearListExclEnds(0.25, 0.75, sample_size, precision)
+
+  #13
+  sample_size = 2
+  total_num_games *= sample_size
+  mid_card_call_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
+
+  #14
+  sample_size = 2
+  total_num_games *= sample_size
+  high_card_river_raise_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
+
+  #15
+  sample_size = 2
+  total_num_games *= sample_size
+  high_card_raise_limit_paras = generateLinearListExclEnds(0.25, 1, sample_size, precision)
+
+  #16      
+  sample_size = 2
+  total_num_games *= sample_size
+  preflop_raise_limit_paras = generateLinearListExclEnds(2, 30, sample_size, precision)
+
+  #17
+  sample_size = 1
+  total_num_games *= sample_size
+  preflop_suitedhand_call_limit_paras = generateLinearListExclEnds(2, 20, sample_size, precision)
+
+  #18
+  sample_size = 1
+  total_num_games *= sample_size
+  preflop_lowhand_call_limit_paras = generateLinearListExclEnds(2, 6, sample_size, precision)  
+
+  # #19
+  # sample_size = 1
+  # total_num_games *= sample_size
+  # preflop_verylowhand_call_limit_paras = generateLinearListExclEnds(2, 2, sample_size, precision)    
+
+  # #20
+  # sample_size = 1
+  # total_num_games *= sample_size
+  # preflop_nogoodhand_call_limit_paras = generateLinearListExclEnds(2, 2, sample_size, precision)    
+
+
+
+
+  # num of runs
   num_run_per_param_set = 3
   total_num_games *= num_run_per_param_set
 
@@ -150,48 +247,88 @@ if __name__ == '__main__':
   rm_mass_result = subprocess.call([clean_mass_result_file_cmd], shell=True)
   print "... clean_mass_result_file_cmd:" + str(rm_mass_result) + " ..."
 
-  for low_card_up_lim in low_card_up_lim_paras:
-    mid_card_up_lim_paras = generateLinearListExclEnds(low_card_up_lim, mid_card_up_lim_max, mid_card_up_lim_sample_size, precision)
-    for mid_card_up_lim in mid_card_up_lim_paras:
-      high_card_up_lim_paras = generateLinearListExclEnds(mid_card_up_lim, high_card_up_lim_max, high_card_up_lim_sample_size, precision)         
-      for high_card_up_lim in high_card_up_lim_paras:
-        for opp_discount_lim in opp_discount_lim_paras:
-          # -- Clean up before running 
-          rm_param_result = subprocess.call([clean_param_file_cmd], shell=True)
-          print "... clean_param_file_cmd:" + str(rm_param_result) + " ..."
-          rm_run_result = subprocess.call([clean_run_result_files_cmd], shell=True)
-          print "... clean_run_result_files_cmd:" + str(rm_run_result) + " ..."
+  for river_low_card_up_lim in river_low_card_up_lim_paras:
+    river_mid_card_up_lim_paras = generateLinearListExclEnds(river_low_card_up_lim, river_mid_card_up_lim_max, river_mid_card_up_lim_sample_size, precision)
+    for river_mid_card_up_lim in river_mid_card_up_lim_paras:
+      river_high_card_up_lim_paras = generateLinearListExclEnds(river_mid_card_up_lim, river_high_card_up_lim_max, river_high_card_up_lim_sample_size, precision)         
+      for river_high_card_up_lim in river_high_card_up_lim_paras:
+        for river_opp_discount_lim in river_opp_discount_lim_paras:
+
+          for turn_low_card_up_lim in turn_low_card_up_lim_paras:
+            turn_mid_card_up_lim_paras = generateLinearListExclEnds(turn_low_card_up_lim, turn_mid_card_up_lim_max, turn_mid_card_up_lim_sample_size, precision)
+            for turn_mid_card_up_lim in turn_mid_card_up_lim_paras:
+              turn_high_card_up_lim_paras = generateLinearListExclEnds(turn_mid_card_up_lim, turn_high_card_up_lim_max, turn_high_card_up_lim_sample_size, precision)         
+              for turn_high_card_up_lim in turn_high_card_up_lim_paras:
+                for turn_opp_discount_lim in turn_opp_discount_lim_paras:    
+
+                  for flop_low_card_up_lim in flop_low_card_up_lim_paras:
+                    flop_mid_card_up_lim_paras = generateLinearListExclEnds(flop_low_card_up_lim, flop_mid_card_up_lim_max, flop_mid_card_up_lim_sample_size, precision)
+                    for flop_mid_card_up_lim in flop_mid_card_up_lim_paras:
+                      flop_high_card_up_lim_paras = generateLinearListExclEnds(flop_mid_card_up_lim, flop_high_card_up_lim_max, flop_high_card_up_lim_sample_size, precision)         
+                      for flop_high_card_up_lim in flop_high_card_up_lim_paras:
+                        for flop_opp_discount_lim in flop_opp_discount_lim_paras:
+
+                          for mid_card_river_call_limit in mid_card_river_call_limit_paras:
+                            for mid_card_call_limit in mid_card_call_limit_paras:
+                              for high_card_river_raise_limit in high_card_river_raise_limit_paras:
+                                for high_card_raise_limit in high_card_raise_limit_paras:
+                                  for preflop_raise_limit in preflop_raise_limit_paras:
+                                    for preflop_suitedhand_call_limit in preflop_suitedhand_call_limit_paras:
+                                      for preflop_lowhand_call_limit in preflop_lowhand_call_limit_paras:
+                                        # for preflop_verylowhand_call_limit in preflop_verylowhand_call_limit_paras:
+                                          #   for preflop_nogoodhand_call_limit in preflop_nogoodhand_call_limit_paras:
+
+                                              # to temporarily relieve from 'too many staic loop' error
+                                              preflop_verylowhand_call_limit = 4
+                                              preflop_nogoodhand_call_limit = 2
+
+                                              # -- Clean up before running 
+                                              rm_param_result = subprocess.call([clean_param_file_cmd], shell=True)
+                                              print "... clean_param_file_cmd:" + str(rm_param_result) + " ..."
+                                              rm_run_result = subprocess.call([clean_run_result_files_cmd], shell=True)
+                                              print "... clean_run_result_files_cmd:" + str(rm_run_result) + " ..."
 
 
-          # -- Parameters
-          param_list = [low_card_up_lim, mid_card_up_lim, high_card_up_lim, opp_discount_lim]
-          print "... parameter combo: " + str(param_list) + "..."
+                                              # -- Parameters
+                                              param_list = [river_low_card_up_lim, river_mid_card_up_lim, river_high_card_up_lim, river_opp_discount_lim,
+                                                turn_low_card_up_lim, turn_mid_card_up_lim, turn_high_card_up_lim, turn_opp_discount_lim,
+                                                flop_low_card_up_lim, flop_mid_card_up_lim, flop_high_card_up_lim, flop_opp_discount_lim,
+                                                mid_card_river_call_limit, mid_card_call_limit, high_card_river_raise_limit, high_card_raise_limit,
+                                                preflop_raise_limit, preflop_suitedhand_call_limit, preflop_lowhand_call_limit, preflop_verylowhand_call_limit,
+                                                preflop_nogoodhand_call_limit]
+                                              print "... parameter combo: " + str(param_list) + "..."
 
-          # -- Write the parameter combo to the parameter file
-          f = open(input_params_file, 'w')
-          f.write('%f, %f, %f, %f\n' %(low_card_up_lim, mid_card_up_lim, high_card_up_lim, opp_discount_lim))
-          f.close()
+                                              # -- Write the parameter combo to the parameter file
+                                              f = open(input_params_file, 'w')
+                                              f.write('%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n' %(
+                                                river_low_card_up_lim, river_mid_card_up_lim, river_high_card_up_lim, river_opp_discount_lim,
+                                                turn_low_card_up_lim, turn_mid_card_up_lim, turn_high_card_up_lim, turn_opp_discount_lim,
+                                                flop_low_card_up_lim, flop_mid_card_up_lim, flop_high_card_up_lim, flop_opp_discount_lim,
+                                                mid_card_river_call_limit, mid_card_call_limit, high_card_river_raise_limit, high_card_raise_limit,
+                                                preflop_raise_limit, preflop_suitedhand_call_limit, preflop_lowhand_call_limit, preflop_verylowhand_call_limit,
+                                                preflop_nogoodhand_call_limit))
+                                              f.close()
 
-          # -- Run engine, the player will read the file above 
-          # number of times you ran for each set of parameter combo          
-          for i in range(num_run_per_param_set):
-            engine_run_result = subprocess.call([engine_cmd], shell=True)
-            print "......... " + str(i) + " - engine_run_result:" + str(engine_run_result) + ", " + str(param_list) + "..."
-            
-            # Print out game count
-            total_game_count += 1
-            game_end = time.time()
-            print "============ " + str(total_game_count) + " Out of " + str(total_num_games) + " Games Has Completed, Duration:" + str(game_end - game_start) + "============" 
-            game_start = game_end
+                                              # -- Run engine, the player will read the file above 
+                                              # number of times you ran for each set of parameter combo          
+                                              for i in range(num_run_per_param_set):
+                                                engine_run_result = subprocess.call([engine_cmd], shell=True)
+                                                print "......... " + str(i) + " - engine_run_result:" + str(engine_run_result) + ", " + str(param_list) + "..."
+                                                
+                                                # Print out game count
+                                                total_game_count += 1
+                                                game_end = time.time()
+                                                print "============ " + str(total_game_count) + " Out of " + str(total_num_games) + " Games Has Completed, Duration:" + str(game_end - game_start) + "============" 
+                                                game_start = game_end
 
-          # -- Generate the result
-          # generate the tuple for all stats of current param based on the *.txt files
-          all_stats_tuple_for_curr_params = generateAllStatsTuple(run_result_dir, player_names, param_list, player_of_interest)
-          # Add this result to the global result list
-          all_stats_tuple_list.append(all_stats_tuple_for_curr_params)
+                                              # -- Generate the result
+                                              # generate the tuple for all stats of current param based on the *.txt files
+                                              all_stats_tuple_for_curr_params = generateAllStatsTuple(run_result_dir, player_names, param_list, player_of_interest)
+                                              # Add this result to the global result list
+                                              all_stats_tuple_list.append(all_stats_tuple_for_curr_params)
 
-          # Write this to an unsorted file as we go, in case it stops in the middle of the run
-          writeOneStats(all_stats_tuple_for_curr_params, massplay_result_output_file_unsorted)
+                                              # Write this to an unsorted file as we go, in case it stops in the middle of the run
+                                              writeOneStats(all_stats_tuple_for_curr_params, massplay_result_output_file_unsorted)
 
 
 
