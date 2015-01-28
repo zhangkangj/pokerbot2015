@@ -1,8 +1,8 @@
 from .. import base_player
 from bot.mixedoppnew6 import mixedoppnew6_bot
 from bot.mixedoppnew6 import mixedoppnew6_opponent
-#from bot.tight_aggressive import tight_aggressive_bot
-#from bot.tight_conservative import tight_conservative_bot
+from bot.tight_aggressive import tight_aggressive_bot
+from bot.tight_conservative import tight_conservative_bot
 from bot.mixed import mixed_bot
 
 import base_nash_bot
@@ -10,7 +10,7 @@ import base_nash_bot
 class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
-    self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
+ #   self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
     self.mixed_bot = mixed_bot.MixedBot(self)
     self.opponew6 = self.mixed_bot
      ## by defalt it uses mixedoppnew6
@@ -29,8 +29,8 @@ class Base_nashPlayer(base_player.BasePlayer):
     self.nash_bot_50 = base_nash_bot.Base_nashBot(self, 50, data_folder + 'prob4_50_total.npy')
     self.nash_bot_25 = base_nash_bot.Base_nashBot(self, 25, data_folder + 'prob4_25_total.npy')
     self.nash_bot_10 = base_nash_bot.Base_nashBot(self, 10, data_folder + 'prob4_10_total.npy')
-#    self.tight_aggressive_bot1 = tight_aggressive_bot.TightAggressiveBot(self)
-#    self.tight_conservative_bot1 = tight_conservative_bot.TightConservativeBot(self)
+    self.tight_aggressive_bot1 = tight_aggressive_bot.TightAggressiveBot(self)
+    self.tight_conservative_bot1 = tight_conservative_bot.TightConservativeBot(self)
     self.current_bot = self.opponew6
     self.current_bot_type = 'MIXED'
     self.Bankrolls={};
@@ -73,17 +73,17 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'Now change to nash bot for new hand'
     elif self.num_active_player == 3: #and (self.current_bot_type == 'NASH'):
       if self.stack_rank == 3 and min(self.stack_sizes) < 50 and max(self.stack_sizes) > 450:
-        self.current_bot = self.mixed
+        self.current_bot = self.tight_conservative_bot1
  #       self.current_bot = self.opponew6
         self.current_bot_type = 'TIGHT_CONSERVATIVE'
         print "Should use tight here - depend on whether second person is tight";
       elif self.stack_rank == 3 and min(self.stack_sizes) < 50 and max(self.stack_sizes) < 350:
-        self.current_bot = self.mixed
+        self.current_bot = self.tight_aggressive_bot1
   #      self.current_bot = self.opponew6
         self.current_bot_type = 'TIGHT_AGGRESSIVE'
         print "Should use tight aggressive here"
       elif self.stack_rank == 2 and self.stack_sizes[self.seat-1] < 100:
-        self.current_bot = self.mixed
+        self.current_bot = self.tight_conservative_bot1
     #    self.current_bot = self.opponew6
         print "Should use tight conservative here"
         self.current_bot_type = 'TIGHT_CONSERVATIVE'
