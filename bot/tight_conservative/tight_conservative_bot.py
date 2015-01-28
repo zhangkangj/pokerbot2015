@@ -82,6 +82,7 @@ class TightConservativeBot(base_bot.BaseBot):
         equity = 0.25
         var = 0.1
     return equity
+    
   
   
   def preflop(self, can_raise, can_bet, can_call):
@@ -140,19 +141,31 @@ class TightConservativeBot(base_bot.BaseBot):
         bet_amount = int([action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]) 
         result = 'BET:' + str(bet_amount)        
         print 'betting', result
-      else:
+      elif can_raise:
         # medium raise
         raise_amount = int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1])
         result = 'RAISE:' + str(raise_amount)
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in preflop'
     else:
       if can_bet:
         # max bet
         result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]
         print 'betting', result
-      else:
+      elif can_raise:
         result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in preflop'
     return result
     
 
@@ -233,9 +246,15 @@ class TightConservativeBot(base_bot.BaseBot):
         # max bet
         result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]
         print 'betting', result
-      else:
+      elif can_raise:
         result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in flop'
     return result
     
     
@@ -312,9 +331,15 @@ class TightConservativeBot(base_bot.BaseBot):
         # max bet
         result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]
         print 'betting', result
-      else:
+      elif can_raise:
         result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in turn'
     return result
     
     

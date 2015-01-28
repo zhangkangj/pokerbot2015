@@ -141,19 +141,31 @@ class TightAggressiveBot(base_bot.BaseBot):
         bet_amount = (int([action for action in self.player.legal_actions if 'BET' in action][0].split(':')[1]) + int([action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]))/2
         result = 'BET:' + str(bet_amount)        
         print 'betting', result
-      else:
+      elif can_raise:
         # medium raise
         raise_amount = (int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[1]) + int([action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2]))/2
         result = 'RAISE:' + str(raise_amount)
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in preflop'
     else:
       if can_bet:
         # max bet
         result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]
         print 'betting', result
-      else:
+      elif can_raise:
         result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2]
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in preflop'
     return result
     
 
@@ -234,9 +246,15 @@ class TightAggressiveBot(base_bot.BaseBot):
         # max bet
         result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]
         print 'betting', result
-      else:
+      elif can_raise:
         result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2]
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in flop'
     return result
     
     
@@ -313,9 +331,15 @@ class TightAggressiveBot(base_bot.BaseBot):
         # max bet
         result = 'BET:' + [action for action in self.player.legal_actions if 'BET' in action][0].split(':')[2]
         print 'betting', result
-      else:
+      elif can_raise:
         result = 'RAISE:' + [action for action in self.player.legal_actions if 'RAISE' in action][0].split(':')[2]
         print 'raising', result
+      elif can_call:
+        call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
+      else:
+        print 'Error in turn'
     return result
     
     
@@ -385,5 +409,5 @@ class TightAggressiveBot(base_bot.BaseBot):
         result = 'CALL:' + str(call_amount)
         print 'calling', result
       else:
-        print 'error'
+        print 'error in river'
     return result

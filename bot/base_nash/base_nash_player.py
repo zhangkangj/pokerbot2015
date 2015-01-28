@@ -12,28 +12,28 @@ class Base_nashPlayer(base_player.BasePlayer):
     super(Base_nashPlayer, self).__init__()
     self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
     self.mixed_bot = mixed_bot.MixedBot(self)
+    self.opponew6 = self.mixed_bot
      ## by defalt it uses mixedoppnew6
-    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, '../../data/cfr/aws_new/prob_300_total.npy')
+    data_folder = '../../data/cfr/aws_new/'
+    self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, data_folder+'prob4_300_total.npy')
  #   self.nash_bot_300 = []
-    self.nash_bot_200 = []
-    self.nash_bot_140 = []
-    self.nash_bot_90 = []
-    self.nash_bot_50 = []
-    self.nash_bot_25 = []
-    self.nash_bot_10 = []
-#    self.nash_bot_200 = base_nash_bot.Base_nashBot(self, 200, '../../data/cfr/aws/prob_300_total.npy')
-#    self.nash_bot_140 = base_nash_bot.Base_nashBot(self, 140, '../../data/cfr/aws/prob_300_total.npy')
-#    self.nash_bot_90 = base_nash_bot.Base_nashBot(self, 90, '../../data/cfr/aws/prob_300_total.npy')
-#    self.nash_bot_50 = base_nash_bot.Base_nashBot(self, 50, '../../data/cfr/aws_new/prob4_50_total.npy')
-#    self.nash_bot_25 = base_nash_bot.Base_nashBot(self, 25, '../../data/cfr/aws_new/prob4_25_total.npy')
-#    self.nash_bot_10 = base_nash_bot.Base_nashBot(self, 10, '../../data/cfr/aws/prob_300_total.npy')
+ #   self.nash_bot_200 = []
+ #   self.nash_bot_140 = []
+ #   self.nash_bot_90 = []
+ #   self.nash_bot_50 = []
+ #   self.nash_bot_25 = []
+ #   self.nash_bot_10 = []
+    self.nash_bot_200 = base_nash_bot.Base_nashBot(self, 200, data_folder + 'prob4_200_total.npy')
+    self.nash_bot_140 = base_nash_bot.Base_nashBot(self, 140, data_folder + 'prob4_140_total.npy')
+    self.nash_bot_90 = base_nash_bot.Base_nashBot(self, 90, data_folder + 'prob4_90_total.npy')
+    self.nash_bot_50 = base_nash_bot.Base_nashBot(self, 50, data_folder + 'prob4_50_total.npy')
+    self.nash_bot_25 = base_nash_bot.Base_nashBot(self, 25, data_folder + 'prob4_25_total.npy')
+    self.nash_bot_10 = base_nash_bot.Base_nashBot(self, 10, data_folder + 'prob4_10_total.npy')
 #    self.tight_aggressive_bot1 = tight_aggressive_bot.TightAggressiveBot(self)
 #    self.tight_conservative_bot1 = tight_conservative_bot.TightConservativeBot(self)
     self.current_bot = self.opponew6
     self.current_bot_type = 'MIXED'
     self.Bankrolls={};
-
-
 
   def new_game(self, parts):
     print 
@@ -51,23 +51,24 @@ class Base_nashPlayer(base_player.BasePlayer):
   def new_hand(self, parts):
     super(Base_nashPlayer, self).new_hand(parts);
     if self.num_active_player == 2 and (self.current_bot_type != 'NASH'):
-      if self.init_stack_sizes[self.seat-1] > 200:
+      minstack = min(self.init_stack_sizes[0], self.init_stack_sizes[1])
+      if minstack > 200:
         self.current_bot = self.nash_bot_300;
-      elif self.init_stack_sizes[self.seat-1] > 140:
+      elif minstack > 140:
         self.current_bot = self.nash_bot_200;
-      elif self.init_stack_sizes[self.seat-1] > 90:
+      elif minstack > 90:
         self.current_bot = self.nash_bot_140;
-      elif self.init_stack_sizes[self.seat-1] > 50:
+      elif minstack > 50:
         self.current_bot = self.nash_bot_90;
-      elif self.init_stack_sizes[self.seat-1] > 25:
+      elif minstack > 25:
         self.current_bot = self.nash_bot_50;
-      elif self.init_stack_sizes[self.seat-1] > 10:
+      elif minstack > 10:
         self.current_bot = self.nash_bot_25;
       else:
         self.current_bot = self.nash_bot_10;
     	#self.current_bot = base_nash_bot.Base_nashBot(self, 100, ' ')
       #Max add the following line, for now, only use nash_300
-      self.current_bot = self.nash_bot_300
+      #self.current_bot = self.nash_bot_300
       self.current_bot_type = 'NASH'
       print 'Now change to nash bot for new hand'
     elif self.num_active_player == 3: #and (self.current_bot_type == 'NASH'):

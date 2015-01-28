@@ -10,7 +10,7 @@ from lib.evaluator import evaluator, evaluator_cy
 # from lib.evaluator import evaluator_cy
 from lib import util
 import numpy as np
-from study.cfr import cfr_cy2
+from study.cfr import cfr_cy4
 
 
 class Base_nashBot(base_bot.BaseBot):
@@ -18,7 +18,7 @@ class Base_nashBot(base_bot.BaseBot):
     super(Base_nashBot, self).__init__(player)
     #initialize the bot with corresponding game tree
     self.just_init = False
-    self.root = cfr_cy2.RoundNode(0, 0, stack, stack)
+    self.root = cfr_cy4.RoundNode(0, 0, stack, stack)
     self.last_raise_amount = 0
     self.last_round_pot_size = 0
     #the stack and the data file should match! no check

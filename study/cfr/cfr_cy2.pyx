@@ -56,11 +56,13 @@ cdef class Node(object):
     self.child_nodes.append(node)
 
   cdef void spawn_fold_node(self, bint sb_win, int win_amount):
+    print win_amount, sb_win, 'spawning fold node'
     node = FoldNode(sb_win, win_amount)
     self.child_nodes.append(node)
     self.num_child += 1
 
   cdef void spawn_showdown_node(self, int pot_size):
+    print pot_size, 'spawning showdown node'
     node = ShowdownNode(pot_size)
     self.child_nodes.append(node)
     self.num_child += 1
