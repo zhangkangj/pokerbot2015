@@ -1,9 +1,10 @@
 #include <assert.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 
-#include "evaluator.c"
+#include "evaluator_lib.c"
 
 uint64_t rdtsc(){
     unsigned int lo,hi;
@@ -16,7 +17,7 @@ void benchmark() {
   uint64_t aa, bb, cc, dd, ee, ff, gg;
   clock_t stop_time, start_time = clock();
   uint64_t stop_cycle, start_cycle = rdtsc();
-  unsigned int result[16384] = {0};
+  unsigned int result[32000] = {0};
   for (a = 0; a < 46; ++a) {
     aa = num_to_bit(a);
     for (b = a+1; b < 47; ++b) {
@@ -47,15 +48,15 @@ void benchmark() {
   printf("%0.2f cycles, %0.2f nanoseconds. \n", ((double)(stop_cycle - start_cycle))/133784560.0, ((double) (stop_time - start_time)) / CLOCKS_PER_SEC / 133784560.0 * 1e9);
   unsigned int hands[9] = {0};
   unsigned int i;
-  for (i=0; i<16384; i++) {
-    if (i<1000) hands[0] += result[i];
-    else if (i < 2093)  hands[1] += result[i];
-    else if (i < 4000)  hands[2] += result[i];
-    else if (i < 5000)  hands[3] += result[i];
-    else if (i < 6000)  hands[4] += result[i];
-    else if (i < 7000)  hands[5] += result[i];
-    else if (i < 8000)  hands[6] += result[i];
-    else if (i < 10000)  hands[7] += result[i];
+  for (i=0; i<32000; i++) {
+    if (i<4000) hands[0] += result[i];
+    else if (i < 6147)  hands[1] += result[i];
+    else if (i < 8000)  hands[2] += result[i];
+    else if (i < 12000)  hands[3] += result[i];
+    else if (i < 16000)  hands[4] += result[i];
+    else if (i < 20000)  hands[5] += result[i];
+    else if (i < 24000)  hands[6] += result[i];
+    else if (i < 28000)  hands[7] += result[i];
     else hands[8] += result[i];
   }
   printf("straight flush:   %d\n", hands[8]);
@@ -69,15 +70,60 @@ void benchmark() {
   printf("no pair:          %d\n", hands[0]);
 }
 
+float get_preflop_naive_strength(const char x_str[3], const char y_str[3]) {
+  unsigned int x = card_to_num(x_str), y = card_to_num(y_str);
+  unsigned int a, b, c, d, e, f, g;
+  unsigned long long result = 0;
+  uint64_t aa, bb, cc, dd, ee, ff, gg, xx = card_to_bit(x_str), yy = card_to_bit(y_str);
+  unsigned int mask[48] = {0};
+  for (a = 0; a < 51; ++a) {
+    if ((a==x)||(a==y)) continue;
+    aa = num_to_bit(a);
+    for (b = a+1; b < 52; ++b) {
+      if ((b==x)||(b==y)) continue;
+      bb = num_to_bit(b);
+      int i, j=0;
+      for (i=0; i<52; i++) {
+        if ((i!=a)&&(i!=b)&&(i!=x)&&(i!=y)) {
+          mask[j++] = i;
+        }
+      }
+      for (c = 0; c < 44; ++c) {
+        cc = num_to_bit(mask[c]);
+        for (d = c+1; d < 45; ++d) {
+          dd = num_to_bit(mask[d]);
+          for (e = d+1; e < 46; ++e) {
+            ee = num_to_bit(mask[e]);
+            for (f = e+1; f < 47; ++f) {
+              ff = num_to_bit(mask[f]);
+              for (g = f+1; g < 48; ++g) {
+                gg = num_to_bit(mask[g]);
+                unsigned int tmp1 = evaluate(xx, yy, cc, dd, ee, ff, gg);
+                unsigned int tmp2 = evaluate(aa, bb, cc, dd, ee, ff, gg);
+                result += (tmp1>tmp2)*2 + (tmp1==tmp2);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return result / 2097572400.0 / 2;
+}
+
 void test() {
+  
+  printf("%d\n", evaluate_cards("Ac", "Kc", "Qc", "Jc", "Tc", "Qd", "Td"));
   // four of a kind
+  /*
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "8c", "2c"));
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "Ts", "2c"));
-  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Tc", "Ts", "Th"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ac", "Kc", "Ts", "Th"));
   // full house
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ks", "Kc", "Js", "Th"));
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ks", "Kc", "Kh", "Th"));
   printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ks", "Kc", "Ts", "Th"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Qs", "Qc", "Ts", "Th"));
   // straight
   printf("%d\n", evaluate_cards("As", "Ah", "Kd", "Qs", "Jc", "Ts", "Th"));
   printf("%d\n", evaluate_cards("As", "Ah", "Kd", "Qs", "Jc", "Ts", "9h"));
@@ -86,7 +132,8 @@ void test() {
   printf("%d\n", evaluate_cards("As", "Ah", "Ks", "Qs", "Js", "Ts", "Th"));
   printf("%d\n", evaluate_cards("As", "Ah", "Ks", "Qs", "Js", "9s", "9h"));
   // three of a kind
-  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ks", "Qs", "Jh", "9h"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Ks", "Ts", "9h", "8h"));
+  printf("%d\n", evaluate_cards("As", "Ah", "Ad", "Qs", "Ts", "9h", "8h"));
   printf("%d\n", evaluate_cards("2s", "2h", "2d", "Ks", "Qs", "Jh", "Ah"));
   // two pair / pair
   printf("%d\n", evaluate_cards("As", "Ah", "Kd", "Ks", "Qs", "Jh", "9h"));
@@ -95,22 +142,27 @@ void test() {
   printf("%d\n", evaluate_cards("Ks", "Kh", "3d", "3s", "As", "Ah", "2h"));
   printf("%d\n", evaluate_cards("As", "Ah", "Kd", "Qs", "Ts", "8h", "9h"));
   // high card
-  printf("%d\n", evaluate_cards("As", "Kd", "Qs", "Ts", "9h", "8h", "7c"));
+  printf("%d\n", evaluate_cards("As", "Kd", "Qs", "Ts", "9h", "8h", "7c"));*/
 }
-
 
 void test_preflop() {
   clock_t stop_time, start_time = clock();
   uint64_t stop_cycle, start_cycle = rdtsc();
-  float result = get_preflop_naive_strength("Ad", "Ac");
+  //float result = get_preflop_naive_strength("Ad", "Ac");
+  int i, result = 0;
+  unsigned int results[1081] = {0};
+  evaluate_turn(51, 47, 43, 39, 35, 31, results);
+  for (i = 0; i < 1081; i++) {
+    result += results[i];
+  }
   stop_cycle = rdtsc();
   stop_time = clock();
-  printf("%f\n", result);
+  printf("%f\n", (float)result);
   printf("%0.2f cycles, %0.2f seconds. \n", ((double)(stop_cycle - start_cycle)), ((double) (stop_time - start_time)) / CLOCKS_PER_SEC);
 }
 
 int main( int argc, const char* argv[]) {
   //benchmark();
-  //test_preflop();
-  test();
+  test_preflop();
+  //test();
 }
