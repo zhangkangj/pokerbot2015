@@ -149,9 +149,21 @@ if __name__ == '__main__':
   #manual
   #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.5, 0.6617, 0.8308, 0.1, 0.495, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
 
-  fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.4, 0.6617, 0.8308, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+  #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.4, 0.6617, 0.8308, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
 
   #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.3, 0.6617, 0.8308, 0.1, 0.2, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4, 2]
+
+  #win mixed + stronger
+  #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.1083, 0.6617, 0.8308, 0.1, 0.4033, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+
+  #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.305, 0.6617, 0.8308, 0.1, 0.4033, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+
+  #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.5017, 0.6617, 0.8308, 0.1, 0.4033, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+
+  fixed_param_vals = [0.5, 0.6617, 0.9667, 0.105, 0.4, 0.6617, 0.8333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+  # fixed_param_vals = [0.5, 0.6617, 0.8667, 0.105, 0.4, 0.6617, 0.8667, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+  # fixed_param_vals = [0.5, 0.6617, 0.9, 0.105, 0.4, 0.6617, 0.9333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+  # fixed_param_vals = [0.5, 0.6617, 0.8333, 0.105, 0.4, 0.6617, 0.8667, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
 
   # River
   #0
@@ -188,17 +200,17 @@ if __name__ == '__main__':
 
   # Turn
   #4
-  # sample_size = 1
-  # if fixed_param_vals != None:
-  #   turn_low_card_up_lim_paras = [float(fixed_param_vals[4])]
-  # else:
-  #   total_num_games *= sample_size
-  #   turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
+  sample_size = 1
+  if fixed_param_vals != None:
+    turn_low_card_up_lim_paras = [float(fixed_param_vals[4])]
+  else:
+    total_num_games *= sample_size
+    turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
   
-  # TODO: temp tune key 
-  sample_size = 2
-  total_num_games *= sample_size
-  turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
+  # # TODO: temp tune key 
+  # sample_size = 3
+  # total_num_games *= sample_size
+  # turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
 
   #5
   turn_mid_card_up_lim_max = 0.99
@@ -226,17 +238,17 @@ if __name__ == '__main__':
 
   # Flop
   #8
-  # sample_size = 1
-  # if fixed_param_vals != None:
-  #   flop_low_card_up_lim_paras = [float(fixed_param_vals[8])]
-  # else:
-  #   total_num_games *= sample_size
-  #   flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  sample_size = 1
+  if fixed_param_vals != None:
+    flop_low_card_up_lim_paras = [float(fixed_param_vals[8])]
+  else:
+    total_num_games *= sample_size
+    flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
 
-  # TODO: temp tune key
-  sample_size = 2
-  total_num_games *= sample_size
-  flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
+  # # TODO: temp tune key
+  # sample_size = 3
+  # total_num_games *= sample_size
+  # flop_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.6, sample_size, precision)
 
   #9
   flop_mid_card_up_lim_max = 0.99
@@ -341,7 +353,7 @@ if __name__ == '__main__':
 
 
   # num of runs
-  num_run_per_param_set = 1
+  num_run_per_param_set = 10
   total_num_games *= num_run_per_param_set
 
   # global result list
