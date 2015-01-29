@@ -160,19 +160,26 @@ if __name__ == '__main__':
 
   #fixed_param_vals = [0.5, 0.6617, 0.8308, 0.105, 0.5017, 0.6617, 0.8308, 0.1, 0.4033, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
 
-  fixed_param_vals = [0.5, 0.6617, 0.9667, 0.105, 0.4, 0.6617, 0.8333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+  # fixed_param_vals = [0.5, 0.6617, 0.9667, 0.105, 0.4, 0.6617, 0.8333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
   # fixed_param_vals = [0.5, 0.6617, 0.8667, 0.105, 0.4, 0.6617, 0.8667, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
   # fixed_param_vals = [0.5, 0.6617, 0.9, 0.105, 0.4, 0.6617, 0.9333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
   # fixed_param_vals = [0.5, 0.6617, 0.8333, 0.105, 0.4, 0.6617, 0.8667, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+  
+  # what mixedoppnew6 uses
+  fixed_param_vals = [0.5, 0.6617, 0.9667, 0.105, 0.4, 0.6617, 0.8333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
 
   # River
   #0
-  sample_size = 1
-  if fixed_param_vals != None:
-    river_low_card_up_lim_paras = [float(fixed_param_vals[0])]
-  else:
-    total_num_games *= sample_size
-    river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  # sample_size = 1
+  # if fixed_param_vals != None:
+  #   river_low_card_up_lim_paras = [float(fixed_param_vals[0])]
+  # else:
+  #   total_num_games *= sample_size
+  #   river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  # # TODO: temp tune key 
+  sample_size = 10
+  total_num_games *= sample_size
+  turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.7, sample_size, precision)
 
   #1
   river_mid_card_up_lim_max = 0.99
@@ -292,7 +299,7 @@ if __name__ == '__main__':
     mid_card_call_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
 
   #14
-  sample_size = 2
+  sample_size = 3
   if fixed_param_vals != None:
     high_card_river_raise_limit_paras = [float(fixed_param_vals[14])]
   else:  
@@ -300,7 +307,7 @@ if __name__ == '__main__':
     high_card_river_raise_limit_paras = generateLinearListExclEnds(0.5, 1, sample_size, precision)
 
   #15
-  sample_size = 2
+  sample_size = 3
   if fixed_param_vals != None:
     high_card_raise_limit_paras = [float(fixed_param_vals[15])]
   else:  
