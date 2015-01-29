@@ -41,9 +41,9 @@ class TopPlayLib(object):
     print "----- enter top_card_river()"
 
     top_card_band_factor = 1
-    # top_strategy_list = [1,1,1,2,2,2,3]
+    top_strategy_list = [1,1,1,2,2,2,5,5,6]
     # try to be the most aggressive here
-    top_strategy_list = [1]
+    #top_strategy_list = [1]
     result = bot_action_lib.BotActionLib.random_get_top_strategy(player, equity, can_raise, can_bet, can_call, top_card_band_factor, top_strategy_list)
     print "--- exit top_card_river(), result: " + result
         
