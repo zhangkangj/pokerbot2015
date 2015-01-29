@@ -3,16 +3,16 @@ from bot.mixedoppnew6 import mixedoppnew6_bot
 from bot.mixedoppnew6 import mixedoppnew6_opponent
 from bot.tight_aggressive import tight_aggressive_bot
 from bot.tight_conservative import tight_conservative_bot
-from bot.mixed import mixed_bot
+#from bot.mixed import mixed_bot
 
 import base_nash_bot
 
 class Base_nashPlayer(base_player.BasePlayer):
   def __init__(self):
     super(Base_nashPlayer, self).__init__()
- #   self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
-    self.mixed_bot = mixed_bot.MixedBot(self)
-    self.opponew6 = self.mixed_bot
+    self.opponew6 = mixedoppnew6_bot.Mixedoppnew6Bot(self)
+  #  self.mixed_bot = mixed_bot.MixedBot(self)
+  #  self.opponew6 = self.mixed_bot
      ## by defalt it uses mixedoppnew6
     data_folder = '../../data/cfr/aws_new/'
     self.nash_bot_300 = base_nash_bot.Base_nashBot(self, 300, data_folder+'prob4_300_total.npy')
@@ -249,9 +249,7 @@ class Base_nashPlayer(base_player.BasePlayer):
       # if max(len(self.last_actions_preflop_init),len(self.last_actions_flop_init),len(self.last_actions_turn_init),len(self.last_actions_river_init)) < 7:
       #   # max < 7 then can change bot
       
-#grafting
-
-      
+#grafting    
       minstack = 301
       minstack = min([self.init_stack_sizes[player_index] for player_index in range(3) if self.player_names[player_index] != out_player])
       print 'out_player', out_player

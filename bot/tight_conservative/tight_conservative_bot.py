@@ -234,7 +234,7 @@ class TightConservativeBot(base_bot.BaseBot):
         print 'checking', result
       else:
         call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
-        call2pot = call_amount / self.player.pot_size        
+        call2pot = float(call_amount) / float(self.player.pot_size)        
         if call2pot < call2pot_limit:
           result = 'CALL:' + str(call_amount)
           print 'calling', result
@@ -273,7 +273,7 @@ class TightConservativeBot(base_bot.BaseBot):
     hole_cards = self.player.hole_cards
     board_cards = self.player.board_cards
     
-    idx = evaluator.flop_index(hole_cards[0],hole_cards[1],board_cards[0],board_cards[1],board_cards[2])
+    idx = evaluator.turn_index(hole_cards[0],hole_cards[1],board_cards[0],board_cards[1],board_cards[2],board_cards[3])
 
     bucket = self.turn_buckets[idx]
     print 'bucket is', bucket
@@ -319,7 +319,7 @@ class TightConservativeBot(base_bot.BaseBot):
         print 'checking', result
       else:
         call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
-        call2pot = call_amount / self.player.pot_size        
+        call2pot = float(call_amount) / float(self.player.pot_size)        
         if call2pot < call2pot_limit:
           result = 'CALL:' + str(call_amount)
           print 'calling', result
@@ -344,7 +344,7 @@ class TightConservativeBot(base_bot.BaseBot):
     
     
   def river(self, can_raise, can_bet, can_call):
-    call2pot_limit = 0.4       
+    call2pot_limit = 0.3      
       
     hole_card_str = ''.join(self.player.hole_cards)
     board_card_str = ''.join(self.player.board_cards)
@@ -375,7 +375,7 @@ class TightConservativeBot(base_bot.BaseBot):
         print 'checking', result
       else:
         call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
-        call2pot = call_amount / self.player.pot_size        
+        call2pot = float(call_amount) / float(self.player.pot_size)       
         if call2pot < call2pot_limit:
           result = 'CALL:' + str(call_amount)
           print 'calling', result
