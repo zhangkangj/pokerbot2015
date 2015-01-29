@@ -88,7 +88,7 @@ class Base_nashBot(base_bot.BaseBot):
       if index == 0:
         return 'CHECK'
       else:          
-        tree_raise_ratio = self.current_node.get_raise_amount() / tree_pot_size
+        tree_raise_ratio = 1.0 * self.current_node.get_raise_amount() / tree_pot_size
         raise_amount_propose = int(tree_raise_ratio * self.player.pot_size)
         raise_amount_final = min(raise_amount_max, max(raise_amount_min, raise_amount_propose))
         print 'bet yooooo:', str(raise_amount_final)
@@ -109,7 +109,7 @@ class Base_nashBot(base_bot.BaseBot):
       elif index == 1:
         return 'CALL:' + str(call_amount)     
       else:
-        tree_raise_ratio = self.current_node.get_raise_amount() / tree_pot_size
+        tree_raise_ratio = 1.0 * self.current_node.get_raise_amount() / tree_pot_size
         #bug, don't know how to get pot_size if call.
         raise_amount_propose = int(tree_raise_ratio * (self.last_round_pot_size + call_amount * 2)) + call_amount
         raise_amount_final = min(raise_amount_max, max(raise_amount_min, raise_amount_propose))
@@ -213,7 +213,7 @@ class Base_nashBot(base_bot.BaseBot):
         tree_raise_ratios = []
  #       print self.current_node.get_node_type(), 'current node type'
         for i in range(1,self.current_node.get_num_child()):
-          tree_raise_ratios.append(self.current_node.child_nodes[i].get_raise_amount() / tree_pot_size)
+          tree_raise_ratios.append(1.0 * self.current_node.child_nodes[i].get_raise_amount() / tree_pot_size)
         index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
         self.current_node = self.current_node.child_nodes[index + 1]
       elif self.current_node.get_node_type() == 'RaiseNode':
@@ -238,7 +238,7 @@ class Base_nashBot(base_bot.BaseBot):
           tree_pot_size = self.current_node.get_pot_size()
           tree_raise_ratios = []
           for i in range(2,self.current_node.get_num_child()):
-            tree_raise_ratios.append(self.current_node.get_raise_amount() / tree_pot_size)
+            tree_raise_ratios.append(1.0 * self.current_node.get_raise_amount() / tree_pot_size)
           index = self.find_similar_child_node(tree_raise_ratios, raise_ratio)
           self.current_node = self.current_node.child_nodes[index + 2]
       else:

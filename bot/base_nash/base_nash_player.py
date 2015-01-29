@@ -165,6 +165,14 @@ class Base_nashPlayer(base_player.BasePlayer):
       print 'self.last_actions_flop:', self.last_actions_flop;  
       print 'self.last_actions_turn:', self.last_actions_turn;
       print 'self.last_actions_river:', self.last_actions_river;
+      #max add: find outplayer:
+      out_player = 'a'
+      for action_find_out in self.last_actions_preflop + self.last_actions_flop + self.last_actions_turn + self.last_actions_river:        
+        if action_find_out[1] == 'FOLD':
+          out_player = action_find_out[0]
+          print 'the out player issss:', out_player
+          break      
+      
       self.last_actions_preflop_init = self.prepare_last_actions(self.active_name,self.inactive_name,self.last_actions_preflop)
       self.last_actions_flop_init = self.prepare_last_actions(self.active_name,self.inactive_name,self.last_actions_flop)
       self.last_actions_turn_init = self.prepare_last_actions(self.active_name,self.inactive_name,self.last_actions_turn)
@@ -187,7 +195,7 @@ class Base_nashPlayer(base_player.BasePlayer):
         firstelm = self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init = [firstelm , (self.active_name,'POST',2) , (self.player_name,'CALL',2)] + self.last_actions_preflop_init
         # if I am BB and SB fold. I change to SB.I post1, oppo post 2, i called. then whatever.
-      elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[0][0] == self.player_name and self.last_actions_preflop_init[0][1] == 'CALL':
+      elif self.last_actions_preflop[1][0] == self.player_name and self.last_actions_preflop_init[0][0] == self.player_name and self.last_actions_preflop_init[1][1] == 'CALL':
         self.last_actions_preflop_init.pop(0)
         self.last_actions_preflop_init = [(self.player_name,'POST',1),(self.active_name,'POST',2),(self.player_name,'CALL',2)] + self.last_actions_preflop_init
         # if last one is check. was conclued by me. should concluded by him.
@@ -242,9 +250,30 @@ class Base_nashPlayer(base_player.BasePlayer):
       #   # max < 7 then can change bot
       
 #grafting
-#      if self.nash_bot1.initialize_from_beginning(action_seq):
-#        self.current_bot = self.nash_bot1
-#        self.current_bot_type = 'NASH'
+
+      
+      minstack = 301
+      minstack = min([self.init_stack_sizes[player_index] for player_index in range(3) if self.player_names[player_index] != out_player])
+      print 'out_player', out_player
+      print 'minstack is', minstack
+      print 'action_seq',action_seq
+      if minstack > 200:
+        candidate_bot = self.nash_bot_300;
+      elif minstack > 140:
+        candidate_bot = self.nash_bot_200;
+      elif minstack > 90:
+        candidate_bot = self.nash_bot_140;
+      elif minstack > 50:
+        candidate_bot = self.nash_bot_90;
+      elif minstack > 25:
+        candidate_bot = self.nash_bot_50;
+      elif minstack > 10:
+        candidate_bot = self.nash_bot_25;
+      else:
+        candidate_bot = self.nash_bot_10;
+      if candidate_bot.initialize_from_beginning(action_seq):
+        self.current_bot = candidate_bot
+        self.current_bot_type = 'NASH'
       
 
     	###############!!!!!!!!!!!!!!!!!!!!!!!!!##################
