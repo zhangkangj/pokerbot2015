@@ -211,7 +211,6 @@ class Mixedoppnew8Bot(base_bot.BaseBot):
     print "------> flop_min_to_bet_top:" + str(self.player.param.flop_min_to_bet_top)
 
     max_discount_factor_for_opponent = self.player.param.flop_max_discount_factor_for_opponent
-    equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
     min_to_bet_mid = self.player.param.flop_min_to_bet_mid
     min_to_bet_high = self.player.param.flop_min_to_bet_high
@@ -259,7 +258,6 @@ class Mixedoppnew8Bot(base_bot.BaseBot):
     print "------> turn_min_to_bet_top:" + str(self.player.param.turn_min_to_bet_top)    
 
     max_discount_factor_for_opponent = self.player.param.turn_max_discount_factor_for_opponent
-    equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
     min_to_bet_mid = self.player.param.turn_min_to_bet_mid
     min_to_bet_high = self.player.param.turn_min_to_bet_high
@@ -320,7 +318,6 @@ class Mixedoppnew8Bot(base_bot.BaseBot):
     # [('td6c', 0.9166666666666666), ('xx', 0.03166666666666667), ('xx', 0.051666666666666666)]
 
     max_discount_factor_for_opponent = self.player.param.river_max_discount_factor_for_opponent
-    equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
     min_to_bet_mid = self.player.param.river_min_to_bet_mid
     min_to_bet_high = self.player.param.river_min_to_bet_high
