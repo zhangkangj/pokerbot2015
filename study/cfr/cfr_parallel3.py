@@ -66,8 +66,8 @@ def run_cfr(root, index, num_iter, num_gen):
 def transfer_file(filename):
   rand_name = filename + str(random.randint(0,1000))
   os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem data/%s ubuntu@54.205.253.94:data2/%s' % (filename, rand_name))
-  os.system('ssh ubuntu@54.205.253.94 "mv data2/%s data2/%s"'%(rand_name, filename))
-  
+  os.system('ssh -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94 "mv data2/%s data2/%s"'%(rand_name, filename))
+
 if __name__ == '__main__':
   import argparse
   parser = argparse.ArgumentParser(description='parallel')
@@ -90,8 +90,8 @@ if __name__ == '__main__':
   REGRET_FILE = 'regret4_%d_total' % STACK_SIZE
   PROB_FILE = 'prob4_%d_total' % STACK_SIZE
   try:
-    os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data'% (REGRET_FILE + '.npy'))
-    os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data'% (PROB_FILE + '.npy'))
+    os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data/'% (REGRET_FILE + '.npy'))
+    os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data/'% (PROB_FILE + '.npy'))
   except:
     print 'no initial files'
   regret = np.zeros(NUM_NODE, dtype=np.float64)
@@ -123,8 +123,8 @@ if __name__ == '__main__':
       current_regret += np.frombuffer(results[j][0].get_obj(), dtype=np.float64)
       current_prob   += np.frombuffer(results[j][1].get_obj(), dtype=np.float32)
     try:
-      os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data'% (REGRET_FILE + '.npy'))
-      os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data'% (PROB_FILE + '.npy'))
+      os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data/'% (REGRET_FILE + '.npy'))
+      os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data/'% (PROB_FILE + '.npy'))
       regret = np.load(REGRET_FILE+'.npy')
       prob = np.load(PROB_FILE+'.npy')
     except:
