@@ -8,22 +8,16 @@ Created on Mon Jan 12 12:58:46 2015
 from .. import base_bot
 from lib.evaluator import evaluator
 
-import mixedoppnew6_param
 import bot_action_lib
 import top_play_lib
 
-class Mixedoppnew6Bot(base_bot.BaseBot):
-
-  def __init__(self, player):
-    super(Mixedoppnew6Bot, self).__init__(player)
-    self.param = mixedoppnew6_param.Mixedoppnew6Param()
-    self.param.readin_params()
+class Mixedoppnew8Bot(base_bot.BaseBot):
 
   def action(self):
     hole_card_str = ''.join(self.player.hole_cards)
     board_card_str = ''.join(self.player.board_cards)
     card_str = hole_card_str+':xx'*(self.player.num_active_player-1)
-    equity = evaluator.evaluate(card_str, board_card_str, '', 300)
+    equity = evaluator.evaluate(card_str, board_card_str, '', 100)
     can_raise = False
     can_bet = False
     can_call = False
@@ -31,7 +25,7 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
       can_raise |= 'RAISE' in action
       can_bet |= 'BET' in action
       can_call |= 'CALL' in action
-    return super(Mixedoppnew6Bot, self).action(equity, can_raise, can_bet, can_call)
+    return super(Mixedoppnew8Bot, self).action(equity, can_raise, can_bet, can_call)
 
   def preflop(self, equity, can_raise, can_bet, can_call):
     result = 'CHECK'
@@ -56,11 +50,11 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
     print "----------equity: " + str(equity)
     print "----------curr pot_size: " + str(self.player.pot_size) 
 
-    preflop_raisehand_raise_limit = self.param.preflop_raise_limit
-    preflop_suitedcallhand_call_limit = self.param.preflop_suitedhand_call_limit
-    preflop_lowcallhand_call_limit = self.param.preflop_lowhand_call_limit
-    preflop_verylowcallhand_call_limit = self.param.preflop_verylowhand_call_limit
-    preflop_nogoodhand_call_limit = self.param.preflop_nogoodhand_call_limit
+    preflop_raisehand_raise_limit = self.player.param.preflop_raise_limit
+    preflop_suitedcallhand_call_limit = self.player.param.preflop_suitedhand_call_limit
+    preflop_lowcallhand_call_limit = self.player.param.preflop_lowhand_call_limit
+    preflop_verylowcallhand_call_limit = self.player.param.preflop_verylowhand_call_limit
+    preflop_nogoodhand_call_limit = self.player.param.preflop_nogoodhand_call_limit
 
     if is_raise_hand:
         #debug
@@ -111,7 +105,7 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
     call_limit_factor = 0.5
 
     equity_band_factor = 1
-    call_limit = self.player.current_stacksize * equity * self.param.mid_card_river_call_limit_factor
+    call_limit = self.player.current_stacksize * equity * self.player.param.mid_card_river_call_limit_factor
 
     # at river you know that for sure you only have a mid hand, play conservatively with lower call limit
     result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, call_limit)
@@ -137,7 +131,7 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
     call_limit_factor = 1.0
 
     equity_band_factor = 1
-    call_limit = self.player.current_stacksize * equity * self.param.mid_card_call_limit_factor
+    call_limit = self.player.current_stacksize * equity * self.player.param.mid_card_call_limit_factor
 
     # call with a limit to leave room to improve
     result = bot_action_lib.BotActionLib.action_equity_call_fold(self.player, equity, can_raise, can_bet, can_call, call_limit)
@@ -169,7 +163,7 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
 
     call_limit = None
     # use a raise limit to reduce loss if we end up losing, given this is not the 'top' card spectrum 
-    raise_limit = self.player.current_stacksize * equity * self.param.high_card_raise_limit_factor
+    raise_limit = self.player.current_stacksize * equity * self.player.param.high_card_raise_limit_factor
 
     result = bot_action_lib.BotActionLib.action_equity_raise_call(self.player, equity, can_raise, can_bet, can_call, equity_band_factor, raise_limit, call_limit)   
     
@@ -211,17 +205,17 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
     # else:
     #   max_discount_factor_for_opponent = 1 * base_max_discount_factor_for_opponent
 
-    print "------> flop. max_discount_factor_for_opponent:" + str(self.param.flop_max_discount_factor_for_opponent)
-    print "------> flop_min_to_bet_mid:" + str(self.param.flop_min_to_bet_mid)
-    print "------> flop_min_to_bet_high:" + str(self.param.flop_min_to_bet_high)
-    print "------> flop_min_to_bet_top:" + str(self.param.flop_min_to_bet_top)
+    print "------> flop. max_discount_factor_for_opponent:" + str(self.player.param.flop_max_discount_factor_for_opponent)
+    print "------> flop_min_to_bet_mid:" + str(self.player.param.flop_min_to_bet_mid)
+    print "------> flop_min_to_bet_high:" + str(self.player.param.flop_min_to_bet_high)
+    print "------> flop_min_to_bet_top:" + str(self.player.param.flop_min_to_bet_top)
 
-    max_discount_factor_for_opponent = self.param.flop_max_discount_factor_for_opponent
+    max_discount_factor_for_opponent = self.player.param.flop_max_discount_factor_for_opponent
     equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
-    min_to_bet_mid = self.param.flop_min_to_bet_mid
-    min_to_bet_high = self.param.flop_min_to_bet_high
-    min_to_bet_top = self.param.flop_min_to_bet_top
+    min_to_bet_mid = self.player.param.flop_min_to_bet_mid
+    min_to_bet_high = self.player.param.flop_min_to_bet_high
+    min_to_bet_top = self.player.param.flop_min_to_bet_top
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4
@@ -259,17 +253,17 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
     #debug
     print "------> enter turn(), equity:" + str(equity)
 
-    print "------> turn. max_discount_factor_for_opponent:" + str(self.param.turn_max_discount_factor_for_opponent)
-    print "------> turn_min_to_bet_mid:" + str(self.param.turn_min_to_bet_mid)
-    print "------> turn_min_to_bet_high:" + str(self.param.turn_min_to_bet_high)
-    print "------> turn_min_to_bet_top:" + str(self.param.turn_min_to_bet_top)    
+    print "------> turn. max_discount_factor_for_opponent:" + str(self.player.param.turn_max_discount_factor_for_opponent)
+    print "------> turn_min_to_bet_mid:" + str(self.player.param.turn_min_to_bet_mid)
+    print "------> turn_min_to_bet_high:" + str(self.player.param.turn_min_to_bet_high)
+    print "------> turn_min_to_bet_top:" + str(self.player.param.turn_min_to_bet_top)    
 
-    max_discount_factor_for_opponent = self.param.turn_max_discount_factor_for_opponent
+    max_discount_factor_for_opponent = self.player.param.turn_max_discount_factor_for_opponent
     equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
-    min_to_bet_mid = self.param.turn_min_to_bet_mid
-    min_to_bet_high = self.param.turn_min_to_bet_high
-    min_to_bet_top = self.param.turn_min_to_bet_top
+    min_to_bet_mid = self.player.param.turn_min_to_bet_mid
+    min_to_bet_high = self.player.param.turn_min_to_bet_high
+    min_to_bet_top = self.player.param.turn_min_to_bet_top
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4
@@ -308,10 +302,10 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
     #debug
     print "------> enter river(), equity:" + str(equity)
 
-    print "------> river. max_discount_factor_for_opponent:" + str(self.param.river_max_discount_factor_for_opponent)
-    print "------> river_min_to_bet_mid:" + str(self.param.river_min_to_bet_mid)
-    print "------> river_min_to_bet_high:" + str(self.param.river_min_to_bet_high)
-    print "------> river_min_to_bet_top:" + str(self.param.river_min_to_bet_top)
+    print "------> river. max_discount_factor_for_opponent:" + str(self.player.param.river_max_discount_factor_for_opponent)
+    print "------> river_min_to_bet_mid:" + str(self.player.param.river_min_to_bet_mid)
+    print "------> river_min_to_bet_high:" + str(self.player.param.river_min_to_bet_high)
+    print "------> river_min_to_bet_top:" + str(self.player.param.river_min_to_bet_top)
 
     # medium top pair: 0.548
     # bash-3.2$  ./calculator.sh tdkc:xx:xx 4d7h2sjdts
@@ -325,12 +319,12 @@ class Mixedoppnew6Bot(base_bot.BaseBot):
     # bash-3.2$ ./calculator.sh td6c:xx:xx 4dthjs5dts
     # [('td6c', 0.9166666666666666), ('xx', 0.03166666666666667), ('xx', 0.051666666666666666)]
 
-    max_discount_factor_for_opponent = self.param.river_max_discount_factor_for_opponent
+    max_discount_factor_for_opponent = self.player.param.river_max_discount_factor_for_opponent
     equity = self.player.discount_equity_for_opponent(equity, max_discount_factor_for_opponent)
 
-    min_to_bet_mid = self.param.river_min_to_bet_mid
-    min_to_bet_high = self.param.river_min_to_bet_high
-    min_to_bet_top = self.param.river_min_to_bet_top
+    min_to_bet_mid = self.player.param.river_min_to_bet_mid
+    min_to_bet_high = self.player.param.river_min_to_bet_high
+    min_to_bet_top = self.player.param.river_min_to_bet_top
 
     # maximum percentage we should discount the equity for opponent observing result
     # base_max_discount_factor_for_opponent = 0.4

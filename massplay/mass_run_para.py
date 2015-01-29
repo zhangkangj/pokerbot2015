@@ -76,6 +76,20 @@ def generateLinearListExclEnds(min_lim, max_lim, size, deci_precision):
 def getFirstEleAsKey(tuple):
   return tuple[0]
 
+import multiprocessing
+def run_engine(game_index):
+  engine_run_result = -1
+  proc_name = str(multiprocessing.current_process().name)
+  try:
+    #engine_run_result = 0
+    engine_run_result = subprocess.call([engine_cmd], shell=True)
+    print "......... process (" + proc_name + ") for " + str(game_index) + "th game for a parameter combo engine_run_result:" + str(engine_run_result) + "..."
+
+  except:
+    print('......... %s running %d game failed!' % (proc_name, game_index))
+
+  return str(multiprocessing.current_process().name) + ": " + str(engine_run_result)
+
 # import os
 # files = []
 # for (dirpath, dirnames, filenames) in os.walk("./log/test"):
@@ -353,8 +367,10 @@ if __name__ == '__main__':
 
 
   # num of runs
-  num_run_per_param_set = 10
+  num_run_per_param_set = 16
   total_num_games *= num_run_per_param_set
+
+  num_cpu = 8
 
   # global result list
   all_stats_tuple_list = []
@@ -403,14 +419,11 @@ if __name__ == '__main__':
                                         # for preflop_verylowhand_call_limit in preflop_verylowhand_call_limit_paras:
                                           #   for preflop_nogoodhand_call_limit in preflop_nogoodhand_call_limit_paras:
 
-
-
                                               # -- Clean up before running 
                                               rm_param_result = subprocess.call([clean_param_file_cmd], shell=True)
                                               print "... clean_param_file_cmd:" + str(rm_param_result) + " ..."
                                               rm_run_result = subprocess.call([clean_run_result_files_cmd], shell=True)
                                               print "... clean_run_result_files_cmd:" + str(rm_run_result) + " ..."
-
 
                                               # -- Parameters
                                               param_list = [river_low_card_up_lim, river_mid_card_up_lim, river_high_card_up_lim, river_opp_discount_lim,
@@ -434,15 +447,33 @@ if __name__ == '__main__':
 
                                               # -- Run engine, the player will read the file above 
                                               # number of times you ran for each set of parameter combo          
-                                              for i in range(num_run_per_param_set):
-                                                engine_run_result = subprocess.call([engine_cmd], shell=True)
-                                                print "......... " + str(i) + " - engine_run_result:" + str(engine_run_result) + ", " + str(param_list) + "..."
-                                                
-                                                # Print out game count
-                                                total_game_count += 1
-                                                game_end = time.time()
-                                                print "============ " + str(total_game_count) + " Out of " + str(total_num_games) + " Games Has Completed, Duration:" + str(game_end - game_start) + "============" 
-                                                game_start = game_end
+                                              # for i in range(num_run_per_param_set):
+                                              #   process = Process(target=run_engine, args=(i))
+                                              #   process.start()
+                                              #   process.join()
+
+                                              print "....before Pool Created ..."
+
+                                              proc_pool = multiprocessing.Pool(num_cpu)
+                                              print "....after Pool Created with " + str(num_cpu) + " workers ..."
+
+                                              run_engine_args = range(num_run_per_param_set)
+                                              run_engine_results = proc_pool.map(run_engine, run_engine_args)
+                                              print "....after Pool Mapped with " + str(num_cpu) + " workers and passing arguments " + str(run_engine_args) + "..."
+                                              
+                                              proc_pool.close()
+                                              print "....after Pool Closed ..."
+
+                                              proc_pool.join()
+                                              print "....after Pool Joined ..."
+
+                                              print "....run engine results: " + str(run_engine_results) + "..."
+ 
+                                              # Print out game count
+                                              total_game_count += num_run_per_param_set
+                                              game_end = time.time()
+                                              print "============ " + str(total_game_count) + " Out of " + str(total_num_games) + " Games Has Completed, Duration:" + str(game_end - game_start) + "============" 
+                                              game_start = game_end
 
                                               # -- Generate the result
                                               # generate the tuple for all stats of current param based on the *.txt files

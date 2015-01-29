@@ -94,9 +94,15 @@ for i in range(51):
     print util.n2c([i,j]), idx, result[idx]
 
 
-reload(cfr_cy3)
-root = cfr_cy3.RoundNode(0, 0, 4, 4)
+reload(cfr_cy4)
+root = cfr_cy3.RoundNode(0, 0, 25, 25)
 root.initialize_regret()
-root.load_buckets()
-board_cards = np.random.choice(52, 5, replace=False)
-timeit root.public_chance_sampling(board_cards)
+root.load_regret('data/prob4_25_total.npy')
+root.load_prob('data/prob4_25_total.npy')
+
+n = 4
+result = np.reshape(normalize(root.child_nodes[0].average_prob[:(n*169)], n=n), (169,n))
+for i in range(51):
+  for j in range(i+1, 52):
+    idx = evaluator_cy.preflop_idx(i, j)
+    print util.n2c([i,j]), idx, ' '.join(['%.3f' %x for x in result[idx]])

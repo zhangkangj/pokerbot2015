@@ -591,21 +591,23 @@ cdef class RaiseNode(PlayerNode):
         #desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/3, (pot_size+amount_sb+amount_bb+call_amount)*2/3, pot_size+amount_sb+amount_bb+call_amount]
         desired_amounts = [(pot_size+amount_sb+amount_bb+call_amount)/2, pot_size+amount_sb+amount_bb+call_amount]
         if raise_limit < pot_size + amount_sb + amount_bb + call_amount:
-          raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit]))
+          raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit and amount >= 2] + [raise_limit]))
         else:
           raise_amounts = sorted(set(desired_amounts))
         for raise_amount in raise_amounts:
+          if raise_amount == 0:
+            continue
           sb_delta_, bb_delta_ = (raise_amount+sb_delta, 0) if is_sb else (0, raise_amount+bb_delta)
           self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta_, stack_bb-bb_delta_,
                                 amount_sb+sb_delta_, amount_bb+bb_delta_, raise_amount, num_bet+1, raise_amount)
       elif num_bet <= MAX_BET_NUM + 1:
-        raise_amount = min(raise_limit, pot_size + amount_sb + amount_bb + call_amount)
+        raise_amount = max(min(raise_limit, pot_size + amount_sb + amount_bb + call_amount), 2)
         sb_delta_, bb_delta_ = (raise_amount+sb_delta, 0) if is_sb else (0, raise_amount+bb_delta)
         self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta_, stack_bb-bb_delta_,
                               amount_sb+sb_delta_, amount_bb+bb_delta_, raise_amount, num_bet+1, raise_amount)
       else:
         if raise_limit < pot_size + amount_sb + amount_bb + call_amount:
-          raise_amount = raise_limit
+          raise_amount = max(raise_limit, 2)
           sb_delta_, bb_delta_ = (raise_amount+sb_delta, 0) if is_sb else (0, raise_amount+bb_delta)
           self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta_, stack_bb-bb_delta_,
                                 amount_sb+sb_delta_, amount_bb+bb_delta_, raise_amount, num_bet+1, raise_amount)
@@ -651,10 +653,12 @@ cdef class CheckNode(PlayerNode):
     raise_limit = stack_sb if is_sb else stack_bb
     desired_amounts = [2 , (pot_size+amount_sb+amount_bb)/2, pot_size+amount_sb+amount_bb]
     if raise_limit < pot_size + amount_sb + amount_bb:
-      raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit] + [raise_limit]))
+      raise_amounts = sorted(set([amount for amount in desired_amounts if amount < raise_limit and amount >= 2] + [raise_limit]))
     else:
       raise_amounts = sorted(set(desired_amounts))
     for raise_amount in raise_amounts:
+      if raise_amount == 0:
+        continue
       sb_delta, bb_delta = (raise_amount, 0) if is_sb else (0, raise_amount)
       self.spawn_raise_node(not is_sb, pot_size, stack_sb-sb_delta, stack_bb-bb_delta,
                             amount_sb+sb_delta, amount_bb+bb_delta, raise_amount, num_bet=1, raise_amount=raise_amount)
