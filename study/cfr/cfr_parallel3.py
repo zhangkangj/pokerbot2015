@@ -96,15 +96,14 @@ if __name__ == '__main__':
     print 'no initial files'
   regret = np.zeros(NUM_NODE, dtype=np.float64)
   try:
-    regret = np.load(REGRET_FILE+'.npy')
+    regret = np.load('data/' + REGRET_FILE+'.npy')
   except:
     pass
   prob = np.zeros(NUM_NODE, dtype=np.float32)
   try:
-    prob = np.load(PROB_FILE+'.npy')
+    prob = np.load('data/' + PROB_FILE+'.npy')
   except:
     pass
-  print 'initialized'
   
   for i in range(0, NUM_GEN):
     time.sleep(random.randint(0,20))
@@ -127,11 +126,12 @@ if __name__ == '__main__':
       os.system('scp -c blowfish -C -i ~/.ssh/pokerbot.pem ubuntu@54.205.253.94:data2/%s data/'% (PROB_FILE + '.npy'))
       regret = np.load(REGRET_FILE+'.npy')
       prob = np.load(PROB_FILE+'.npy')
+      print 'loaded fetched files again'
     except:
       print 'no initial files here'
     regret += current_regret * 15.0 / float(NUM_THREAD)
     prob   += current_prob   * 15.0 / float(NUM_THREAD)
-    np.save(REGRET_FILE, regret)
-    np.save(PROB_FILE, prob)
+    np.save('data/' + REGRET_FILE, regret)
+    np.save('data/' + PROB_FILE, prob)
     transfer_file(REGRET_FILE + '.npy')
     transfer_file(PROB_FILE + '.npy')
