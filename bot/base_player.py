@@ -150,9 +150,8 @@ class BasePlayer(object):
 #      print "-------========> action is for oppo2: " + self.opp2.oppo_name + ", one_action:" + str(one_action)
       self.opp2.Oppo_update(action_state,one_action[:-1]);
     elif self.opp0.is_active_in_game and self.opp0.is_active_in_hand and (self.player_name in one_action[-1]):
-#      print "-------========> action is for player, not opponent, one_action:" + str(one_action)
+      print "-------========> action is for player, not opponent, one_action:" + str(one_action)
       self.opp0.Oppo_update(action_state,one_action[:-1]);
-      pass
     else:
       print "ERROR: it is not possible to have both opponent (in-hand or in-game) inactive or if they are active, there is no action message for their last actions"
       pass

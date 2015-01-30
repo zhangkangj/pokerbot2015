@@ -101,11 +101,30 @@ class BotActionLib(object):
   def action_equity_raise_call(player, equity, can_raise, can_bet, can_call, band_factor, raise_limit, call_limit, use_min=False, use_max=False):
     #debug
     print "----------> enter action_equity_raise_call(), band_factor:" + str(band_factor) + ", raise_limit:" + str(raise_limit) + ", call_limit:" + str(call_limit)   
-    result = 'CHECK'    
+    result = 'CHECK'   
+
+    print "----------> enter action_equity_raise_call(), player.opp0.all_actions[]: "  + str(player.opp0.all_actions)
     if can_bet:
         result = BotActionLib.action_betraise_call_fold(player, equity, can_raise, can_bet, can_call, band_factor, 'BET', raise_limit, call_limit, use_min, use_max)
     elif can_raise:
-        result = BotActionLib.action_betraise_call_fold(player, equity, can_raise, can_bet, can_call, band_factor, 'RAISE', raise_limit, call_limit, use_min, use_max)
+        # TODO: temp limit to two reraise only 
+        num_raise_limit = 3
+
+        if len(player.opp0.all_actions) == 0:
+            print "------------> enter action_equity_raise_call(), all_actions[] is empty, we just started, so we can raise"
+            # If we raise less than the limit, raise
+            result = BotActionLib.action_betraise_call_fold(player, equity, can_raise, can_bet, can_call, band_factor, 'RAISE', raise_limit, call_limit, use_min, use_max) 
+        else: 
+            # get actions object in the current state        
+            current_state_actions = player.opp0.all_actions[-1]
+            if len(current_state_actions.raise_seqs) < num_raise_limit:
+                print "------------> enter action_equity_raise_call(), we only raised " + str(len(current_state_actions.raise_seqs)) + " times, so we can raise again"
+                # If we raise less than the limit, raise
+                result = BotActionLib.action_betraise_call_fold(player, equity, can_raise, can_bet, can_call, band_factor, 'RAISE', raise_limit, call_limit, use_min, use_max)
+            else:
+                print "------------> enter action_equity_raise_call(), we already raised " + str(len(current_state_actions.raise_seqs)) + " times, so we fall back to call"
+                # If we already raised the limited times, fall back to call anything
+                result = BotActionLib.action_equity_call_fold(player, equity, can_raise, can_bet, can_call, None)
     elif can_call:
         # This will only happen if we can not reraise any more
         result = BotActionLib.action_equity_call_fold(player, equity, can_raise, can_bet, can_call, call_limit)

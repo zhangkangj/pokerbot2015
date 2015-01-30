@@ -91,9 +91,9 @@ if __name__ == '__main__':
   game_start = start
 
   # Player name last char cannot be digit
-  player_names = ["MixedOppNewEight", "Mixed", "MixedStronger"]
+  player_names = ["MixedOppNewSix", "MixedOppNewNine", "Fold"]
 
-  player_of_interest = "MixedOppNewEight"
+  player_of_interest = "MixedOppNewNine"
 
   precision = 4
 
@@ -166,20 +166,21 @@ if __name__ == '__main__':
   # fixed_param_vals = [0.5, 0.6617, 0.8333, 0.105, 0.4, 0.6617, 0.8667, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
   
   # what mixedoppnew6 uses
-  fixed_param_vals = [0.5, 0.6617, 0.9667, 0.105, 0.4, 0.6617, 0.8333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
-
+  #fixed_param_vals = [0.5, 0.6617, 0.9667, 0.105, 0.4, 0.6617, 0.8333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+  fixed_param_vals = [0.1355, 0.6617, 0.9667, 0.105, 0.4, 0.6617, 0.8333, 0.1, 0.3, 0.7425, 0.8713, 0.05, 0.4167, 0.8333, 0.8333, 0.5, 20.667, 11.0, 4.0, 4.0, 2.0]
+  
   # River
   #0
-  # sample_size = 1
-  # if fixed_param_vals != None:
-  #   river_low_card_up_lim_paras = [float(fixed_param_vals[0])]
-  # else:
-  #   total_num_games *= sample_size
-  #   river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
-  # # TODO: temp tune key 
-  sample_size = 10
-  total_num_games *= sample_size
-  turn_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.7, sample_size, precision)
+  sample_size = 1
+  if fixed_param_vals != None:
+    river_low_card_up_lim_paras = [float(fixed_param_vals[0])]
+  else:
+    total_num_games *= sample_size
+    river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.98, sample_size, precision)
+  # TODO: temp tune key 
+  # sample_size = 10
+  # total_num_games *= sample_size
+  # river_low_card_up_lim_paras = generateLinearListExclEnds(0.01, 0.7, sample_size, precision)
 
   #1
   river_mid_card_up_lim_max = 0.99
@@ -360,7 +361,7 @@ if __name__ == '__main__':
 
 
   # num of runs
-  num_run_per_param_set = 10
+  num_run_per_param_set = 3
   total_num_games *= num_run_per_param_set
 
   # global result list

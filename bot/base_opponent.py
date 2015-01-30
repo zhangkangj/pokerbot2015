@@ -61,7 +61,7 @@ class BaseOpponent(object):
 
 		if self.last_state == '':
 			#debug
-#			print "-------====!!==> Oppo_update(), enter if{} (when opponent is intialized), action_state: " + str(action_state) + ", all_actions:" + str(self.all_actions) + ", one_action: " + str(one_action)
+			print "-------====!!==> Oppo_update(), enter if{} (when opponent is intialized), action_state: " + str(action_state) + ", all_actions:" + str(self.all_actions) + ", one_action: " + str(one_action)
 
 			# initial state when opponent is intialized
 			new_action=base_opponent_action.BaseOpponentAction(self.oppo_name,action_state, self)
@@ -70,19 +70,19 @@ class BaseOpponent(object):
 			self.last_state = action_state;
 
 			#debug
-#			print "-------====!!==> Oppo_update(), exit if{}... (when opponent is intialized), action_state: " + str(action_state) + "all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
+			print "-------====!!==> Oppo_update(), exit if{}... (when opponent is intialized), action_state: " + str(action_state) + "all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
 
 		elif (action_state == self.last_state):
 			#debug
-#			print "-------====!!==> Oppo_update(), enter elif{} (when still in the same state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
+			print "-------====!!==> Oppo_update(), enter elif{} (when still in the same state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
 
 			self.all_actions[-1].Action_update(one_action)
 			#debug
-#			print "-------====!!==> Oppo_update(), exit elif{}... (when still in the same state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
+			print "-------====!!==> Oppo_update(), exit elif{}... (when still in the same state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
 
 		else:
 			#debug
-#			print "-------====!!==> Oppo_update(), enter else{} (when switch to a new state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
+			print "-------====!!==> Oppo_update(), enter else{} (when switch to a new state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
 
 			# when switch to a new state
 			new_action=base_opponent_action.BaseOpponentAction(self.oppo_name,action_state, self)
@@ -91,7 +91,7 @@ class BaseOpponent(object):
 			self.last_state = action_state
 			self.update_prev_states_stats()
 			#debug
-#			print "-------====!!==> Oppo_update(), exit else{}... (when switch to a new state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
+			print "-------====!!==> Oppo_update(), exit else{}... (when switch to a new state), action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action)
 
 		#debug
-#		print "-------====!!==> exiting Oppo_update()..., oppo_name: " + self.oppo_name + ", action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action) + ", is_active_in_hand:" + str(self.is_active_in_hand)			
+		print "-------====!!==> exiting Oppo_update()..., oppo_name: " + self.oppo_name + ", action_state: " + str(action_state) + ", all_actions count:" + str(len(self.all_actions)) + ", one_action: " + str(one_action) + ", is_active_in_hand:" + str(self.is_active_in_hand)			
