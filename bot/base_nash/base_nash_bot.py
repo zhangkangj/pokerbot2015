@@ -67,9 +67,13 @@ class Base_nashBot(base_bot.BaseBot):
     #add a safe to nash:
     if can_call and (prob[1] > 0.75 or (prob[0] + prob[1]) < 0.5 or prob[0] < 0.05):
       print 'NASH has not converge at this node, current index is', index
-      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])   
-      call_equity= 1.0 * (call_amount - self.last_raise_amount) / (self.player.pot_size + call_amount - self.last_raise_amount)           
-      print 'call amount:', call_amount, 'call_equity:', call_equity
+      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1]) 
+      if self.last_raise_amount == 0:
+        call_add = call_amount
+      else:
+        call_add = 2 * call_amount - self.player.pot_size + self.last_round_pot_size
+      call_equity= 1.0 * (call_add) / (self.player.pot_size + call_add)           
+      print 'call amount:', call_add, 'call_equity:', call_equity, 'last pot size', self.last_round_pot_size
       #this means nash hasn't converge at this node
       hole_card_str = ''.join(self.player.hole_cards)
       board_card_str = ''.join(self.player.board_cards)
@@ -190,7 +194,11 @@ class Base_nashBot(base_bot.BaseBot):
     print 'check_call node, decide by equity.'
     if can_call:
       call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])   
-      call_equity= 1.0 * (call_amount - self.last_raise_amount) / (self.player.pot_size + call_amount - self.last_raise_amount)           
+      if self.last_raise_amount == 0:
+        call_add = call_amount
+      else:
+        call_add = 2 * call_amount - self.player.pot_size + self.last_round_pot_size
+      call_equity= 1.0 * (call_add) / (self.player.pot_size + call_add)                 
       print 'call amount:', call_amount, 'call_equity:', call_equity
       #this means nash hasn't converge at this node
       hole_card_str = ''.join(self.player.hole_cards)
@@ -216,6 +224,7 @@ class Base_nashBot(base_bot.BaseBot):
  #     print self.current_node.get_node_type(), 'should be maybe roundnode'
       self.current_node = self.root.child_nodes[0]
       self.last_raise_amount = 2
+      self.last_round_pot_size = 0
     elif self.current_node.get_node_type() == 'ShowdownNode':
       print 'current is showdown node, does not move node'
       return 'Showdown'
