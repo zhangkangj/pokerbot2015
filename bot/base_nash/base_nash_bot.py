@@ -64,6 +64,28 @@ class Base_nashBot(base_bot.BaseBot):
       if s >= r:
         index = i
         break
+    #add a safe to nash:
+    if can_call and (prob[1] > 0.75 or (prob[0] + prob[1]) < 0.5 or prob[0] < 0.05):
+      print 'NASH has not converge at this node, current index is', index
+      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])   
+      call_equity= 1.0 * (call_amount - self.last_raise_amount) / (self.player.pot_size + call_amount - self.last_raise_amount)           
+      print 'call amount:', call_amount, 'call_equity:', call_equity
+      #this means nash hasn't converge at this node
+      hole_card_str = ''.join(self.player.hole_cards)
+      board_card_str = ''.join(self.player.board_cards)
+      card_str = hole_card_str+':xx'
+      equity = evaluator.evaluate(card_str, board_card_str, '', 300)
+      if equity < call_equity *2.5  and self.player.num_board_card >= 4:
+        index = 1
+      if equity < call_equity * 2.3 and self.player.num_board_card >= 4:
+        index = 0
+   
+    
+    if index == 0 and self.player.num_board_card == 0 and self.player.pot_size <10 and ((bucket > 65 and bucket < 91) or (bucket > 156)):
+      #if preflop with A, never fold
+      print 'we have good cards, do not fold'      
+      index = 1
+      
     #chose index as the next action, find call_amount in legal action for later use
     print 'last_actions:', self.player.last_actions
     print 'current node type:', self.current_node.get_node_type(), 'bucket:', bucket, 'action probability', prob
@@ -165,10 +187,22 @@ class Base_nashBot(base_bot.BaseBot):
     
 
   def check_call(self, can_raise, can_bet, can_call):
+    print 'check_call node, decide by equity.'
     if can_call:
-      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])
-      result = 'CALL:' + str(call_amount)
-      print 'calling', result
+      call_amount = int([action for action in self.player.legal_actions if 'CALL' in action][0].split(':')[1])   
+      call_equity= 1.0 * (call_amount - self.last_raise_amount) / (self.player.pot_size + call_amount - self.last_raise_amount)           
+      print 'call amount:', call_amount, 'call_equity:', call_equity
+      #this means nash hasn't converge at this node
+      hole_card_str = ''.join(self.player.hole_cards)
+      board_card_str = ''.join(self.player.board_cards)
+      card_str = hole_card_str+':xx'
+      equity = evaluator.evaluate(card_str, board_card_str, '', 300) 
+      if equity < call_equity * 2.3 and self.player.num_board_card >= 4:
+        result = 'FOLD'       
+        print 'fold'
+      else:
+        result = 'CALL:' + str(call_amount)
+        print 'calling', result
     else:
       print 'check'
       result = 'CHECK'
