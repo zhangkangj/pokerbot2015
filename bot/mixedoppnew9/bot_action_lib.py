@@ -108,7 +108,7 @@ class BotActionLib(object):
         result = BotActionLib.action_betraise_call_fold(player, equity, can_raise, can_bet, can_call, band_factor, 'BET', raise_limit, call_limit, use_min, use_max)
     elif can_raise:
         # TODO: temp limit to two reraise only 
-        num_raise_limit = 3
+        num_raise_limit = 2
 
         if len(player.opp0.all_actions) == 0:
             print "------------> enter action_equity_raise_call(), all_actions[] is empty, we just started, so we can raise"
