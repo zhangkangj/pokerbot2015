@@ -46,6 +46,9 @@ class Mixedoppnew9Opponent(base_opponent.BaseOpponent):
 
     print "-------------======> in eval_opponent(), self.all_actions: " + str(self.all_actions)
     # last element of the all_action list is the current state actions 
+    if len(self.all_actions) == 0:
+      return 0
+
     curr_actions = self.all_actions[-1]
     if curr_actions is None or curr_actions is '':
       print "Error: Current action is empty or None"
